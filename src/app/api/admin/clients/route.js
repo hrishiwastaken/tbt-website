@@ -6,7 +6,7 @@ import { getSession } from "@/lib/auth";
 export async function GET(request) {
   try {
     const session = await getSession(request);
-    if (!session || session.role !== "ADMIN") {
+    if (!session || (session.role !== "ADMIN" && session.role !== "THERAPIST")) {
       return NextResponse.json({ error: "Unauthorized access" }, { status: 401 });
     }
 
@@ -30,7 +30,7 @@ export async function GET(request) {
 export async function DELETE(request) {
   try {
     const session = await getSession(request);
-    if (!session || session.role !== "ADMIN") {
+    if (!session || (session.role !== "ADMIN" && session.role !== "THERAPIST")) {
       return NextResponse.json({ error: "Unauthorized access" }, { status: 401 });
     }
 

@@ -1,17 +1,14 @@
 import React from "react";
 import { prisma } from "@/lib/db";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
 import BookingWizard from "@/components/BookingWizard";
 
 export const dynamic = "force-dynamic";
 
 export default async function BookPage({ searchParams }) {
   const sParams = await searchParams;
-  const initialTherapist = sParams.therapist || "";
   const initialService = sParams.service || "";
 
-  // Fetch active therapists and services
+  // Fetch active therapists (which will be Dr. Madhumati Dhumak) and services
   const therapists = await prisma.therapist.findMany({
     where: { isActive: true },
     select: {
@@ -36,17 +33,12 @@ export default async function BookPage({ searchParams }) {
   });
 
   return (
-    <>
-      <Navbar />
-      <main className="flex-grow w-full max-w-[1440px] mx-auto px-margin-mobile md:px-margin-desktop py-12">
-        <BookingWizard
-          therapists={therapists}
-          services={services}
-          initialTherapist={initialTherapist}
-          initialService={initialService}
-        />
-      </main>
-      <Footer />
-    </>
+    <main className="flex-grow w-full max-w-7xl mx-auto px-6 md:px-12 py-28">
+      <BookingWizard
+        therapists={therapists}
+        services={services}
+        initialService={initialService}
+      />
+    </main>
   );
 }

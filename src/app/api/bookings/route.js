@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import Razorpay from "razorpay";
 import { rateLimiter } from "@/lib/rateLimit";
 
 export async function POST(request) {
@@ -28,6 +27,7 @@ export async function POST(request) {
       emergencyContact,
       gdprConsent,
       paymentOption, // "PAY_NOW" or "PAY_LATER"
+      upiUtr,
     } = body;
 
     // 1. Basic validation
@@ -65,7 +65,6 @@ export async function POST(request) {
       return NextResponse.json({ error: "Invalid date or time format" }, { status: 400 });
     }
 
-    const startSlot = new Date(bookingDate);
     const endSlot = new Date(bookingDate);
     endSlot.setMinutes(endSlot.getMinutes() + service.durationMinutes);
 
@@ -120,52 +119,36 @@ export async function POST(request) {
     // 7. Handle Payment integration
     if (paymentOption === "PAY_NOW") {
       try {
-        const isMockKeys =
-          !process.env.RAZORPAY_KEY_ID ||
-          process.env.RAZORPAY_KEY_ID.includes("mock") ||
-          !process.env.RAZORPAY_KEY_SECRET ||
-          process.env.RAZORPAY_KEY_SECRET.includes("mock");
-
-        let razorpayOrder;
-
-        if (isMockKeys) {
-          console.warn("Razorpay keys are mock or placeholder. Creating a simulated order.");
-          razorpayOrder = {
-            id: `order_mock_${booking.id.slice(0, 8)}`,
-            amount: amountInINR * 100,
-            currency: "INR",
-            receipt: booking.id,
-            status: "created",
-          };
-        } else {
-          // Initialize Razorpay SDK
-          const razorpay = new Razorpay({
-            key_id: process.env.RAZORPAY_KEY_ID,
-            key_secret: process.env.RAZORPAY_KEY_SECRET,
-          });
-
-          // Create order in Razorpay (amount must be in paise: multiply by 100)
-          razorpayOrder = await razorpay.orders.create({
-            amount: Math.round(amountInINR * 100),
-            currency: "INR",
-            receipt: booking.id,
-          });
+        if (!upiUtr || upiUtr.length !== 12 || !/^\d+$/.test(upiUtr)) {
+          // Clean up pending booking
+          await prisma.booking.delete({ where: { id: booking.id } });
+          return NextResponse.json({ error: "Invalid UPI Reference/UTR Number. Must be a 12-digit number." }, { status: 400 });
         }
 
-        // Update booking with Razorpay Order ID
+        const invoiceNumber = `INV-${new Date().getFullYear()}-${booking.id.slice(0, 6).toUpperCase()}`;
+
+        // Update booking with UTR code
         const updatedBooking = await prisma.booking.update({
           where: { id: booking.id },
-          data: { razorpayOrderId: razorpayOrder.id },
+          data: { 
+            razorpayPaymentId: upiUtr,
+            invoiceNumber
+          },
+        });
+
+        // Create a pending payment log in the transactions database
+        await prisma.payment.create({
+          data: {
+            bookingId: booking.id,
+            amount: amountInINR,
+            status: "PENDING",
+            razorpayPaymentId: upiUtr,
+            invoiceNumber,
+          },
         });
 
         return NextResponse.json({
           booking: updatedBooking,
-          razorpayOrder: {
-            id: razorpayOrder.id,
-            amount: razorpayOrder.amount,
-            currency: razorpayOrder.currency,
-            keyId: process.env.RAZORPAY_KEY_ID || "rzp_test_mock123456789",
-          },
           client: {
             name: client.name,
             email: client.email,
@@ -173,10 +156,10 @@ export async function POST(request) {
           },
         });
       } catch (paymentErr) {
-        console.error("Razorpay Order Creation Failed:", paymentErr);
+        console.error("UPI Payment Save Failed:", paymentErr);
         // Clean up pending booking
         await prisma.booking.delete({ where: { id: booking.id } });
-        return NextResponse.json({ error: "Failed to initialize payment gateway." }, { status: 500 });
+        return NextResponse.json({ error: "Failed to process payment details." }, { status: 500 });
       }
     }
 

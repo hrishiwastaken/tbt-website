@@ -17,13 +17,11 @@ export default function AdminLayout({ children }) {
 
   const checkAdminAuth = async () => {
     try {
-      // Validate session via client fetching or similar
       const res = await fetch("/api/admin/stats");
       if (!res.ok) {
         router.push("/admin/login");
       } else {
-        // Mock email for dashboard display
-        setAdminEmail("admin@madhumaticlinic.com");
+        setAdminEmail("admin@solispsychology.com");
       }
     } catch (err) {
       console.error(err);
@@ -54,22 +52,22 @@ export default function AdminLayout({ children }) {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-alabaster-bg flex justify-center items-center font-body text-body text-taupe-body">
+      <div className="min-h-screen bg-ivory flex justify-center items-center font-dmsans text-sm text-sage">
         Loading admin console...
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-alabaster-bg flex flex-col md:flex-row font-body">
+    <div className="min-h-screen bg-ivory flex flex-col md:flex-row font-dmsans">
       {/* Sidebar Panel */}
-      <aside className="w-full md:w-64 bg-linen-surface border-b md:border-b-0 md:border-r border-surface-variant/40 flex flex-col justify-between py-6 px-4 shrink-0">
+      <aside className="w-full md:w-64 bg-sand/30 border-b md:border-b-0 md:border-r border-mist/30 flex flex-col justify-between py-6 px-4 shrink-0">
         <div>
           <div className="px-3 mb-8">
-            <Link href="/" className="font-hero text-h3 text-on-surface block hover:opacity-90">
-              Madhumati Clinic
+            <Link href="/" className="font-cormorant font-semibold text-2xl text-charcoal block hover:opacity-90 leading-tight">
+              Solis Psychology
             </Link>
-            <span className="font-label text-[10px] text-rosewood-cta uppercase tracking-widest font-bold flex items-center gap-1 mt-1">
+            <span className="font-dmsans text-[10px] text-terracotta uppercase tracking-widest font-bold flex items-center gap-1 mt-1">
               <ShieldAlert size={10} /> Admin Console
             </span>
           </div>
@@ -82,13 +80,13 @@ export default function AdminLayout({ children }) {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`flex items-center gap-3 px-3 py-3 rounded-lg font-body text-caption transition-all ${
+                  className={`flex items-center gap-3 px-3 py-3 rounded-lg text-xs font-semibold uppercase tracking-wider transition-all ${
                     isActive
-                      ? "bg-rosewood-cta text-white font-semibold"
-                      : "text-taupe-body hover:bg-surface-container-low hover:text-on-surface"
+                      ? "bg-forest text-warm-white"
+                      : "text-sage hover:bg-mist/20 hover:text-charcoal"
                   }`}
                 >
-                  <Icon size={16} />
+                  <Icon size={14} />
                   {item.name}
                 </Link>
               );
@@ -96,13 +94,13 @@ export default function AdminLayout({ children }) {
           </nav>
         </div>
 
-        <div className="pt-4 border-t border-surface-variant/30 mt-6 px-3 flex flex-col gap-4">
-          <div className="text-[10px] text-taupe-body font-mono truncate">
+        <div className="pt-4 border-t border-mist/20 mt-6 px-3 flex flex-col gap-4">
+          <div className="text-[10px] text-sage font-mono truncate">
             {adminEmail}
           </div>
           <button
             onClick={handleLogout}
-            className="flex items-center gap-2 text-taupe-body hover:text-[#ba1a1a] transition-colors font-label text-label uppercase tracking-widest"
+            className="flex items-center gap-2 text-sage hover:text-red-700 transition-colors text-xs font-bold tracking-widest uppercase"
           >
             <LogOut size={14} /> Logout
           </button>

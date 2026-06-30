@@ -11,20 +11,11 @@ export async function PUT(request, { params }) {
 
     // 1. Authenticate session
     const session = await getSession(request);
-    if (!session || session.role !== "THERAPIST") {
+    if (!session || (session.role !== "ADMIN" && session.role !== "THERAPIST")) {
       return NextResponse.json({ error: "Unauthorized access" }, { status: 401 });
     }
 
-    // 2. Fetch therapist profile linked to this user
-    const therapist = await prisma.therapist.findUnique({
-      where: { userId: session.userId },
-    });
-
-    if (!therapist) {
-      return NextResponse.json({ error: "Therapist profile not found" }, { status: 404 });
-    }
-
-    // 3. Find booking and verify ownership
+    // 2. Find booking
     const booking = await prisma.booking.findUnique({
       where: { id: bookingId },
     });
@@ -33,11 +24,7 @@ export async function PUT(request, { params }) {
       return NextResponse.json({ error: "Booking not found" }, { status: 404 });
     }
 
-    if (booking.therapistId !== therapist.id) {
-      return NextResponse.json({ error: "Unauthorized modification" }, { status: 403 });
-    }
-
-    // 4. Update data structure
+    // 3. Update data structure
     const updateData = {};
     
     if (status) {
@@ -47,7 +34,7 @@ export async function PUT(request, { params }) {
       }
       updateData.status = status;
       
-      // Auto-update paymentStatus to PAID if marked completed and was pending
+      // Auto-update paymentStatus to PAID and trigger payment logs transition
       if (status === "COMPLETED" && booking.paymentStatus === "PENDING") {
         updateData.paymentStatus = "PAID";
         
@@ -55,6 +42,33 @@ export async function PUT(request, { params }) {
         if (!booking.invoiceNumber) {
           updateData.invoiceNumber = `INV-${new Date().getFullYear()}-${booking.id.slice(0, 6).toUpperCase()}`;
         }
+
+        const pendingPaymentCount = await prisma.payment.count({
+          where: { bookingId: booking.id, status: "PENDING" }
+        });
+
+        if (pendingPaymentCount > 0) {
+          await prisma.payment.updateMany({
+            where: { bookingId: booking.id, status: "PENDING" },
+            data: { status: "SUCCESS" },
+          });
+        } else {
+          await prisma.payment.create({
+            data: {
+              bookingId: booking.id,
+              amount: booking.amount,
+              status: "SUCCESS",
+              razorpayPaymentId: booking.razorpayPaymentId || "cash_or_upi_post",
+              invoiceNumber: booking.invoiceNumber || updateData.invoiceNumber,
+            }
+          });
+        }
+      } else if (status === "CONFIRMED" && booking.paymentStatus === "PENDING" && booking.razorpayPaymentId) {
+        updateData.paymentStatus = "PAID";
+        await prisma.payment.updateMany({
+          where: { bookingId: booking.id, status: "PENDING" },
+          data: { status: "SUCCESS" },
+        });
       }
     }
 

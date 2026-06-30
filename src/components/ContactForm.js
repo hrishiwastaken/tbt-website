@@ -19,7 +19,6 @@ export default function ContactForm() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // Simple basic client-side check
     if (!formData.name || !formData.email || !formData.subject || !formData.message) {
       setStatus("ERROR");
       setMessageText("Please fill out all fields.");
@@ -54,23 +53,23 @@ export default function ContactForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-8 bg-linen-surface p-8 md:p-12 rounded-[20px] border border-surface-variant/40 shadow-sm">
-      <h3 className="font-hero text-h2 text-on-surface mb-6 border-b border-surface-variant pb-2">Send a Message</h3>
+    <form onSubmit={handleSubmit} className="space-y-6 glass-card p-8 md:p-12 rounded-2xl border border-mist/30 shadow-warm-soft">
+      <h3 className="font-cormorant text-3xl font-semibold text-charcoal mb-4 border-b border-mist/20 pb-2">Send a Message</h3>
       
       {status === "SUCCESS" && (
-        <div className="p-4 rounded bg-[#d6e7d7] text-[#111f15] font-body text-caption">
+        <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm font-medium">
           {messageText}
         </div>
       )}
 
       {status === "ERROR" && (
-        <div className="p-4 rounded bg-[#ffdad6] text-[#ba1a1a] font-body text-caption font-semibold">
+        <div className="p-4 rounded-xl bg-rose-50 border border-red-200 text-red-700 text-sm font-medium">
           {messageText}
         </div>
       )}
 
       <div>
-        <label htmlFor="name" className="font-label text-label text-taupe-body uppercase block mb-1">
+        <label htmlFor="name" className="text-xs font-bold tracking-wider uppercase text-sage block mb-1">
           Full Name
         </label>
         <input
@@ -81,14 +80,14 @@ export default function ContactForm() {
           onChange={handleChange}
           required
           placeholder="Jane Doe"
-          className="form-input-minimal"
+          className="w-full bg-warm-white/50 border-t-0 border-l-0 border-r-0 border-b border-mist/60 focus:ring-0 focus:border-forest text-charcoal py-2 px-0 transition-colors text-base"
           disabled={status === "SENDING"}
         />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <div>
-          <label htmlFor="email" className="font-label text-label text-taupe-body uppercase block mb-1">
+          <label htmlFor="email" className="text-xs font-bold tracking-wider uppercase text-sage block mb-1">
             Email Address
           </label>
           <input
@@ -99,12 +98,12 @@ export default function ContactForm() {
             onChange={handleChange}
             required
             placeholder="jane@example.com"
-            className="form-input-minimal"
+            className="w-full bg-warm-white/50 border-t-0 border-l-0 border-r-0 border-b border-mist/60 focus:ring-0 focus:border-forest text-charcoal py-2 px-0 transition-colors text-base"
             disabled={status === "SENDING"}
           />
         </div>
         <div>
-          <label htmlFor="subject" className="font-label text-label text-taupe-body uppercase block mb-1">
+          <label htmlFor="subject" className="text-xs font-bold tracking-wider uppercase text-sage block mb-1">
             Subject
           </label>
           <input
@@ -115,25 +114,25 @@ export default function ContactForm() {
             onChange={handleChange}
             required
             placeholder="Consultation Inquiry"
-            className="form-input-minimal"
+            className="w-full bg-warm-white/50 border-t-0 border-l-0 border-r-0 border-b border-mist/60 focus:ring-0 focus:border-forest text-charcoal py-2 px-0 transition-colors text-base"
             disabled={status === "SENDING"}
           />
         </div>
       </div>
 
       <div>
-        <label htmlFor="message" className="font-label text-label text-taupe-body uppercase block mb-1">
+        <label htmlFor="message" className="text-xs font-bold tracking-wider uppercase text-sage block mb-1">
           Message
         </label>
         <textarea
           id="message"
           name="message"
-          rows="4"
+          rows={4}
           value={formData.message}
           onChange={handleChange}
           required
           placeholder="Write your details or inquiry here..."
-          className="form-input-minimal"
+          className="w-full bg-warm-white/50 border-t-0 border-l-0 border-r-0 border-b border-mist/60 focus:ring-0 focus:border-forest text-charcoal py-2 px-0 transition-colors text-base"
           disabled={status === "SENDING"}
         />
       </div>
@@ -142,7 +141,7 @@ export default function ContactForm() {
         <button
           type="submit"
           disabled={status === "SENDING"}
-          className="bg-rosewood-cta text-on-primary hover:opacity-90 px-8 py-3 rounded-full font-body text-body transition-opacity disabled:opacity-50"
+          className="bg-forest hover:bg-terracotta text-warm-white font-medium px-8 py-3 rounded-full transition-colors disabled:opacity-50 shadow-sm hover:shadow-md"
         >
           {status === "SENDING" ? "Sending..." : "Submit Inquiry"}
         </button>

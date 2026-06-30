@@ -6,7 +6,7 @@ export async function GET(request) {
   try {
     // 1. Authenticate Admin session
     const session = await getSession(request);
-    if (!session || session.role !== "ADMIN") {
+    if (!session || (session.role !== "ADMIN" && session.role !== "THERAPIST")) {
       return NextResponse.json({ error: "Unauthorized access" }, { status: 401 });
     }
 

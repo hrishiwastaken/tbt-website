@@ -42,8 +42,8 @@ export async function POST(request) {
       role: user.role,
     });
 
-    // Determine redirect path based on role
-    const redirectUrl = user.role === "ADMIN" ? "/admin/bookings" : "/therapist/dashboard";
+    // Determine redirect path (both roles redirect to unified admin panel)
+    const redirectUrl = "/admin/bookings";
 
     const response = NextResponse.json({
       message: "Login successful",

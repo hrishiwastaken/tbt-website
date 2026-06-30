@@ -26,7 +26,6 @@ export default function AdminLoginPage() {
       const data = await res.json();
 
       if (res.ok) {
-        // Force reload/redirect to dashboard
         router.push(data.redirectUrl || "/admin/bookings");
         router.refresh();
       } else {
@@ -41,48 +40,49 @@ export default function AdminLoginPage() {
   };
 
   return (
-    <main className="min-h-screen bg-alabaster-bg flex flex-col justify-center items-center px-margin-mobile relative overflow-hidden">
-      {/* Decorative breathe bg */}
+    <main className="min-h-screen bg-ivory flex flex-col justify-center items-center px-6 relative overflow-hidden font-dmsans">
+      {/* Decorative background shape */}
       <div className="absolute inset-0 pointer-events-none -z-10 flex items-center justify-center">
-        <div className="w-[600px] h-[600px] rounded-full breathwork-bg blur-3xl opacity-20"></div>
+        <div className="w-[600px] h-[600px] rounded-full bg-sand/30 blur-3xl opacity-40"></div>
       </div>
 
-      <div className="w-full max-w-md bg-linen-surface p-8 md:p-12 rounded-[20px] border border-surface-variant/40 shadow-sm text-center">
-        <Link href="/" className="font-hero text-h2 text-primary hover:opacity-90 transition-opacity block mb-2">
-          Madhumati Clinic
+      <div className="w-full max-w-md glass-card p-8 md:p-12 rounded-2xl border border-mist/30 shadow-warm-soft text-center relative overflow-hidden">
+        <div className="absolute top-0 left-0 right-0 h-1 bg-forest" />
+        <Link href="/" className="font-cormorant font-semibold text-3xl text-forest hover:opacity-90 transition-opacity block mb-2 leading-none">
+          Solis Psychology
         </Link>
-        <span className="font-label text-label text-rosewood-cta uppercase tracking-widest block mb-8">
+        <span className="text-xs font-bold tracking-widest text-terracotta uppercase block mb-8">
           Admin Portal
         </span>
 
         {errorMsg && (
-          <div className="mb-6 p-4 rounded bg-[#ffdad6] text-[#ba1a1a] font-body text-caption font-semibold text-left">
+          <div className="mb-6 p-4 rounded-xl bg-rose-50 border border-red-200 text-red-700 text-xs font-semibold text-left">
             {errorMsg}
           </div>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-6 text-left">
           <div>
-            <label className="font-label text-label text-taupe-body uppercase block mb-1">Email Address</label>
+            <label className="text-xs font-bold tracking-wider uppercase text-sage block mb-1">Email Address</label>
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="admin@madhumaticlinic.com"
-              className="form-input-minimal"
+              placeholder="admin@solispsychology.com"
+              className="w-full bg-warm-white/50 border-t-0 border-l-0 border-r-0 border-b border-mist/60 focus:ring-0 focus:border-forest text-charcoal py-2 px-0 transition-colors text-base"
               required
               disabled={loading}
             />
           </div>
 
           <div>
-            <label className="font-label text-label text-taupe-body uppercase block mb-1">Password</label>
+            <label className="text-xs font-bold tracking-wider uppercase text-sage block mb-1">Password</label>
             <input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••••••"
-              className="form-input-minimal"
+              className="w-full bg-warm-white/50 border-t-0 border-l-0 border-r-0 border-b border-mist/60 focus:ring-0 focus:border-forest text-charcoal py-2 px-0 transition-colors text-base"
               required
               disabled={loading}
             />
@@ -91,17 +91,17 @@ export default function AdminLoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-rosewood-cta text-on-primary font-body text-body py-4 rounded-full hover:opacity-90 transition-opacity mt-4 disabled:opacity-50"
+            className="w-full bg-forest hover:bg-terracotta text-warm-white font-bold py-4 rounded-full transition-colors mt-4 disabled:opacity-50 shadow-sm"
           >
             {loading ? "Authenticating..." : "Login to Portal"}
           </button>
         </form>
 
-        <div className="mt-8 border-t border-surface-variant/30 pt-4 flex justify-between font-caption text-caption text-taupe-body">
-          <Link href="/" className="hover:text-rosewood-cta transition-colors">
+        <div className="mt-8 border-t border-mist/20 pt-4 flex justify-between text-xs text-sage font-medium">
+          <Link href="/" className="hover:text-forest transition-colors">
             ← Main Site
           </Link>
-          <Link href="/therapist/login" className="hover:text-rosewood-cta transition-colors">
+          <Link href="/therapist/login" className="hover:text-forest transition-colors">
             Therapist Login →
           </Link>
         </div>

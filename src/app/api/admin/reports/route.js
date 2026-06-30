@@ -1,4 +1,3 @@
-import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getSession } from "@/lib/auth";
 
@@ -6,7 +5,7 @@ export async function GET(request) {
   try {
     // 1. Authenticate Admin session
     const session = await getSession(request);
-    if (!session || session.role !== "ADMIN") {
+    if (!session || (session.role !== "ADMIN" && session.role !== "THERAPIST")) {
       return new Response("Unauthorized access", { status: 401 });
     }
 
@@ -68,7 +67,7 @@ export async function GET(request) {
       status: 200,
       headers: {
         "Content-Type": "text/csv; charset=utf-8",
-        "Content-Disposition": "attachment; filename=madhumati_clinic_report.csv",
+        "Content-Disposition": "attachment; filename=solis_psychology_report.csv",
         "Pragma": "no-cache",
         "Cache-Control": "no-store",
       },

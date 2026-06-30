@@ -1,7 +1,7 @@
 import crypto from "crypto";
 
 const ALGORITHM = "aes-256-gcm";
-const KEY_HEX = process.env.ENCRYPTION_KEY || "f1a8c9e54d7b2a3c9b8d7e6f5a4b3c2d1e0f9a8b7c6d5e4f3a2b1c0d9e8f7a6b"; // Fallback dev key
+const KEY_HEX = process.env.ENCRYPTION_KEY || "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff"; // Fallback dev key
 const KEY = Buffer.from(KEY_HEX, "hex");
 
 export function encryptText(text) {
