@@ -1,0 +1,120 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String     @id @default(uuid())
+  email        String     @unique
+  passwordHash String
+  role         String     // "ADMIN" | "THERAPIST"
+  therapist    Therapist?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+}
+
+model Therapist {
+  id           String                  @id @default(uuid())
+  userId       String?                 @unique
+  user         User?                   @relation(fields: [userId], references: [id], onDelete: SetNull)
+  name         String
+  photo        String?
+  bio          String
+  fees         Float
+  slug         String                  @unique
+  isActive     Boolean                 @default(true)
+  availability TherapistAvailability[]
+  bookings     Booking[]
+  createdAt    DateTime                @default(now())
+  updatedAt    DateTime                @updatedAt
+}
+
+model TherapistAvailability {
+  id          String    @id @default(uuid())
+  therapistId String
+  therapist   Therapist @relation(fields: [therapistId], references: [id], onDelete: Cascade)
+  dayOfWeek   Int       // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+  startTime   String    // "HH:MM" e.g. "09:00"
+  endTime     String    // "HH:MM" e.g. "17:00"
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@unique([therapistId, dayOfWeek, startTime, endTime])
+}
+
+model Service {
+  id              String    @id @default(uuid())
+  name            String
+  description     String
+  durationMinutes Int
+  price           Float
+  slug            String    @unique
+  isActive        Boolean   @default(true)
+  bookings        Booking[]
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}
+
+model Client {
+  id               String    @id @default(uuid())
+  name             String
+  email            String    @unique
+  phone            String
+  dob              String    // YYYY-MM-DD
+  emergencyContact String
+  gdprConsent      Boolean   @default(false)
+  bookings         Booking[]
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+}
+
+model Booking {
+  id                String    @id @default(uuid())
+  therapistId       String
+  therapist         Therapist @relation(fields: [therapistId], references: [id])
+  serviceId         String
+  service           Service   @relation(fields: [serviceId], references: [id])
+  clientId          String
+  client            Client    @relation(fields: [clientId], references: [id])
+  dateTime          DateTime  // Date and start time of booking
+  durationMinutes   Int
+  amount            Float
+  status            String    // "PENDING", "CONFIRMED", "COMPLETED", "CANCELLED", "NO_SHOW"
+  notes             String?   // Encrypted session notes
+  razorpayOrderId   String?   @unique
+  razorpayPaymentId String?   @unique
+  invoiceNumber     String?   @unique
+  paymentStatus     String    // "PENDING", "PAID", "REFUNDED"
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  payments          Payment[]
+}
+
+model Payment {
+  id                String   @id @default(uuid())
+  bookingId         String
+  booking           Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  amount            Float
+  status            String   // "PENDING", "SUCCESS", "FAILED", "REFUNDED"
+  razorpayPaymentId String?
+  invoiceNumber     String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+model Testimonial {
+  id         String   @id @default(uuid())
+  clientName String
+  quote      String
+  status     String   // "PENDING", "APPROVED", "HIDDEN"
+  rating     Int      @default(5)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
