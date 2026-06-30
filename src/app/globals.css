@@ -103,11 +103,11 @@ a {
 
 /* Glassmorphic Panel Design Token */
 .glass-card {
-  background: rgba(253, 250, 246, 0.75);
+  background: linear-gradient(135deg, rgba(235, 224, 208, 0.55), rgba(200, 217, 204, 0.35));
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(200, 217, 204, 0.45);
-  box-shadow: inset 0 1.5px 0 rgba(255, 255, 255, 0.6), 0 8px 32px rgba(46, 74, 56, 0.04);
+  border: 1px solid rgba(200, 217, 204, 0.55);
+  box-shadow: inset 0 1.5px 0 rgba(255, 255, 255, 0.5), 0 8px 32px rgba(46, 74, 56, 0.06);
 }
 
 /* Tactile button shimmer sweep on hover */
