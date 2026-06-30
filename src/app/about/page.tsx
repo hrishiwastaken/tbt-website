@@ -34,22 +34,6 @@ export default function About() {
       specialisations: ["Anxiety & Stress", "Trauma & PTSD", "Life Transitions"],
       bio: "With over 12 years of clinical experience, Dr. Dhumak founded Solis Psychology to create a sanctuary where scientific insight meets deep, non-judgmental human empathy. She specializes in guiding clients through trauma recovery and stress management at their own pace.",
       image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=600&q=80"
-    },
-    {
-      name: "Marcus Thorne",
-      role: "Senior Couples & Family Counsellor",
-      credentials: "M.Sc. Counselling Psychology",
-      specialisations: ["Relationship Therapy", "Family Systems", "Conflict Resolution"],
-      bio: "Marcus specialises in systemic family therapy, helping couples and families build stronger bonds, improve emotional expression, and dismantle destructive cycles.",
-      image: "https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=600&q=80"
-    },
-    {
-      name: "Dr. Sarah Jenkins",
-      role: "Child & Adolescent Specialist",
-      credentials: "Ph.D. Child Psychology",
-      specialisations: ["Child & Adolescent Therapy", "Self-Esteem & Identity", "Parental Support"],
-      bio: "Dr. Jenkins utilizes creative, play-integrated therapy structures to support children and teenagers facing developmental shifts, trauma, and identity exploration.",
-      image: "https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=600&q=80"
     }
   ];
 
