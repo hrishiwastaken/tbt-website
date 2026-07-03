@@ -124,8 +124,8 @@ export default function Home() {
           <div className="lg:col-span-5 relative w-full flex justify-center lg:justify-start lg:-ml-24 xl:-ml-36">
             
             <div 
-              className="relative w-full max-w-[390px] aspect-[4/5] overflow-hidden bg-forest-slate shadow-2xl border-t border-r border-muted-sage/20 flex items-end"
-              style={{ borderRadius: "0 280px 0 0" }}
+              className="relative w-full max-w-[390px] aspect-[4/5] overflow-hidden bg-forest-slate shadow-2xl border-t border-r border-b border-muted-sage/20 flex items-end"
+              style={{ borderRadius: "0 280px 280px 0" }}
             >
               <Image
                 src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=1200&q=80"
