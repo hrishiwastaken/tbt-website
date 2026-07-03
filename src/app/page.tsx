@@ -449,7 +449,7 @@ export default function Home() {
               >
                 {/* Stars Rating row */}
                 <div className="flex justify-center gap-1 text-teal-sage/85 text-xs mb-6 tracking-widest">
-                  {"★".repeat(t.rating || 5)}
+                  {"★".repeat(5)}
                 </div>
                 <p className="font-cormorant italic text-2xl md:text-3xl lg:text-4xl text-forest-slate leading-relaxed max-w-3xl mx-auto mb-6 text-balance">
                   &ldquo;{t.quote}&rdquo;
