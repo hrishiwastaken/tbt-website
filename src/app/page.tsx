@@ -206,7 +206,7 @@ export default function Home() {
       </div>
 
       {/* SECTION 2: WHAT WE HELP WITH (STILLPOINT GREEN BLOCK) */}
-      <section className="bg-muted-sage pt-12 pb-24 relative overflow-hidden">
+      <section className="bg-muted-sage pt-12 pb-24 relative">
         {/* Soft floating leaves in background */}
         <div className="absolute top-[10%] right-[5%] opacity-[0.05] text-warm-white pointer-events-none hidden md:block">
           <svg width="220" height="220" fill="currentColor" viewBox="0 0 24 24">
@@ -214,10 +214,10 @@ export default function Home() {
           </svg>
         </div>
 
-        <div className="max-w-7xl mx-auto px-6 md:px-12 relative z-10">
+        <div className="max-w-7xl mx-auto px-6 md:px-12 relative">
           
-          {/* Three Arch-topped Cards Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+          {/* Three Arch-topped Cards Grid with negative top margin to overlap the transition */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto -mt-24 md:-mt-36 lg:-mt-44 relative z-30">
             
             {/* Card 1: Individual Therapy */}
             <div className="bg-warm-white p-6 rounded-[32px] border border-warm-sand/15 shadow-warm-soft flex flex-col justify-between items-center text-center hover:shadow-lg transition-shadow duration-300">
