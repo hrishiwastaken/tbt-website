@@ -232,7 +232,7 @@ export default function Home() {
                 />
               </div>
               {/* White text box at bottom */}
-              <div className="bg-warm-white rounded-b-[24px] w-[85%] px-5 py-6 text-center shadow-warm-soft -mt-1 border border-t-0 border-warm-sand/15">
+              <div className="bg-warm-white rounded-b-[24px] w-full px-5 py-6 text-center shadow-warm-soft -mt-1 border border-t-0 border-warm-sand/15">
                 <h3 className="font-cormorant text-xl md:text-2xl font-semibold text-forest-slate mb-2 uppercase tracking-wide">Individual Therapy</h3>
                 <p className="text-xs md:text-sm text-forest-slate/80 leading-relaxed mb-5 font-dmsans">
                   One-on-one sessions tailored specifically to you. Process emotional pain, challenge deep-seated patterns, and build genuine coping skills.
@@ -257,7 +257,7 @@ export default function Home() {
                   className="object-cover"
                 />
               </div>
-              <div className="bg-warm-white rounded-b-[24px] w-[85%] px-5 py-6 text-center shadow-warm-soft -mt-1 border border-t-0 border-warm-sand/15">
+              <div className="bg-warm-white rounded-b-[24px] w-full px-5 py-6 text-center shadow-warm-soft -mt-1 border border-t-0 border-warm-sand/15">
                 <h3 className="font-cormorant text-xl md:text-2xl font-semibold text-forest-slate mb-2 uppercase tracking-wide">Couples Counseling</h3>
                 <p className="text-xs md:text-sm text-forest-slate/80 leading-relaxed mb-5 font-dmsans">
                   A structured, neutral space to resolve conflict, dismantle communication barriers, and restore intimacy. Open to couples at any stage.
@@ -282,7 +282,7 @@ export default function Home() {
                   className="object-cover"
                 />
               </div>
-              <div className="bg-warm-white rounded-b-[24px] w-[85%] px-5 py-6 text-center shadow-warm-soft -mt-1 border border-t-0 border-warm-sand/15">
+              <div className="bg-warm-white rounded-b-[24px] w-full px-5 py-6 text-center shadow-warm-soft -mt-1 border border-t-0 border-warm-sand/15">
                 <h3 className="font-cormorant text-xl md:text-2xl font-semibold text-forest-slate mb-2 uppercase tracking-wide">Family Therapy</h3>
                 <p className="text-xs md:text-sm text-forest-slate/80 leading-relaxed mb-5 font-dmsans">
                   Improve communication dynamics, boundary-setting, and conflict resolution mechanisms within family and systemic structures.
