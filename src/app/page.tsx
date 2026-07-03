@@ -120,11 +120,13 @@ export default function Home() {
 
         <div className="max-w-7xl mx-auto px-6 md:px-12 grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center relative z-10">
           
-          {/* Left Column (5 Cols): Arched shape containing the therapist portrait + floating circle badge */}
+          {/* Left Column (5 Cols): Arched shape containing the therapist portrait */}
           <div className="lg:col-span-5 relative w-full flex justify-center lg:justify-start lg:-ml-24 xl:-ml-36">
             
-            {/* The circular/oval background container with flat-left and flat-bottom (rounded top-right corner only) */}
-            <div className="relative w-full max-w-[390px] aspect-[4/5] rounded-tr-[280px] rounded-tl-none rounded-bl-none rounded-br-none overflow-hidden bg-forest-slate shadow-2xl border-t border-r border-muted-sage/20 flex items-end">
+            <div 
+              className="relative w-full max-w-[390px] aspect-[4/5] overflow-hidden bg-forest-slate shadow-2xl border-t border-r border-muted-sage/20 flex items-end"
+              style={{ borderRadius: "0 280px 0 0" }}
+            >
               <Image
                 src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=1200&q=80"
                 alt="Dr. Madhumati Dhumak - Clinical Psychologist"
@@ -133,13 +135,6 @@ export default function Home() {
                 sizes="(max-width: 1024px) 100vw, 35vw"
                 className="object-cover object-top filter brightness-[0.93] contrast-[1.02]"
               />
-            </div>
-
-            {/* Circular shop-like badge floating on the left */}
-            <div className="absolute -left-6 top-[38%] z-20 w-32 h-32 bg-warm-sand border border-muted-sage/35 text-forest-slate rounded-full flex flex-col items-center justify-center text-center shadow-lg p-2 font-cormorant">
-              <span className="text-[10px] uppercase font-bold font-dmsans tracking-widest text-teal-sage mb-0.5">RCI</span>
-              <span className="text-lg font-bold italic text-forest-slate leading-tight">Licensed</span>
-              <span className="text-[8px] uppercase tracking-wider text-muted-sage font-dmsans mt-0.5">Clinical Care</span>
             </div>
             
           </div>
