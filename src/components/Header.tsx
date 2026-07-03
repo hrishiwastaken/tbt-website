@@ -44,14 +44,14 @@ export default function Header() {
       <header
         className={`fixed top-0 left-0 right-0 z-40 transition-all duration-300 ${
           isScrolled
-            ? "bg-warm-white/80 backdrop-blur-lg border-b border-mist/20 shadow-warm-soft py-4"
+            ? "bg-warm-sand/90 backdrop-blur-lg border-b border-muted-sage/20 shadow-warm-soft py-4"
             : "bg-transparent py-6"
         }`}
       >
         <div className="max-w-7xl mx-auto px-6 md:px-12 flex items-center justify-between">
           {/* Logo */}
           <Link href="/" className="z-50">
-            <span className="font-cormorant font-semibold text-2xl md:text-3xl text-forest tracking-tight">
+            <span className="font-cormorant font-semibold text-2xl md:text-3xl text-forest-slate tracking-tight">
               Solis Psychology
             </span>
           </Link>
@@ -66,15 +66,15 @@ export default function Header() {
                   href={link.href}
                   className={`font-dmsans text-sm font-medium tracking-wide transition-colors relative py-1 ${
                     isActive
-                      ? "text-forest font-semibold"
-                      : "text-sage hover:text-forest"
+                      ? "text-teal-sage font-semibold"
+                      : "text-forest-slate/90 hover:text-teal-sage"
                   }`}
                 >
                   {link.name}
                   {isActive && (
                     <motion.div
                       layoutId="activeUnderline"
-                      className="absolute bottom-0 left-0 right-0 h-0.5 bg-terracotta"
+                      className="absolute bottom-0 left-0 right-0 h-0.5 bg-teal-sage"
                       transition={{ type: "spring", stiffness: 380, damping: 30 }}
                     />
                   )}
@@ -85,7 +85,7 @@ export default function Header() {
             {/* Book Appointment CTA */}
             <Link
               href="/book"
-              className="font-dmsans text-sm font-medium bg-forest hover:bg-terracotta text-warm-white px-6 py-2.5 rounded-full shadow-sm hover:shadow-warm-soft transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0 btn-shimmer"
+              className="font-dmsans text-sm font-semibold bg-teal-sage hover:bg-forest-slate text-warm-sand px-6 py-2.5 rounded-full shadow-sm hover:shadow-warm-soft transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0 btn-shimmer"
             >
               Book Appointment
             </Link>

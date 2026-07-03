@@ -59,20 +59,20 @@ export default function About() {
     <div className="bg-ivory min-h-screen font-dmsans">
       
       {/* SECTION 1: PAGE HERO */}
-      <section className="bg-sand pt-32 pb-20">
+      <section className="bg-warm-tan/30 pt-32 pb-20">
         <div className="max-w-4xl mx-auto px-6 text-center">
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
-            <span className="text-xs font-semibold tracking-[0.15em] text-terracotta uppercase mb-4 block">
+            <span className="text-[11px] font-bold tracking-[0.25em] text-teal-sage uppercase mb-4 block">
               About the Practice
             </span>
-            <h1 className="font-cormorant text-5xl md:text-6xl font-semibold text-charcoal leading-tight mb-6">
+            <h1 className="font-cormorant text-5xl md:text-6xl font-semibold text-forest-slate leading-tight mb-6">
               About Solis Psychology
             </h1>
-            <p className="text-sage text-lg md:text-xl max-w-2xl mx-auto leading-relaxed">
+            <p className="text-forest-slate/85 text-lg md:text-xl max-w-2xl mx-auto leading-relaxed font-dmsans">
               We believe every person deserves a space where they feel seen, heard, and supported on their journey toward mental well-being.
             </p>
           </motion.div>
@@ -84,10 +84,10 @@ export default function About() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
           {/* Story Text */}
           <div className="lg:col-span-7 space-y-6">
-            <h2 className="font-cormorant text-4xl md:text-[48px] font-semibold text-charcoal mb-4">
+            <h2 className="font-cormorant text-4xl md:text-[48px] font-semibold text-forest-slate mb-4">
               Building a Safe Haven for Healing
             </h2>
-            <div className="text-sage text-base md:text-lg space-y-6 leading-relaxed">
+            <div className="text-forest-slate/90 text-base md:text-lg space-y-6 leading-relaxed font-dmsans">
               <p>
                 Solis Psychology was founded with a singular, vital goal: to create a therapeutic environment that combines clinical excellence with genuine, authentic warmth. We recognized that traditional clinical spaces often felt cold, intimidating, or sterile. We set out to change that, designing our practice to feel like entering a comfortable, peaceful room where you can catch your breath.
               </p>
@@ -100,27 +100,27 @@ export default function About() {
             </div>
           </div>
 
-          {/* Story Image */}
-          <div className="lg:col-span-5 relative aspect-[4/5] rounded-2xl overflow-hidden shadow-warm-soft w-full max-w-md mx-auto">
+          {/* Story Image in Arch frame */}
+          <div className="lg:col-span-5 relative aspect-[4/5] rounded-t-full overflow-hidden shadow-warm-soft w-full max-w-md mx-auto border border-muted-sage/25 bg-warm-tan">
             <Image
               src="https://images.unsplash.com/photo-1518241353330-0f7941c2d9b5?auto=format&fit=crop&w=800&q=80"
               alt="Soft natural sunlight filtering through leaves near a quiet reading space"
               fill
               sizes="(max-width: 1024px) 100vw, 35vw"
-              className="object-cover"
+              className="object-cover transition-transform duration-700 hover:scale-105"
             />
           </div>
         </div>
       </section>
 
       {/* SECTION 3: OUR VALUES */}
-      <section className="py-24 bg-mist/30">
+      <section className="py-24 bg-muted-sage/20">
         <div className="max-w-7xl mx-auto px-6 md:px-12">
           <div className="text-center max-w-2xl mx-auto mb-16">
-            <h2 className="font-cormorant text-4xl md:text-[48px] font-semibold text-charcoal leading-tight mb-4">
+            <h2 className="font-cormorant text-4xl md:text-[48px] font-semibold text-forest-slate leading-tight mb-4">
               The Principles That Guide Us
             </h2>
-            <p className="text-sage text-base md:text-lg">
+            <p className="text-forest-slate/85 text-base md:text-lg">
               Our core values form the foundation of our clinical practice, dictating how we treat every individual who reaches out.
             </p>
           </div>
@@ -129,15 +129,15 @@ export default function About() {
             {values.map((v) => (
               <div
                 key={v.title}
-                className="bg-warm-white p-8 rounded-2xl shadow-warm-soft border border-mist/20 flex flex-col items-start"
+                className="bg-warm-sand p-8 rounded-2xl shadow-warm-soft border border-muted-sage/20 flex flex-col items-start"
               >
-                <div className="mb-6 p-3 bg-mist/30 rounded-xl">
+                <div className="mb-6 p-3 bg-teal-sage/10 rounded-xl text-teal-sage">
                   {v.icon}
                 </div>
-                <h3 className="font-cormorant text-2xl font-semibold text-charcoal mb-4">
+                <h3 className="font-cormorant text-2xl font-semibold text-forest-slate mb-4">
                   {v.title}
                 </h3>
-                <p className="text-sm text-sage leading-relaxed">
+                <p className="text-sm text-forest-slate/80 leading-relaxed font-dmsans">
                   {v.text}
                 </p>
               </div>
@@ -227,17 +227,17 @@ export default function About() {
       </section>
 
       {/* SECTION 5: APPOINTMENT PROMPT */}
-      <section className="bg-sand py-16 text-center border-t border-mist/20">
+      <section className="bg-warm-tan/30 py-16 text-center border-t border-muted-sage/20">
         <div className="max-w-2xl mx-auto px-6">
-          <h2 className="font-cormorant text-3xl md:text-4xl font-semibold text-charcoal mb-4">
+          <h2 className="font-cormorant text-3xl md:text-4xl font-semibold text-forest-slate mb-4">
             We are here to support your path forward.
           </h2>
-          <p className="text-sm text-sage mb-8">
+          <p className="text-sm text-forest-slate/80 mb-8 font-dmsans">
             Speak with one of our coordinators to find the therapist best suited to your needs.
           </p>
           <Link
             href="/contact"
-            className="inline-block font-dmsans text-sm font-medium bg-forest hover:bg-sage text-warm-white px-8 py-3.5 rounded-full transition-all hover:shadow-lg"
+            className="inline-block font-dmsans text-sm font-semibold bg-teal-sage hover:bg-forest-slate text-warm-sand px-8 py-3.5 rounded-full transition-all hover:shadow-lg btn-shimmer"
           >
             Schedule a Consultation
           </Link>

@@ -8,14 +8,22 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        forest: "#2E4A38",
-        sage: "#5A7A65",
-        mist: "#C8D9CC",
-        ivory: "#F8F4ED",
-        sand: "#EBE0D0",
-        terracotta: "#B5714A",
-        charcoal: "#2A2A2A",
-        "warm-white": "#FDFAF6",
+        "warm-sand": "#DAD7CA",      // primary light bg
+        "muted-sage": "#9FACA5",     // secondary bg / divider
+        "warm-tan": "#DCCDB2",       // card bg
+        "teal-sage": "#698E8B",      // buttons, links, accents
+        "forest-slate": "#55665D",   // headings / labels
+        "near-black": "#202623",     // body text
+        
+        // Legacy compatibility mappings
+        forest: "#698E8B",
+        sage: "#9FACA5",
+        mist: "#9FACA5",
+        ivory: "#DAD7CA",
+        sand: "#DCCDB2",
+        terracotta: "#698E8B",
+        charcoal: "#55665D",
+        "warm-white": "#FFFFFF",
       },
       fontFamily: {
         cormorant: ["var(--font-cormorant)", "serif"],

@@ -3,19 +3,27 @@
 @tailwind utilities;
 
 :root {
-  --color-forest: #2E4A38;
-  --color-sage: #5A7A65;
-  --color-mist: #C8D9CC;
-  --color-ivory: #F8F4ED;
-  --color-sand: #EBE0D0;
-  --color-terracotta: #B5714A;
-  --color-charcoal: #2A2A2A;
-  --color-warm-white: #FDFAF6;
+  --color-warm-sand: #DAD7CA;
+  --color-muted-sage: #9FACA5;
+  --color-warm-tan: #DCCDB2;
+  --color-teal-sage: #698E8B;
+  --color-forest-slate: #55665D;
+  --color-near-black: #202623;
+
+  /* Legacy mappings */
+  --color-forest: #698E8B;
+  --color-sage: #9FACA5;
+  --color-mist: #9FACA5;
+  --color-ivory: #DAD7CA;
+  --color-sand: #DCCDB2;
+  --color-terracotta: #698E8B;
+  --color-charcoal: #55665D;
+  --color-warm-white: #FFFFFF;
 }
 
 body {
-  background-color: var(--color-ivory);
-  color: var(--color-charcoal);
+  background-color: var(--color-warm-sand);
+  color: var(--color-near-black);
   font-family: var(--font-dm-sans), sans-serif;
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
@@ -103,11 +111,11 @@ a {
 
 /* Glassmorphic Panel Design Token */
 .glass-card {
-  background: linear-gradient(135deg, rgba(235, 224, 208, 0.55), rgba(200, 217, 204, 0.35));
+  background: linear-gradient(135deg, rgba(220, 205, 178, 0.65), rgba(159, 172, 165, 0.45));
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(200, 217, 204, 0.55);
-  box-shadow: inset 0 1.5px 0 rgba(255, 255, 255, 0.5), 0 8px 32px rgba(46, 74, 56, 0.06);
+  border: 1px solid rgba(159, 172, 165, 0.55);
+  box-shadow: inset 0 1.5px 0 rgba(255, 255, 255, 0.5), 0 8px 32px rgba(85, 102, 93, 0.08);
 }
 
 /* Tactile button shimmer sweep on hover */

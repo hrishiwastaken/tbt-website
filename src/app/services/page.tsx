@@ -79,18 +79,18 @@ export default function Services() {
   ];
 
   return (
-    <div className="bg-ivory min-h-screen font-dmsans">
+    <div className="bg-warm-sand min-h-screen font-dmsans">
       
       {/* HERO SECTION */}
-      <section className="bg-sand pt-32 pb-20 border-b border-mist/20">
+      <section className="bg-warm-tan/30 pt-32 pb-20 border-b border-muted-sage/20">
         <div className="max-w-4xl mx-auto px-6 text-center">
-          <span className="text-xs font-semibold tracking-[0.15em] text-terracotta uppercase mb-4 block">
+          <span className="text-[11px] font-bold tracking-[0.25em] text-teal-sage uppercase mb-4 block">
             Clinical Care Options
           </span>
-          <h1 className="font-cormorant text-5xl md:text-6xl font-semibold text-charcoal leading-tight mb-6">
+          <h1 className="font-cormorant text-5xl md:text-6xl lg:text-7xl font-semibold text-forest-slate leading-tight mb-6">
             Our Services
           </h1>
-          <p className="text-sage text-lg md:text-xl max-w-2xl mx-auto leading-relaxed">
+          <p className="text-forest-slate/85 text-lg md:text-xl max-w-2xl mx-auto leading-relaxed">
             Evidence-based therapy tailored to your needs. We provide structured support pathways for various clinical mental health requirements.
           </p>
         </div>
@@ -103,13 +103,13 @@ export default function Services() {
           return (
             <div 
               key={service.title} 
-              className={`py-16 md:py-24 border-b border-mist/20 ${isEven ? "bg-ivory" : "bg-warm-white"}`}
+              className={`py-16 md:py-24 border-b border-muted-sage/20 ${isEven ? "bg-warm-sand" : "bg-warm-sand/45"}`}
             >
               <div className="max-w-7xl mx-auto px-6 md:px-12">
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
                   
-                  {/* Image Column */}
-                  <div className={`lg:col-span-5 relative aspect-[4/3] w-full rounded-2xl overflow-hidden shadow-warm-soft ${
+                  {/* Image Column: Arch-topped doorway container */}
+                  <div className={`lg:col-span-5 relative aspect-[4/5] w-full max-w-sm mx-auto rounded-t-full overflow-hidden shadow-warm-soft border border-muted-sage/25 bg-warm-tan ${
                     isEven ? "lg:order-1" : "lg:order-2"
                   }`}>
                     <Image
@@ -117,7 +117,7 @@ export default function Services() {
                       alt={`${service.title} - Session image`}
                       fill
                       sizes="(max-width: 1024px) 100vw, 35vw"
-                      className="object-cover"
+                      className="object-cover transition-transform duration-700 hover:scale-105"
                     />
                   </div>
 
@@ -125,30 +125,30 @@ export default function Services() {
                   <div className={`lg:col-span-7 space-y-6 ${
                     isEven ? "lg:order-2" : "lg:order-1"
                   }`}>
-                    <h2 className="font-cormorant text-3xl md:text-4xl font-semibold text-charcoal">
+                    <h2 className="font-cormorant text-3xl md:text-4xl lg:text-5xl font-semibold text-forest-slate">
                       {service.title}
                     </h2>
                     
                     {/* Meta info tags */}
-                    <div className="flex flex-wrap items-center gap-4 text-xs font-medium font-dmsans text-forest">
-                      <span className="flex items-center gap-1.5 bg-mist/30 px-3 py-1.5 rounded-full border border-forest/5">
+                    <div className="flex flex-wrap items-center gap-4 text-xs font-semibold font-dmsans text-teal-sage">
+                      <span className="flex items-center gap-1.5 bg-muted-sage/20 px-4 py-2 rounded-full border border-teal-sage/10">
                         <Clock className="w-3.5 h-3.5" />
                         {service.duration}
                       </span>
-                      <span className="flex items-center gap-1.5 bg-mist/30 px-3 py-1.5 rounded-full border border-forest/5">
+                      <span className="flex items-center gap-1.5 bg-muted-sage/20 px-4 py-2 rounded-full border border-teal-sage/10">
                         <Laptop className="w-3.5 h-3.5" />
                         {service.format}
                       </span>
                     </div>
 
-                    <p className="text-sage text-base md:text-lg leading-relaxed">
+                    <p className="text-forest-slate/90 text-base md:text-lg leading-relaxed font-dmsans">
                       {service.description}
                     </p>
 
                     <div className="pt-2">
                       <Link
                         href={`/contact?service=${encodeURIComponent(service.title)}`}
-                        className="inline-flex items-center gap-2 bg-forest hover:bg-sage text-warm-white text-sm font-medium px-6 py-3 rounded-full hover:shadow-lg transition-all"
+                        className="inline-flex items-center gap-2 bg-teal-sage hover:bg-forest-slate text-warm-sand text-sm font-semibold px-8 py-3.5 rounded-full hover:shadow-lg transition-all btn-shimmer"
                       >
                         Book This Session
                       </Link>
@@ -160,20 +160,18 @@ export default function Services() {
             </div>
           );
         })}
-      </section>
-
       {/* PRICING SECTION */}
-      <section className="py-24 bg-mist/20">
+      <section className="py-24 bg-muted-sage/20">
         <div className="max-w-7xl mx-auto px-6 md:px-12">
           {/* Header */}
           <div className="text-center max-w-2xl mx-auto mb-16">
-            <span className="text-xs font-semibold tracking-[0.15em] text-terracotta uppercase mb-3 block">
+            <span className="text-[11px] font-bold tracking-[0.25em] text-teal-sage uppercase mb-3 block">
               Investment & Pricing
             </span>
-            <h2 className="font-cormorant text-4xl md:text-[48px] font-semibold text-charcoal leading-tight mb-4">
+            <h2 className="font-cormorant text-4xl md:text-[48px] font-semibold text-forest-slate leading-tight mb-4">
               Transparent Fees for Quality Care
             </h2>
-            <p className="text-sage text-base">
+            <p className="text-forest-slate/85 text-base">
               Prioritizing your well-being with structured, transparent therapy investment paths.
             </p>
           </div>
@@ -187,29 +185,29 @@ export default function Services() {
                   key={plan.type}
                   className={`rounded-2xl p-8 md:p-12 shadow-warm-soft flex flex-col justify-between relative transition-all duration-300 ${
                     isRecommended 
-                      ? "bg-warm-white border-2 border-terracotta/40 hover:border-terracotta" 
-                      : "glass-card hover:border-forest/20"
+                      ? "bg-warm-sand border-2 border-teal-sage hover:border-forest-slate" 
+                      : "glass-card hover:border-teal-sage/35"
                   }`}
                 >
                   {isRecommended && (
-                    <span className="absolute top-0 right-8 -translate-y-1/2 bg-terracotta text-warm-white text-[10px] font-bold tracking-wider uppercase px-3.5 py-1 rounded-full shadow-sm">
+                    <span className="absolute top-0 right-8 -translate-y-1/2 bg-teal-sage text-warm-sand text-[10px] font-bold tracking-wider uppercase px-3.5 py-1 rounded-full shadow-sm">
                       Most Requested
                     </span>
                   )}
                   <div>
-                    <h3 className="font-cormorant text-2xl font-semibold text-charcoal mb-2">
+                    <h3 className="font-cormorant text-2xl font-semibold text-forest-slate mb-2">
                       {plan.type}
                     </h3>
-                    <p className="text-sm text-sage mb-6">
+                    <p className="text-sm text-forest-slate/80 mb-6 font-dmsans">
                       {plan.description}
                     </p>
                     
                     {/* Price */}
                     <div className="mb-8 flex items-baseline gap-1">
-                      <span className="text-4xl md:text-5xl font-cormorant font-semibold text-forest">
+                      <span className="text-4xl md:text-5xl font-cormorant font-semibold text-forest-slate">
                         {plan.price}
                       </span>
-                      <span className="text-xs text-sage font-dmsans">
+                      <span className="text-xs text-forest-slate/80 font-dmsans">
                         / {plan.period}
                       </span>
                     </div>
@@ -217,8 +215,8 @@ export default function Services() {
                     {/* Features */}
                     <ul className="space-y-4 mb-8">
                       {plan.features.map((feat) => (
-                        <li key={feat} className="flex items-center gap-3 text-sm text-sage">
-                          <CheckCircle2 className="w-4 h-4 text-terracotta shrink-0" />
+                        <li key={feat} className="flex items-center gap-3 text-sm text-forest-slate/80 font-dmsans">
+                          <CheckCircle2 className="w-4 h-4 text-teal-sage shrink-0" />
                           <span>{feat}</span>
                         </li>
                       ))}
@@ -227,10 +225,10 @@ export default function Services() {
 
                   <Link
                     href="/contact"
-                    className={`w-full text-center text-sm font-medium py-3.5 rounded-full transition-all block ${
+                    className={`w-full text-center text-sm font-semibold py-3.5 rounded-full transition-all block btn-shimmer ${
                       isRecommended
-                        ? "bg-terracotta hover:bg-forest text-warm-white shadow-md hover:shadow-lg hover:-translate-y-0.5"
-                        : "bg-forest hover:bg-sage text-warm-white hover:-translate-y-0.5"
+                        ? "bg-teal-sage hover:bg-forest-slate text-warm-sand shadow-md hover:shadow-lg hover:-translate-y-0.5"
+                        : "bg-forest-slate hover:bg-teal-sage text-warm-sand hover:-translate-y-0.5"
                     }`}
                   >
                     Book consultation
@@ -242,7 +240,7 @@ export default function Services() {
 
           {/* Sliding scale text */}
           <div className="text-center max-w-lg mx-auto">
-            <p className="text-xs md:text-sm text-sage leading-relaxed italic">
+            <p className="text-xs md:text-sm text-forest-slate/75 leading-relaxed italic font-dmsans">
               * Sliding scale slots are reserved for students, low-income individuals, and those facing sudden economic hardships. Please speak with us during your initial consultation.
             </p>
           </div>

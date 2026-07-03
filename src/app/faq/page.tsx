@@ -16,7 +16,7 @@ function FAQItem({ question, answer, isOpen, onToggle }: FAQItemProps) {
   return (
     <div 
       className={`glass-card rounded-2xl px-6 md:px-8 mb-4 border transition-all duration-300 relative overflow-hidden ${
-        isOpen ? "border-forest/30 shadow-md bg-warm-white" : "border-mist/20 shadow-sm hover:border-forest/20 bg-warm-white/70"
+        isOpen ? "border-teal-sage/40 shadow-md bg-warm-sand/95" : "border-muted-sage/20 shadow-sm hover:border-teal-sage/30 bg-warm-sand/65"
       }`}
     >
       {/* Dynamic Left Vertical Border Accent */}
@@ -24,7 +24,7 @@ function FAQItem({ question, answer, isOpen, onToggle }: FAQItemProps) {
         initial={{ height: 0 }}
         animate={{ height: isOpen ? "100%" : 0 }}
         transition={{ duration: 0.3, ease: "easeInOut" }}
-        className="absolute left-0 top-0 w-1.5 bg-terracotta"
+        className="absolute left-0 top-0 w-1.5 bg-teal-sage"
       />
 
       <button
@@ -32,14 +32,14 @@ function FAQItem({ question, answer, isOpen, onToggle }: FAQItemProps) {
         className="w-full flex justify-between items-center text-left py-5 focus:outline-none group relative z-10"
       >
         <span className={`font-cormorant text-xl md:text-2xl font-semibold transition-colors pr-6 ${
-          isOpen ? "text-forest" : "text-charcoal group-hover:text-forest"
+          isOpen ? "text-forest-slate" : "text-forest-slate/90 group-hover:text-teal-sage"
         }`}>
           {question}
         </span>
         <motion.div
           animate={{ rotate: isOpen ? 180 : 0 }}
           transition={{ duration: 0.3, ease: "easeInOut" }}
-          className={`${isOpen ? "text-forest" : "text-sage group-hover:text-forest"} shrink-0`}
+          className={`${isOpen ? "text-teal-sage" : "text-muted-sage group-hover:text-teal-sage"} shrink-0`}
         >
           <ChevronDown className="w-5 h-5" />
         </motion.div>
@@ -67,7 +67,7 @@ function FAQItem({ question, answer, isOpen, onToggle }: FAQItemProps) {
             }}
             className="overflow-hidden"
           >
-            <div className="font-dmsans text-sm md:text-base text-sage leading-relaxed pb-6 pr-6 text-pretty">
+            <div className="font-dmsans text-sm md:text-base text-forest-slate/85 leading-relaxed pb-6 pr-6 text-pretty">
               {answer}
             </div>
           </motion.div>
@@ -128,18 +128,18 @@ export default function FAQ() {
   };
 
   return (
-    <div className="bg-ivory min-h-screen font-dmsans">
+    <div className="bg-warm-sand min-h-screen font-dmsans">
       
       {/* PAGE HERO */}
-      <section className="bg-sand pt-32 pb-20 border-b border-mist/20">
+      <section className="bg-warm-tan/30 pt-32 pb-20 border-b border-muted-sage/20">
         <div className="max-w-4xl mx-auto px-6 text-center">
-          <span className="text-xs font-semibold tracking-[0.18em] text-terracotta uppercase mb-4 block">
+          <span className="text-[11px] font-bold tracking-[0.25em] text-teal-sage uppercase mb-4 block">
             Got Questions?
           </span>
-          <h1 className="font-cormorant text-5xl md:text-6xl font-semibold text-charcoal leading-tight mb-6">
+          <h1 className="font-cormorant text-5xl md:text-6xl font-semibold text-forest-slate leading-tight mb-6">
             Frequently Asked Questions
           </h1>
-          <p className="text-sage text-lg md:text-xl max-w-2xl mx-auto leading-relaxed">
+          <p className="text-forest-slate/85 text-lg md:text-xl max-w-2xl mx-auto leading-relaxed">
             No question is too small. We are here to clarify any doubts you have about starting your mental health journey.
           </p>
         </div>
@@ -161,27 +161,27 @@ export default function FAQ() {
       </section>
 
       {/* CALL TO ACTION */}
-      <section className="py-16 text-center bg-sand border-t border-mist/20">
+      <section className="py-16 text-center bg-warm-tan/30 border-t border-muted-sage/20">
         <div className="max-w-2xl mx-auto px-6">
-          <HelpCircle className="w-12 h-12 text-terracotta mx-auto mb-4" />
-          <h2 className="font-cormorant text-3xl font-semibold text-charcoal mb-4">
+          <HelpCircle className="w-12 h-12 text-teal-sage mx-auto mb-4" />
+          <h2 className="font-cormorant text-3xl font-semibold text-forest-slate mb-4">
             Still Have Questions?
           </h2>
-          <p className="text-sm text-sage mb-8 max-w-md mx-auto">
+          <p className="text-sm text-forest-slate/80 mb-8 max-w-md mx-auto">
             If you have any other concerns, feel free to drop us a line or connect via WhatsApp. We are happy to help.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link
               href="/contact"
-              className="bg-forest hover:bg-sage text-warm-white font-medium px-8 py-3 rounded-full text-sm transition-all"
+              className="bg-teal-sage hover:bg-forest-slate text-warm-sand font-semibold px-8 py-3.5 rounded-full text-sm transition-all shadow-sm hover:shadow-md btn-shimmer"
             >
               Contact Us Form
             </Link>
             <a
-              href="https://wa.me/919876543210?text=Hi!%20I%20have%20a%20few%20questions%20about%20your%20services."
+              href="https://wa.me/917558493155?text=Hi!%20I%20have%20a%20few%20questions%20about%20your%20services."
               target="_blank"
               rel="noopener noreferrer"
-              className="border border-forest text-forest hover:bg-forest/5 font-medium px-8 py-3 rounded-full text-sm transition-all"
+              className="border border-teal-sage text-teal-sage hover:bg-teal-sage hover:text-warm-sand font-semibold px-8 py-3.5 rounded-full text-sm transition-all btn-shimmer"
             >
               Ask on WhatsApp
             </a>
