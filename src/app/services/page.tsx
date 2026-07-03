@@ -160,6 +160,8 @@ export default function Services() {
             </div>
           );
         })}
+      </section>
+
       {/* PRICING SECTION */}
       <section className="py-24 bg-muted-sage/20">
         <div className="max-w-7xl mx-auto px-6 md:px-12">
