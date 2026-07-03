@@ -14,15 +14,15 @@
   --color-forest: #698E8B;
   --color-sage: #9FACA5;
   --color-mist: #9FACA5;
-  --color-ivory: #DAD7CA;
+  --color-ivory: #FDFBF7;      /* Bright, warm off-white */
   --color-sand: #DCCDB2;
   --color-terracotta: #698E8B;
   --color-charcoal: #55665D;
-  --color-warm-white: #FFFFFF;
+  --color-warm-white: #FDFBF7;  /* Bright, warm off-white */
 }
 
 body {
-  background-color: var(--color-warm-sand);
+  background-color: var(--color-warm-white);
   color: var(--color-near-black);
   font-family: var(--font-dm-sans), sans-serif;
   overflow-x: hidden;
@@ -199,5 +199,19 @@ a {
 
 .text-pretty {
   text-wrap: pretty;
+}
+
+/* Custom Spin Animations */
+@keyframes spin-slow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin-slow {
+  animation: spin-slow 22s linear infinite;
 }
 

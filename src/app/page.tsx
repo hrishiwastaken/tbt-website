@@ -112,27 +112,54 @@ export default function Home() {
   return (
     <div className="overflow-hidden bg-ivory font-dmsans">
       
-      {/* SECTION 1: HERO (EDITORIAL ARCH & CURVES) */}
-      <section className="relative min-h-[90vh] flex flex-col lg:flex-row items-center justify-between gap-12 lg:gap-16 pt-[120px] pb-28 bg-warm-sand overflow-hidden">
-        {/* Organic Curved Background Accent behind the entire section */}
-        <div className="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] md:w-[700px] md:h-[700px] rounded-full bg-warm-tan/30 -z-10 blur-[80px] pointer-events-none" />
-        <div className="absolute bottom-[-5%] left-[-5%] w-[300px] h-[300px] rounded-full bg-muted-sage/20 -z-10 blur-[60px] pointer-events-none" />
-
-        {/* Hand-drawn soft circle accent */}
-        <div className="absolute top-[20%] left-[45%] opacity-[0.15] text-teal-sage pointer-events-none hidden lg:block">
-          <svg width="120" height="120" viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="1.5">
-            <path d="M30,50 C20,20 80,10 85,45 C90,80 30,90 25,60 C20,30 70,25 75,50" strokeLinecap="round" />
-          </svg>
-        </div>
+      {/* SECTION 1: HERO (STILLPOINT LAYOUT REINTERPRETATION) */}
+      <section className="relative min-h-[90vh] flex flex-col lg:flex-row items-center justify-between gap-12 lg:gap-16 pt-[120px] pb-32 bg-warm-white overflow-hidden">
+        {/* Soft Organic Background Blurs */}
+        <div className="absolute top-[-10%] left-[-10%] w-[400px] h-[400px] rounded-full bg-warm-tan/20 -z-10 blur-[80px] pointer-events-none" />
+        <div className="absolute bottom-[5%] right-[-5%] w-[500px] h-[500px] rounded-full bg-muted-sage/10 -z-10 blur-[90px] pointer-events-none" />
 
         <div className="max-w-7xl mx-auto w-full px-6 md:px-12 flex flex-col lg:flex-row items-center justify-between gap-12 lg:gap-16 relative z-10">
-          {/* Left Content Column */}
-          <div className="w-full lg:w-[50%] flex flex-col justify-center">
+          
+          {/* Left Column: Image in Circle Container + Rotating Badge */}
+          <div className="w-full lg:w-[46%] flex justify-center relative order-2 lg:order-1">
+            {/* Background circular outline accent */}
+            <div className="absolute -inset-4 border border-teal-sage/15 rounded-full -z-10" />
+            
+            {/* Rotating Circular Badge (similar to 'Shop Now' sticker layout) */}
+            <div className="absolute -top-6 -right-6 md:top-6 md:-right-6 z-20 w-32 h-32 bg-warm-tan border border-muted-sage/35 text-forest-slate rounded-full flex items-center justify-center text-center shadow-lg pointer-events-none p-4">
+              <div className="relative w-full h-full flex items-center justify-center">
+                <svg className="absolute w-full h-full animate-spin-slow" viewBox="0 0 100 100">
+                  <path id="badgePath" d="M 50,50 m -35,0 a 35,35 0 1,1 70,0 a 35,35 0 1,1 -70,0" fill="none" />
+                  <text className="font-dmsans text-[8.5px] font-bold tracking-[0.12em] fill-forest-slate">
+                    <textPath href="#badgePath" startOffset="0%">
+                      RCI REGISTERED • CLINICAL CARE • SANCTUARY •
+                    </textPath>
+                  </text>
+                </svg>
+                <span className="font-cormorant font-bold text-sm tracking-tighter text-forest-slate">SOLIS</span>
+              </div>
+            </div>
+
+            {/* Circular image container */}
+            <div className="w-full max-w-sm md:max-w-md aspect-square rounded-full overflow-hidden shadow-warm-soft bg-warm-tan relative z-10 border border-muted-sage/20">
+              <Image
+                src="https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=1200&q=80"
+                alt="Warm softly lit therapy room interior with armchair and potted plant"
+                fill
+                priority
+                sizes="(max-width: 768px) 100vw, 40vw"
+                className="object-cover transition-transform duration-700 hover:scale-105"
+              />
+            </div>
+          </div>
+
+          {/* Right Column: Rounded Editorial Card */}
+          <div className="w-full lg:w-[48%] flex flex-col justify-center order-1 lg:order-2">
             <motion.div
               initial="hidden"
               animate="visible"
               variants={staggerContainer}
-              className="max-w-xl text-center lg:text-left mx-auto lg:mx-0"
+              className="bg-warm-sand/35 p-8 md:p-12 rounded-[40px] border border-muted-sage/15 shadow-warm-soft relative z-10 max-w-xl mx-auto lg:mx-0"
             >
               {/* Eyebrow */}
               <motion.span 
@@ -145,7 +172,7 @@ export default function Home() {
               {/* H1 Headline */}
               <motion.h1 
                 variants={fadeInUp}
-                className="font-cormorant text-5xl md:text-6xl lg:text-[72px] font-semibold text-forest-slate leading-[1.08] tracking-[-0.01em] mb-6 text-balance relative"
+                className="font-cormorant text-4xl md:text-5xl lg:text-[56px] font-semibold text-forest-slate leading-[1.1] tracking-[-0.01em] mb-6 text-balance"
               >
                 You Deserve to Feel Like Yourself Again
               </motion.h1>
@@ -153,15 +180,15 @@ export default function Home() {
               {/* Subhead */}
               <motion.p 
                 variants={fadeInUp}
-                className="text-base md:text-lg text-forest-slate/85 leading-relaxed mb-8 text-pretty font-dmsans"
+                className="text-sm md:text-base text-forest-slate/90 leading-relaxed mb-8 text-pretty font-dmsans"
               >
-                Compassionate, evidence-based therapy for individuals, couples, and families. A warm, human-centered sanctuary to begin your journey.
+                Compassionate, evidence-based therapy for individuals, couples, and families. A warm, clinical sanctuary to begin your healing journey.
               </motion.p>
 
               {/* CTAs */}
               <motion.div 
                 variants={fadeInUp}
-                className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center lg:justify-start gap-4 mb-6"
+                className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 mb-6"
               >
                 <Link 
                   href="/book"
@@ -180,176 +207,141 @@ export default function Home() {
               {/* Reassurance */}
               <motion.p 
                 variants={fadeInUp}
-                className="text-xs text-muted-sage flex items-center justify-center lg:justify-start gap-1.5"
+                className="text-xs text-muted-sage flex items-center gap-1.5"
               >
                 <span>🔒</span> All sessions are strictly confidential
               </motion.p>
             </motion.div>
           </div>
 
-          {/* Right Imagery Column */}
-          <div className="w-full lg:w-[45%] flex justify-center relative">
-            {/* Background semicircular/arched background shape */}
-            <div className="absolute top-[8%] left-[2%] right-[2%] bottom-[-5%] bg-warm-tan/40 rounded-t-full -z-10 blur-md pointer-events-none" />
-            <div className="absolute -bottom-6 -right-6 w-32 h-32 rounded-full bg-muted-sage/20 -z-10 blur-xl pointer-events-none" />
-            
-            {/* Decorative organic hand-drawn arrow pointing to the consultation button */}
-            <div className="absolute -left-12 bottom-12 opacity-[0.18] text-teal-sage pointer-events-none hidden xl:block">
-              <svg width="80" height="80" viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M80,20 C50,40 30,50 35,80" strokeLinecap="round" />
-                <path d="M25,75 L35,80 L40,70" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            </div>
-
-            {/* Arch-topped frame container */}
-            <div className="w-full max-w-md aspect-[3/4] rounded-t-full overflow-hidden shadow-warm-soft bg-warm-tan relative z-10 border border-muted-sage/25">
-              <Image
-                src="https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=1200&q=80"
-                alt="Warm softly lit therapy room interior with armchair and potted plant"
-                fill
-                priority
-                sizes="(max-width: 768px) 100vw, 40vw"
-                className="object-cover transition-transform duration-700 hover:scale-105"
-              />
-            </div>
-          </div>
         </div>
 
-        {/* Section Transition Curve (flows Hero into Section 2) */}
+        {/* Section Transition Curve (flows Hero into Section 2 - Dipping Concave Curve) */}
         <div className="absolute bottom-0 left-0 right-0 w-full overflow-hidden leading-none z-20 pointer-events-none">
-          <svg className="relative block w-full h-[60px] md:h-[80px]" viewBox="0 0 1200 120" preserveAspectRatio="none">
-            <path d="M0,0 Q600,120 1200,0 L1200,120 L0,120 Z" fill="var(--color-muted-sage)" className="opacity-20" />
-            <path d="M0,15 Q600,120 1200,15 L1200,120 L0,120 Z" fill="var(--color-warm-sand)" className="opacity-10" />
+          <svg className="relative block w-full h-[80px] md:h-[120px]" viewBox="0 0 1200 120" preserveAspectRatio="none">
+            <path d="M0,0 Q600,160 1200,0 L1200,120 L0,120 Z" fill="var(--color-muted-sage)" />
           </svg>
         </div>
       </section>
 
-      {/* SECTION 2: TRUST BAR */}
-      <section className="bg-muted-sage/25 py-16 relative overflow-hidden">
-        <div className="max-w-7xl mx-auto px-6 md:px-12 relative z-10">
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 text-center">
-            
-            <div className="glass-card p-6 md:p-8 rounded-2xl shadow-sm hover:shadow-warm-soft transition-all duration-300 relative group overflow-hidden">
-              <div className="absolute top-0 left-0 right-0 h-1 bg-teal-sage/40 group-hover:bg-teal-sage transition-colors duration-300" />
-              <div className="font-cormorant text-5xl md:text-6xl font-semibold text-forest-slate">500+</div>
-              <div className="text-xs md:text-sm text-forest-slate font-medium mt-2 tracking-wide uppercase">Clients Supported</div>
-            </div>
-
-            <div className="glass-card p-6 md:p-8 rounded-2xl shadow-sm hover:shadow-warm-soft transition-all duration-300 relative group overflow-hidden">
-              <div className="absolute top-0 left-0 right-0 h-1 bg-teal-sage/40 group-hover:bg-teal-sage transition-colors duration-300" />
-              <div className="font-cormorant text-5xl md:text-6xl font-semibold text-forest-slate">10+</div>
-              <div className="text-xs md:text-sm text-forest-slate font-medium mt-2 tracking-wide uppercase">Years of Practice</div>
-            </div>
-
-            <div className="glass-card p-6 md:p-8 rounded-2xl shadow-sm hover:shadow-warm-soft transition-all duration-300 relative group overflow-hidden">
-              <div className="absolute top-0 left-0 right-0 h-1 bg-teal-sage/40 group-hover:bg-teal-sage transition-colors duration-300" />
-              <div className="font-cormorant text-5xl md:text-6xl font-semibold text-forest-slate">4</div>
-              <div className="text-xs md:text-sm text-forest-slate font-medium mt-2 tracking-wide uppercase">Specialisations</div>
-            </div>
-
-            <div className="glass-card p-6 md:p-8 rounded-2xl shadow-sm hover:shadow-warm-soft transition-all duration-300 relative group overflow-hidden">
-              <div className="absolute top-0 left-0 right-0 h-1 bg-teal-sage/40 group-hover:bg-teal-sage transition-colors duration-300" />
-              <div className="font-cormorant text-5xl md:text-6xl font-semibold text-forest-slate">100%</div>
-              <div className="text-xs md:text-sm text-forest-slate font-medium mt-2 tracking-wide uppercase">Confidential Space</div>
-            </div>
-
-          </div>
-        </div>
-
-        {/* Section Transition Curve (flows Trust Bar into Focus Areas) */}
-        <div className="absolute bottom-0 left-0 right-0 w-full overflow-hidden leading-none z-20 pointer-events-none">
-          <svg className="relative block w-full h-[40px] md:h-[60px]" viewBox="0 0 1200 120" preserveAspectRatio="none">
-            <path d="M0,0 Q600,120 1200,0 L1200,120 L0,120 Z" fill="var(--color-warm-sand)" />
-          </svg>
-        </div>
-      </section>
-
-      {/* SECTION 3: WHAT WE HELP WITH */}
-      <section className="py-24 bg-warm-sand relative">
-        {/* Soft Organic SVGs in background */}
-        <div className="absolute top-20 left-10 w-64 h-64 bg-muted-sage/20 rounded-full blur-3xl -z-10 pointer-events-none" />
-        <div className="absolute bottom-20 right-10 w-80 h-80 bg-warm-tan/40 rounded-full blur-3xl -z-10 pointer-events-none" />
-
-        <div className="max-w-7xl mx-auto px-6 md:px-12">
-          {/* Header */}
-          <div className="text-center max-w-2xl mx-auto mb-16">
-            <span className="text-[11px] font-bold tracking-[0.25em] text-teal-sage uppercase mb-3 block">
-              Our Focus Areas
-            </span>
-            <h2 className="font-cormorant text-4xl md:text-[48px] font-semibold text-forest-slate leading-tight mb-4 text-balance">
-              You Are Not Alone in What You&apos;re Feeling
-            </h2>
-            <p className="text-forest-slate/85 text-base md:text-lg text-pretty">
-              We offer support across a wide range of mental health concerns, using approaches proven to make a lasting difference.
-            </p>
-          </div>
-
-          {/* Cards Grid */}
-          <motion.div 
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-100px" }}
-            variants={staggerContainer}
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
-          >
-            {focusAreas.map((area) => (
-              <motion.div
-                key={area.title}
-                variants={fadeInUp}
-                whileHover={{ y: -8, scale: 1.015, boxShadow: "0 16px 40px rgba(85, 102, 93, 0.12)" }}
-                transition={{ type: "spring", stiffness: 260, damping: 20 }}
-                className="glass-card p-8 rounded-2xl border border-muted-sage/20 hover:border-teal-sage/35 transition-all duration-300 shadow-warm-soft group"
-              >
-                <div className="w-12 h-12 rounded-full bg-teal-sage/10 flex items-center justify-center mb-6 group-hover:bg-teal-sage/20 transition-colors">
-                  {area.icon}
-                </div>
-                <h3 className="font-cormorant text-2xl font-semibold text-forest-slate mb-3">
-                  {area.title}
-                </h3>
-                <p className="text-sm text-forest-slate/80 leading-relaxed text-pretty">
-                  {area.description}
-                </p>
-              </motion.div>
-            ))}
-          </motion.div>
-        </div>
-
-        {/* Section Transition Curve (flows Focus Areas into Pull-Statement) */}
-        <div className="absolute bottom-0 left-0 right-0 w-full overflow-hidden leading-none z-10 pointer-events-none">
-          <svg className="relative block w-full h-[50px] md:h-[60px]" viewBox="0 0 1200 120" preserveAspectRatio="none">
-            <path d="M0,120 Q600,0 1200,120 Z" fill="var(--color-warm-sand)" />
-          </svg>
-        </div>
-      </section>
-
-      {/* SECTION: EDITORIAL PULL-STATEMENT */}
-      <section className="py-24 bg-warm-sand text-center relative overflow-hidden">
-        {/* Soft decorative leaf branch graphic in background */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-[0.03] text-teal-sage pointer-events-none">
-          <svg width="400" height="400" fill="currentColor" viewBox="0 0 24 24">
+      {/* SECTION 2: WHAT WE HELP WITH (STILLPOINT GREEN BLOCK) */}
+      <section className="bg-muted-sage py-24 relative overflow-hidden">
+        {/* Soft floating leaves in background */}
+        <div className="absolute top-[10%] right-[5%] opacity-[0.05] text-warm-white pointer-events-none hidden md:block">
+          <svg width="220" height="220" fill="currentColor" viewBox="0 0 24 24">
             <path d="M17 8C8 10 9 19 9 19s8-.5 10-6.5c1.5-4.5-2-4.5-2-4.5z" />
           </svg>
         </div>
-        <div className="max-w-4xl mx-auto px-6 relative z-10">
-          <span className="text-[11px] font-bold tracking-[0.25em] text-teal-sage uppercase mb-4 block">
-            Our Philosophy
-          </span>
-          <p className="font-cormorant text-3xl md:text-5xl lg:text-6xl italic font-semibold text-forest-slate leading-tight mb-4">
-            &ldquo;Therapy is not about fixing what is broken, but discovering the resilience that was there all along.&rdquo;
-          </p>
-          <div className="w-16 h-[2px] bg-teal-sage/35 mx-auto mt-8" />
+
+        <div className="max-w-7xl mx-auto px-6 md:px-12 relative z-10">
+          
+          {/* Header */}
+          <div className="text-center max-w-2xl mx-auto mb-20">
+            <div className="flex items-center justify-center gap-4 mb-4">
+              <span className="text-[10px] font-bold tracking-[0.3em] text-warm-sand uppercase">Your Journey</span>
+              <div className="w-1.5 h-1.5 rounded-full bg-warm-sand/50" />
+              <span className="text-[10px] font-bold tracking-[0.3em] text-warm-sand uppercase">Starts Here</span>
+            </div>
+            <h2 className="font-cormorant text-4xl md:text-[54px] font-semibold text-warm-sand leading-tight mb-6">
+              Building a Better Future Together
+            </h2>
+            <p className="text-warm-sand/85 text-sm md:text-base leading-relaxed max-w-lg mx-auto font-dmsans">
+              We provide structured support pathways for various clinical mental health requirements, using approaches proven to make a lasting difference.
+            </p>
+          </div>
+
+          {/* Three Arch-topped Cards Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+            
+            {/* Card 1: Individual Therapy */}
+            <div className="bg-warm-white p-6 rounded-[32px] border border-warm-sand/15 shadow-warm-soft flex flex-col justify-between items-center text-center hover:shadow-lg transition-shadow duration-300">
+              <div>
+                <div className="relative aspect-[3/4] w-full rounded-t-full overflow-hidden mb-6 border border-muted-sage/10 bg-warm-tan">
+                  <Image
+                    src="https://images.unsplash.com/photo-1527689368864-3a821dbccc34?auto=format&fit=crop&w=800&q=80"
+                    alt="Individual therapy session"
+                    fill
+                    sizes="(max-width: 768px) 100vw, 30vw"
+                    className="object-cover"
+                  />
+                </div>
+                <h3 className="font-cormorant text-2xl font-semibold text-forest-slate mb-2">Individual Therapy</h3>
+                <p className="text-xs md:text-sm text-forest-slate/80 leading-relaxed mb-6 px-2 font-dmsans">
+                  One-on-one sessions tailored specifically to you. Process emotional pain, challenge deep-seated patterns, and build genuine coping skills.
+                </p>
+              </div>
+              <Link 
+                href="/book" 
+                className="font-dmsans text-[10px] font-bold tracking-[0.2em] text-teal-sage hover:text-forest-slate uppercase underline underline-offset-4 mb-2"
+              >
+                Book Now
+              </Link>
+            </div>
+
+            {/* Card 2: Couples counseling */}
+            <div className="bg-warm-white p-6 rounded-[32px] border border-warm-sand/15 shadow-warm-soft flex flex-col justify-between items-center text-center hover:shadow-lg transition-shadow duration-300">
+              <div>
+                <div className="relative aspect-[3/4] w-full rounded-t-full overflow-hidden mb-6 border border-muted-sage/10 bg-warm-tan">
+                  <Image
+                    src="https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?auto=format&fit=crop&w=800&q=80"
+                    alt="Couples therapy session"
+                    fill
+                    sizes="(max-width: 768px) 100vw, 30vw"
+                    className="object-cover"
+                  />
+                </div>
+                <h3 className="font-cormorant text-2xl font-semibold text-forest-slate mb-2">Couples Counseling</h3>
+                <p className="text-xs md:text-sm text-forest-slate/80 leading-relaxed mb-6 px-2 font-dmsans">
+                  A structured, neutral space to resolve conflict, dismantle communication barriers, and restore intimacy. Open to couples at any stage.
+                </p>
+              </div>
+              <Link 
+                href="/book" 
+                className="font-dmsans text-[10px] font-bold tracking-[0.2em] text-teal-sage hover:text-forest-slate uppercase underline underline-offset-4 mb-2"
+              >
+                Book Now
+              </Link>
+            </div>
+
+            {/* Card 3: Family Systems */}
+            <div className="bg-warm-white p-6 rounded-[32px] border border-warm-sand/15 shadow-warm-soft flex flex-col justify-between items-center text-center hover:shadow-lg transition-shadow duration-300">
+              <div>
+                <div className="relative aspect-[3/4] w-full rounded-t-full overflow-hidden mb-6 border border-muted-sage/10 bg-warm-tan">
+                  <Image
+                    src="https://images.unsplash.com/photo-1542037104857-ffbb0b9155fb?auto=format&fit=crop&w=800&q=80"
+                    alt="Family session"
+                    fill
+                    sizes="(max-width: 768px) 100vw, 30vw"
+                    className="object-cover"
+                  />
+                </div>
+                <h3 className="font-cormorant text-2xl font-semibold text-forest-slate mb-2">Family Therapy</h3>
+                <p className="text-xs md:text-sm text-forest-slate/80 leading-relaxed mb-6 px-2 font-dmsans">
+                  Improve communication dynamics, boundary-setting, and conflict resolution mechanisms within family and systemic structures.
+                </p>
+              </div>
+              <Link 
+                href="/book" 
+                className="font-dmsans text-[10px] font-bold tracking-[0.2em] text-teal-sage hover:text-forest-slate uppercase underline underline-offset-4 mb-2"
+              >
+                Book Now
+              </Link>
+            </div>
+
+          </div>
+
+        </div>
+
+        {/* Section Transition Curve (concave dip flowing back to warm white) */}
+        <div className="absolute bottom-0 left-0 right-0 w-full overflow-hidden leading-none z-20 pointer-events-none">
+          <svg className="relative block w-full h-[60px] md:h-[90px]" viewBox="0 0 1200 120" preserveAspectRatio="none">
+            <path d="M0,120 Q600,0 1200,120 L1200,120 L0,120 Z" fill="var(--color-warm-white)" />
+          </svg>
         </div>
       </section>
 
-      {/* SECTION 4: HOW IT WORKS */}
-      <section className="py-24 bg-muted-sage/20 relative">
-        {/* Curved Divider at the top flow */}
-        <div className="absolute top-0 left-0 right-0 w-full overflow-hidden leading-none z-10 pointer-events-none">
-          <svg className="relative block w-full h-[40px]" viewBox="0 0 1200 120" preserveAspectRatio="none">
-            <path d="M0,0 Q600,80 1200,0 L1200,120 L0,120 Z" fill="var(--color-warm-sand)" />
-          </svg>
-        </div>
-
+      {/* SECTION 3: HOW IT WORKS */}
+      <section className="py-24 bg-warm-white relative">
         <div className="max-w-7xl mx-auto px-6 md:px-12 relative z-10">
           {/* Header */}
           <div className="text-center max-w-xl mx-auto mb-16">
@@ -393,10 +385,10 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Section Transition Curve (flows How It Works into Section 5) */}
+        {/* Section Transition Curve (flows How It Works into Section 4 - Therapist Bio) */}
         <div className="absolute bottom-0 left-0 right-0 w-full overflow-hidden leading-none z-10 pointer-events-none">
           <svg className="relative block w-full h-[50px] md:h-[60px]" viewBox="0 0 1200 120" preserveAspectRatio="none">
-            <path d="M0,0 Q600,100 1200,0 L1200,120 L0,120 Z" fill="var(--color-warm-sand)" />
+            <path d="M0,0 Q600,100 1200,0 L1200,120 L0,120 Z" fill="var(--color-warm-sand)" className="opacity-30" />
           </svg>
         </div>
       </section>
@@ -465,15 +457,15 @@ export default function Home() {
         {/* Section Transition Curve (flows Meet The Therapist into Testimonials) */}
         <div className="absolute bottom-0 left-0 right-0 w-full overflow-hidden leading-none z-10 pointer-events-none">
           <svg className="relative block w-full h-[60px]" viewBox="0 0 1200 120" preserveAspectRatio="none">
-            <path d="M0,0 C300,90 900,90 1200,0 L1200,120 L0,120 Z" fill="var(--color-teal-sage)" />
+            <path d="M0,0 C300,90 900,90 1200,0 L1200,120 L0,120 Z" fill="var(--color-warm-white)" />
           </svg>
         </div>
       </section>
 
-      {/* SECTION 6: TESTIMONIALS (EDITORIAL PULL-QUOTES) */}
-      <section className="py-28 bg-teal-sage text-warm-sand relative overflow-hidden">
+      {/* SECTION 5: TESTIMONIALS (EDITORIAL PULL-QUOTES ON WARM WHITE) */}
+      <section className="py-28 bg-warm-white text-forest-slate relative overflow-hidden">
         {/* Soft leaf graphic overlay in background */}
-        <div className="absolute top-10 right-10 opacity-[0.04] text-warm-sand pointer-events-none">
+        <div className="absolute top-10 right-10 opacity-[0.04] text-teal-sage pointer-events-none">
           <svg width="250" height="250" fill="currentColor" viewBox="0 0 24 24">
             <path d="M17 8C8 10 9 19 9 19s8-.5 10-6.5c1.5-4.5-2-4.5-2-4.5zM2 2C2 2 9 3.5 11 9c1.5 4-1.5 5.5-1.5 5.5S4 13 4 8c0-3.5-2-6-2-6z" />
           </svg>
@@ -482,13 +474,13 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-6 md:px-12 relative z-10">
           {/* Header */}
           <div className="text-center max-w-xl mx-auto mb-20">
-            <span className="text-[11px] font-bold tracking-[0.25em] text-warm-sand/80 uppercase mb-3 block">
+            <span className="text-[11px] font-bold tracking-[0.25em] text-teal-sage uppercase mb-3 block">
               Testimonials
             </span>
-            <h2 className="font-cormorant text-4xl md:text-[48px] font-semibold text-warm-sand mb-4">
+            <h2 className="font-cormorant text-4xl md:text-[48px] font-semibold text-forest-slate mb-4">
               What Our Clients Say
             </h2>
-            <p className="text-warm-sand/85 text-base font-dmsans">
+            <p className="text-forest-slate/80 text-base font-dmsans">
               Real experiences from individuals who took that first step.
             </p>
           </div>
@@ -498,16 +490,16 @@ export default function Home() {
             {testimonials.map((t) => (
               <div 
                 key={t.author} 
-                className="text-center border-b border-warm-sand/15 pb-16 last:border-0 last:pb-0"
+                className="text-center border-b border-muted-sage/20 pb-16 last:border-0 last:pb-0"
               >
                 {/* Stars Rating row */}
-                <div className="flex justify-center gap-1 text-warm-sand/80 text-xs mb-6 tracking-widest">
+                <div className="flex justify-center gap-1 text-teal-sage/85 text-xs mb-6 tracking-widest">
                   {"★".repeat(t.rating || 5)}
                 </div>
-                <p className="font-cormorant italic text-2xl md:text-3xl lg:text-4xl text-warm-sand leading-relaxed max-w-3xl mx-auto mb-6 text-balance">
+                <p className="font-cormorant italic text-2xl md:text-3xl lg:text-4xl text-forest-slate leading-relaxed max-w-3xl mx-auto mb-6 text-balance">
                   &ldquo;{t.quote}&rdquo;
                 </p>
-                <div className="text-[11px] font-bold tracking-[0.22em] text-warm-sand/70 uppercase font-dmsans">
+                <div className="text-[11px] font-bold tracking-[0.22em] text-forest-slate/70 uppercase font-dmsans">
                   {t.author} &mdash; {t.city}
                 </div>
               </div>
@@ -518,21 +510,21 @@ export default function Home() {
         {/* Section Transition Curve (flows Testimonials into Appointment CTA) */}
         <div className="absolute bottom-0 left-0 right-0 w-full overflow-hidden leading-none z-20 pointer-events-none">
           <svg className="relative block w-full h-[60px]" viewBox="0 0 1200 120" preserveAspectRatio="none">
-            <path d="M0,0 Q600,80 1200,0 L1200,120 L0,120 Z" fill="var(--color-warm-sand)" />
+            <path d="M0,0 Q600,80 1200,0 L1200,120 L0,120 Z" fill="var(--color-warm-sand)" className="opacity-40" />
           </svg>
         </div>
       </section>
 
-      {/* SECTION 7: APPOINTMENT CTA BANNER */}
-      <section className="py-24 bg-sand/40 text-center relative overflow-hidden">
+      {/* SECTION 6: APPOINTMENT CTA BANNER */}
+      <section className="py-24 bg-warm-sand/35 text-center relative overflow-hidden">
         {/* Fine border dividing line */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-24 h-0.5 bg-terracotta/30" />
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-24 h-0.5 bg-teal-sage/20" />
         
         <div className="max-w-4xl mx-auto px-6">
-          <h2 className="font-cormorant text-4xl md:text-5xl font-semibold text-charcoal mb-4">
+          <h2 className="font-cormorant text-4xl md:text-5xl font-semibold text-forest-slate mb-4">
             Ready to Take the First Step?
           </h2>
-          <p className="font-dmsans text-sage text-base md:text-lg mb-8 max-w-xl mx-auto leading-relaxed text-pretty">
+          <p className="font-dmsans text-forest-slate/85 text-base md:text-lg mb-8 max-w-xl mx-auto leading-relaxed text-pretty">
             You don&apos;t need to have it all figured out before reaching out. We&apos;ll meet you where you are.
           </p>
           
@@ -542,7 +534,7 @@ export default function Home() {
               href={whatsappUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#20ba59] text-white font-medium px-8 py-3.5 rounded-full shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#20ba59] text-white font-semibold px-8 py-3.5 rounded-full shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 btn-shimmer"
             >
               <PhoneCall className="w-5 h-5" />
               Book via WhatsApp
@@ -551,7 +543,7 @@ export default function Home() {
             {/* Contact CTA */}
             <Link
               href="/contact"
-              className="w-full sm:w-auto inline-flex items-center justify-center bg-forest hover:bg-terracotta text-warm-white font-medium px-8 py-3.5 rounded-full shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300"
+              className="w-full sm:w-auto inline-flex items-center justify-center bg-teal-sage hover:bg-forest-slate text-warm-sand font-semibold px-8 py-3.5 rounded-full shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 btn-shimmer"
             >
               Contact Us
             </Link>

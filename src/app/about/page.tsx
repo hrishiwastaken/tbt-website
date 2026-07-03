@@ -151,13 +151,13 @@ export default function About() {
         <div className="max-w-7xl mx-auto px-6 md:px-12">
           {/* Section Header */}
           <div className="text-center max-w-2xl mx-auto mb-16">
-            <span className="text-xs font-semibold tracking-[0.15em] text-terracotta uppercase mb-3 block">
+            <span className="text-[11px] font-bold tracking-[0.25em] text-teal-sage uppercase mb-3 block">
               Our Practitioners
             </span>
-            <h2 className="font-cormorant text-4xl md:text-[48px] font-semibold text-charcoal mb-4">
+            <h2 className="font-cormorant text-4xl md:text-[48px] font-semibold text-forest-slate mb-4">
               Meet Our Dedicated Team
             </h2>
-            <p className="text-sage text-base md:text-lg">
+            <p className="text-forest-slate/85 text-base md:text-lg">
               A collaborative, compassionate group of licensed professionals here to walk alongside you.
             </p>
           </div>
@@ -174,12 +174,13 @@ export default function About() {
               <motion.div
                 key={t.name}
                 variants={fadeInUp}
-                className="glass-card rounded-2xl overflow-hidden shadow-warm-soft border border-mist/35 flex flex-col h-full hover:shadow-lg hover:-translate-y-1 transition-all duration-300 relative group"
+                className="glass-card rounded-2xl overflow-hidden shadow-warm-soft border border-muted-sage/20 flex flex-col h-full hover:shadow-lg hover:-translate-y-1 transition-all duration-300 relative group"
               >
                 {/* Visual hover border highlighter */}
-                <div className="absolute top-0 left-0 right-0 h-1 bg-transparent group-hover:bg-terracotta transition-colors duration-300 z-10" />
+                <div className="absolute top-0 left-0 right-0 h-1 bg-transparent group-hover:bg-teal-sage transition-colors duration-300 z-10" />
+                
                 {/* Photo */}
-                <div className="relative h-72 w-full bg-sand">
+                <div className="relative h-72 w-full bg-warm-tan">
                   <Image
                     src={t.image}
                     alt={`${t.name} - ${t.role}`}
@@ -192,27 +193,27 @@ export default function About() {
                 {/* Info Content */}
                 <div className="p-8 flex flex-col justify-between flex-grow">
                   <div>
-                    <h3 className="font-cormorant text-2xl font-semibold text-charcoal mb-1">
+                    <h3 className="font-cormorant text-2xl font-semibold text-forest-slate mb-1">
                       {t.name}
                     </h3>
-                    <p className="font-dmsans text-xs text-terracotta font-medium mb-3">
+                    <p className="font-dmsans text-xs text-teal-sage font-medium mb-3">
                       {t.role}
                     </p>
-                    <p className="font-dmsans text-xs text-forest bg-mist/30 border border-forest/10 px-2.5 py-1 rounded-full mb-4 inline-block">
+                    <p className="font-dmsans text-xs text-forest-slate bg-muted-sage/15 border border-teal-sage/10 px-2.5 py-1 rounded-full mb-4 inline-block">
                       {t.credentials}
                     </p>
-                    <p className="text-sm text-sage leading-relaxed mb-6">
+                    <p className="text-sm text-forest-slate/85 leading-relaxed mb-6 font-dmsans">
                       {t.bio}
                     </p>
                   </div>
 
                   {/* Specialisation tags */}
                   <div>
-                    <div className="border-t border-mist/20 pt-4 flex flex-wrap gap-1.5">
+                    <div className="border-t border-muted-sage/20 pt-4 flex flex-wrap gap-1.5">
                       {t.specialisations.map((tag) => (
                         <span 
                           key={tag}
-                          className="text-[11px] font-medium text-sage bg-sand/40 border border-sage/10 px-2 py-0.5 rounded-full"
+                          className="text-[11px] font-medium text-forest-slate bg-warm-tan/40 border border-muted-sage/20 px-2 py-0.5 rounded-full font-dmsans"
                         >
                           {tag}
                         </span>
