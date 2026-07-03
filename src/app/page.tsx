@@ -113,13 +113,18 @@ export default function Home() {
     <div className="overflow-hidden bg-ivory font-dmsans">
       {/* SECTION 1: HERO (STILLPOINT LAYOUT REPLICATION) */}
       <section className="relative min-h-[90vh] pt-[120px] pb-32 bg-warm-white overflow-hidden">
+        
+        {/* Faint Concentric Outline Circles (StillPoint style) */}
+        <div className="absolute top-[10%] left-[32%] w-[420px] h-[420px] rounded-full border border-forest-slate/10 -z-10 pointer-events-none hidden lg:block" />
+        <div className="absolute top-[18%] left-[28%] w-[420px] h-[420px] rounded-full border border-forest-slate/5 -z-10 pointer-events-none hidden lg:block" />
+
         <div className="max-w-7xl mx-auto px-6 md:px-12 grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center relative z-10">
           
           {/* Left Column (5 Cols): Arched shape containing the therapist portrait + floating circle badge */}
-          <div className="lg:col-span-5 relative w-full flex justify-center lg:justify-start">
+          <div className="lg:col-span-5 relative w-full flex justify-center lg:justify-start lg:-ml-24 xl:-ml-36">
             
-            {/* The circular/oval background container with rich dark/warm fill (StillPoint style) */}
-            <div className="relative w-full max-w-[360px] aspect-[4/5] rounded-[180px] overflow-hidden bg-forest-slate shadow-2xl border border-muted-sage/20 flex items-end">
+            {/* The circular/oval background container with flat-left and flat-bottom (rounded top-right corner only) */}
+            <div className="relative w-full max-w-[390px] aspect-[4/5] rounded-tr-[280px] rounded-tl-none rounded-bl-none rounded-br-none overflow-hidden bg-forest-slate shadow-2xl border-t border-r border-muted-sage/20 flex items-end">
               <Image
                 src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=1200&q=80"
                 alt="Dr. Madhumati Dhumak - Clinical Psychologist"
@@ -131,7 +136,7 @@ export default function Home() {
             </div>
 
             {/* Circular shop-like badge floating on the left */}
-            <div className="absolute -left-8 top-[35%] z-20 w-32 h-32 bg-warm-sand border border-muted-sage/35 text-forest-slate rounded-full flex flex-col items-center justify-center text-center shadow-lg p-2 font-cormorant">
+            <div className="absolute -left-6 top-[38%] z-20 w-32 h-32 bg-warm-sand border border-muted-sage/35 text-forest-slate rounded-full flex flex-col items-center justify-center text-center shadow-lg p-2 font-cormorant">
               <span className="text-[10px] uppercase font-bold font-dmsans tracking-widest text-teal-sage mb-0.5">RCI</span>
               <span className="text-lg font-bold italic text-forest-slate leading-tight">Licensed</span>
               <span className="text-[8px] uppercase tracking-wider text-muted-sage font-dmsans mt-0.5">Clinical Care</span>
@@ -139,9 +144,9 @@ export default function Home() {
             
           </div>
 
-          {/* Right Column (7 Cols): Overlapping Rounded white Card with the content */}
-          <div className="lg:col-span-7 flex flex-col justify-center lg:-ml-12 relative z-10">
-            <div className="bg-warm-white p-8 md:p-16 rounded-[40px] border border-muted-sage/20 shadow-warm-soft max-w-2xl">
+          {/* Right Column (7 Cols): Overlapping Rounded white Card with the content (rounded left side pill-like shape) */}
+          <div className="lg:col-span-7 flex flex-col justify-center lg:-ml-20 relative z-10">
+            <div className="bg-warm-white p-8 md:p-16 lg:py-20 lg:px-24 rounded-l-[140px] rounded-r-[40px] border border-muted-sage/20 shadow-warm-soft max-w-2xl">
               <span className="inline-block text-[11px] font-bold tracking-[0.25em] text-teal-sage uppercase mb-4 font-dmsans">
                 Professional Psychology Practice
               </span>
