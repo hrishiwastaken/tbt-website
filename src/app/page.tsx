@@ -220,78 +220,80 @@ export default function Home() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto -mt-24 md:-mt-36 lg:-mt-44 relative z-30">
             
             {/* Card 1: Individual Therapy */}
-            <div className="bg-warm-white p-6 rounded-t-full rounded-b-[32px] border border-warm-sand/15 shadow-warm-soft flex flex-col justify-between items-center text-center hover:shadow-lg transition-shadow duration-300">
-              <div>
-                <div className="relative aspect-[3/4] w-full rounded-t-full overflow-hidden mb-6 border border-muted-sage/10 bg-warm-tan">
-                  <Image
-                    src="https://images.unsplash.com/photo-1527689368864-3a821dbccc34?auto=format&fit=crop&w=800&q=80"
-                    alt="Individual therapy session"
-                    fill
-                    sizes="(max-width: 768px) 100vw, 30vw"
-                    className="object-cover"
-                  />
-                </div>
-                <h3 className="font-cormorant text-2xl font-semibold text-forest-slate mb-2">Individual Therapy</h3>
-                <p className="text-xs md:text-sm text-forest-slate/80 leading-relaxed mb-6 px-2 font-dmsans">
+            <div className="flex flex-col items-center">
+              {/* Bare arched image — no white wrapper */}
+              <div className="relative aspect-[3/4] w-full rounded-t-full overflow-hidden shadow-lg">
+                <Image
+                  src="https://images.unsplash.com/photo-1527689368864-3a821dbccc34?auto=format&fit=crop&w=800&q=80"
+                  alt="Individual therapy session"
+                  fill
+                  sizes="(max-width: 768px) 100vw, 30vw"
+                  className="object-cover"
+                />
+              </div>
+              {/* White text box at bottom */}
+              <div className="bg-warm-white rounded-b-[24px] w-[85%] px-5 py-6 text-center shadow-warm-soft -mt-1 border border-t-0 border-warm-sand/15">
+                <h3 className="font-cormorant text-xl md:text-2xl font-semibold text-forest-slate mb-2 uppercase tracking-wide">Individual Therapy</h3>
+                <p className="text-xs md:text-sm text-forest-slate/80 leading-relaxed mb-5 font-dmsans">
                   One-on-one sessions tailored specifically to you. Process emotional pain, challenge deep-seated patterns, and build genuine coping skills.
                 </p>
+                <Link 
+                  href="/book" 
+                  className="font-dmsans text-[10px] font-bold tracking-[0.2em] text-teal-sage hover:text-forest-slate uppercase underline underline-offset-4"
+                >
+                  Book Now
+                </Link>
               </div>
-              <Link 
-                href="/book" 
-                className="font-dmsans text-[10px] font-bold tracking-[0.2em] text-teal-sage hover:text-forest-slate uppercase underline underline-offset-4 mb-2"
-              >
-                Book Now
-              </Link>
             </div>
 
-            {/* Card 2: Couples counseling */}
-            <div className="bg-warm-white p-6 rounded-t-full rounded-b-[32px] border border-warm-sand/15 shadow-warm-soft flex flex-col justify-between items-center text-center hover:shadow-lg transition-shadow duration-300">
-              <div>
-                <div className="relative aspect-[3/4] w-full rounded-t-full overflow-hidden mb-6 border border-muted-sage/10 bg-warm-tan">
-                  <Image
-                    src="https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?auto=format&fit=crop&w=800&q=80"
-                    alt="Couples therapy session"
-                    fill
-                    sizes="(max-width: 768px) 100vw, 30vw"
-                    className="object-cover"
-                  />
-                </div>
-                <h3 className="font-cormorant text-2xl font-semibold text-forest-slate mb-2">Couples Counseling</h3>
-                <p className="text-xs md:text-sm text-forest-slate/80 leading-relaxed mb-6 px-2 font-dmsans">
+            {/* Card 2: Couples Counseling */}
+            <div className="flex flex-col items-center">
+              <div className="relative aspect-[3/4] w-full rounded-t-full overflow-hidden shadow-lg">
+                <Image
+                  src="https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?auto=format&fit=crop&w=800&q=80"
+                  alt="Couples therapy session"
+                  fill
+                  sizes="(max-width: 768px) 100vw, 30vw"
+                  className="object-cover"
+                />
+              </div>
+              <div className="bg-warm-white rounded-b-[24px] w-[85%] px-5 py-6 text-center shadow-warm-soft -mt-1 border border-t-0 border-warm-sand/15">
+                <h3 className="font-cormorant text-xl md:text-2xl font-semibold text-forest-slate mb-2 uppercase tracking-wide">Couples Counseling</h3>
+                <p className="text-xs md:text-sm text-forest-slate/80 leading-relaxed mb-5 font-dmsans">
                   A structured, neutral space to resolve conflict, dismantle communication barriers, and restore intimacy. Open to couples at any stage.
                 </p>
+                <Link 
+                  href="/book" 
+                  className="font-dmsans text-[10px] font-bold tracking-[0.2em] text-teal-sage hover:text-forest-slate uppercase underline underline-offset-4"
+                >
+                  Book Now
+                </Link>
               </div>
-              <Link 
-                href="/book" 
-                className="font-dmsans text-[10px] font-bold tracking-[0.2em] text-teal-sage hover:text-forest-slate uppercase underline underline-offset-4 mb-2"
-              >
-                Book Now
-              </Link>
             </div>
 
-            {/* Card 3: Family Systems */}
-            <div className="bg-warm-white p-6 rounded-t-full rounded-b-[32px] border border-warm-sand/15 shadow-warm-soft flex flex-col justify-between items-center text-center hover:shadow-lg transition-shadow duration-300">
-              <div>
-                <div className="relative aspect-[3/4] w-full rounded-t-full overflow-hidden mb-6 border border-muted-sage/10 bg-warm-tan">
-                  <Image
-                    src="https://images.unsplash.com/photo-1542037104857-ffbb0b9155fb?auto=format&fit=crop&w=800&q=80"
-                    alt="Family session"
-                    fill
-                    sizes="(max-width: 768px) 100vw, 30vw"
-                    className="object-cover"
-                  />
-                </div>
-                <h3 className="font-cormorant text-2xl font-semibold text-forest-slate mb-2">Family Therapy</h3>
-                <p className="text-xs md:text-sm text-forest-slate/80 leading-relaxed mb-6 px-2 font-dmsans">
+            {/* Card 3: Family Therapy */}
+            <div className="flex flex-col items-center">
+              <div className="relative aspect-[3/4] w-full rounded-t-full overflow-hidden shadow-lg">
+                <Image
+                  src="https://images.unsplash.com/photo-1542037104857-ffbb0b9155fb?auto=format&fit=crop&w=800&q=80"
+                  alt="Family session"
+                  fill
+                  sizes="(max-width: 768px) 100vw, 30vw"
+                  className="object-cover"
+                />
+              </div>
+              <div className="bg-warm-white rounded-b-[24px] w-[85%] px-5 py-6 text-center shadow-warm-soft -mt-1 border border-t-0 border-warm-sand/15">
+                <h3 className="font-cormorant text-xl md:text-2xl font-semibold text-forest-slate mb-2 uppercase tracking-wide">Family Therapy</h3>
+                <p className="text-xs md:text-sm text-forest-slate/80 leading-relaxed mb-5 font-dmsans">
                   Improve communication dynamics, boundary-setting, and conflict resolution mechanisms within family and systemic structures.
                 </p>
+                <Link 
+                  href="/book" 
+                  className="font-dmsans text-[10px] font-bold tracking-[0.2em] text-teal-sage hover:text-forest-slate uppercase underline underline-offset-4"
+                >
+                  Book Now
+                </Link>
               </div>
-              <Link 
-                href="/book" 
-                className="font-dmsans text-[10px] font-bold tracking-[0.2em] text-teal-sage hover:text-forest-slate uppercase underline underline-offset-4 mb-2"
-              >
-                Book Now
-              </Link>
             </div>
 
           </div>
