@@ -20,17 +20,17 @@ export default function TherapistDashboard() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <Surface variant="raised" radius="surface" className="p-6">
           <p className="text-xs uppercase tracking-wide text-ink-muted mb-2">Today&apos;s Sessions</p>
-          <p className="font-cormorant text-3xl font-semibold text-ocean-deep">{TODAY.length}</p>
+          <p className="font-dmsans text-3xl font-bold text-ocean-deep tabular-nums">{TODAY.length}</p>
         </Surface>
         <Surface variant="raised" radius="surface" className="p-6">
           <p className="text-xs uppercase tracking-wide text-ink-muted mb-2">This Week</p>
-          <p className="font-cormorant text-3xl font-semibold text-ocean-deep">11</p>
+          <p className="font-dmsans text-3xl font-bold text-ocean-deep tabular-nums">11</p>
         </Surface>
         <Surface variant="raised" radius="surface" className="p-6">
           <p className="text-xs uppercase tracking-wide text-ink-muted mb-2 flex items-center gap-1">
             <IndianRupee className="w-3 h-3" /> Pending Payments
           </p>
-          <p className="font-cormorant text-3xl font-semibold text-ocean-deep">2</p>
+          <p className="font-dmsans text-3xl font-bold text-ocean-deep tabular-nums">2</p>
         </Surface>
       </div>
 

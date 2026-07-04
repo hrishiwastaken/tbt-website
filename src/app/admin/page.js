@@ -82,7 +82,7 @@ export default function AdminDashboardPage() {
                 </span>
               </div>
               <div>
-                <span className="font-cormorant text-3xl font-bold text-ocean-deep block mb-1">{card.value}</span>
+                <span className="font-dmsans text-3xl font-bold text-ocean-deep block mb-1 tabular-nums">{card.value}</span>
                 <span className="text-[11px] text-ink-muted/80 font-medium">{card.desc}</span>
               </div>
             </div>
