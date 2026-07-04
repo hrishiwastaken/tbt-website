@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { SITE_NAME } from "../../../lib/site";
 
 export default function AdminLoginPage() {
   const router = useRouter();
@@ -49,7 +50,7 @@ export default function AdminLoginPage() {
       <div className="w-full max-w-md glass-card p-8 md:p-12 rounded-2xl border border-mist/30 shadow-warm-soft text-center relative overflow-hidden">
         <div className="absolute top-0 left-0 right-0 h-1 bg-forest" />
         <Link href="/" className="font-cormorant font-semibold text-3xl text-forest hover:opacity-90 transition-opacity block mb-2 leading-none">
-          Solis Psychology
+          {SITE_NAME}
         </Link>
         <span className="text-xs font-bold tracking-widest text-terracotta uppercase block mb-8">
           Admin Portal
@@ -68,7 +69,7 @@ export default function AdminLoginPage() {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="admin@solispsychology.com"
+              placeholder="admin@thebraintea.com"
               className="w-full bg-warm-white/50 border-t-0 border-l-0 border-r-0 border-b border-mist/60 focus:ring-0 focus:border-forest text-charcoal py-2 px-0 transition-colors text-base"
               required
               disabled={loading}
