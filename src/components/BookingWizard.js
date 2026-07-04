@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { SITE_NAME } from "../lib/site";
 
 export default function BookingWizard({
   therapists = [],
@@ -503,7 +504,7 @@ export default function BookingWizard({
                   <div className="bg-white p-4 rounded-xl border border-mist/20 shadow-sm relative w-[212px] h-[212px] flex items-center justify-center">
                     <img
                       src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(
-                        `upi://pay?pa=millionairemanthan@fam&pn=Solis Psychology&am=${selectedService.price * 80}&cu=INR&tn=Solis Session`
+                        `upi://pay?pa=millionairemanthan@fam&pn=${encodeURIComponent(SITE_NAME)}&am=${selectedService.price * 80}&cu=INR&tn=${encodeURIComponent(`${SITE_NAME} Session`)}`
                       )}`}
                       alt="UPI QR Code"
                       className="w-[180px] h-[180px]"

@@ -3,34 +3,37 @@
 @tailwind utilities;
 
 :root {
-  --color-warm-sand: #DAD7CA;
-  --color-muted-sage: #9FACA5;
-  --color-warm-tan: #DCCDB2;
-  --color-teal-sage: #698E8B;
-  --color-forest-slate: #55665D;
-  --color-near-black: #202623;
+  /* The Brain Tea brand palette */
+  --color-ocean: #5D768B;
+  --color-ocean-deep: #26333D;
+  --color-sand: #C8B39B;
+  --color-gold: #E3C9A4;
+  --color-blush: #F2D9C7;
+  --color-ivory: #F8EFE5;
+  --color-surface: #FFFCF8;
+  --color-surface-sunken: #F1E4D5;
+  --color-ink: #26333D;
+  --color-ink-muted: #5C6B74;
 
-  /* Legacy mappings */
-  --color-forest: #698E8B;
-  --color-sage: #9FACA5;
-  --color-mist: #9FACA5;
-  --color-ivory: #FDFBF7;      /* Bright, warm off-white */
-  --color-sand: #DCCDB2;
-  --color-terracotta: #698E8B;
-  --color-charcoal: #55665D;
-  --color-warm-white: #FDFBF7;  /* Bright, warm off-white */
+  /* Legacy mappings (kept for any markup not yet migrated) */
+  --color-forest: #5D768B;
+  --color-sage: #8CA0AD;
+  --color-mist: #E9DFD2;
+  --color-terracotta: #5D768B;
+  --color-charcoal: #26333D;
+  --color-warm-white: #F8EFE5;
 }
 
 body {
-  background-color: var(--color-warm-white);
-  color: var(--color-near-black);
+  background-color: var(--color-ivory);
+  color: var(--color-ink);
   font-family: var(--font-dm-sans), sans-serif;
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Custom scrollbars matching the earthy Sage/Forest palette */
+/* Custom scrollbars matching the Ocean/Ivory palette */
 ::-webkit-scrollbar {
   width: 10px;
 }
@@ -40,34 +43,36 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--color-sage);
+  background: var(--color-sand);
   border: 2px solid var(--color-ivory);
   border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--color-forest);
+  background: var(--color-ocean);
 }
 
 /* Custom Selection styling */
 ::selection {
-  background-color: var(--color-mist);
-  color: var(--color-forest);
+  background-color: var(--color-blush);
+  color: var(--color-ocean-deep);
 }
 
 /* Remove default focus outlines and use custom ring focus states */
 input:focus,
 textarea:focus,
-select:focus {
+select:focus,
+button:focus-visible,
+a:focus-visible {
   outline: none;
-  border-color: var(--color-forest) !important;
-  box-shadow: 0 0 0 3px rgba(46, 74, 56, 0.15) !important;
+  border-color: var(--color-ocean) !important;
+  box-shadow: 0 0 0 3px rgba(93, 118, 139, 0.25) !important;
 }
 
 /* Base styles for standard HTML elements */
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-cormorant), serif;
-  color: var(--color-charcoal);
+  color: var(--color-ocean-deep);
 }
 
 a {
@@ -111,11 +116,56 @@ a {
 
 /* Glassmorphic Panel Design Token */
 .glass-card {
-  background: linear-gradient(135deg, rgba(220, 205, 178, 0.65), rgba(159, 172, 165, 0.45));
+  background: linear-gradient(135deg, rgba(227, 201, 164, 0.55), rgba(93, 118, 139, 0.18));
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(159, 172, 165, 0.55);
-  box-shadow: inset 0 1.5px 0 rgba(255, 255, 255, 0.5), 0 8px 32px rgba(85, 102, 93, 0.08);
+  border: 1px solid rgba(93, 118, 139, 0.25);
+  box-shadow: inset 0 1.5px 0 rgba(255, 255, 255, 0.5), 0 8px 32px rgba(38, 51, 61, 0.08);
+}
+
+/* Soft sculptural neumorphic surfaces -- shadows tinted with brand ocean blue */
+.surface-raised {
+  background: var(--color-surface);
+  border-radius: 24px;
+  box-shadow: 8px 8px 20px rgba(93, 118, 139, 0.16), -8px -8px 20px rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(93, 118, 139, 0.08);
+}
+
+.surface-inset {
+  background: var(--color-surface-sunken);
+  border-radius: 16px;
+  box-shadow: inset 4px 4px 10px rgba(93, 118, 139, 0.16), inset -4px -4px 10px rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(93, 118, 139, 0.08);
+}
+
+.surface-raised-interactive {
+  transition: transform 0.2s var(--ease-out-soft, cubic-bezier(0.23, 1, 0.32, 1)), box-shadow 0.2s ease;
+}
+
+.surface-raised-interactive:hover {
+  transform: translateY(-2px);
+  box-shadow: 10px 10px 24px rgba(93, 118, 139, 0.18), -10px -10px 24px rgba(255, 255, 255, 0.85);
+}
+
+.surface-raised-interactive:active {
+  transform: translateY(0);
+  box-shadow: inset 4px 4px 10px rgba(93, 118, 139, 0.16), inset -4px -4px 10px rgba(255, 255, 255, 0.7);
+}
+
+/* Handwritten accent -- decorative emphasis only, never body copy */
+.text-accent-hand {
+  font-family: var(--font-caveat), cursive;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 /* Tactile button shimmer sweep on hover */
@@ -154,8 +204,8 @@ a {
 
 .floating-input {
   width: 100%;
-  background-color: rgba(235, 224, 208, 0.15);
-  border: 1px solid rgba(200, 217, 204, 0.35);
+  background-color: rgba(227, 201, 164, 0.15);
+  border: 1px solid rgba(93, 118, 139, 0.25);
   color: var(--color-charcoal);
   border-radius: 14px;
   padding: 22px 16px 6px 16px;
@@ -168,7 +218,7 @@ a {
 .floating-input:focus {
   background-color: var(--color-warm-white) !important;
   border-color: var(--color-forest) !important;
-  box-shadow: 0 0 0 3px rgba(46, 74, 56, 0.1) !important;
+  box-shadow: 0 0 0 3px rgba(93, 118, 139, 0.15) !important;
 }
 
 .floating-label {

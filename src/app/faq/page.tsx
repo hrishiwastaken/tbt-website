@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronDown, HelpCircle } from "lucide-react";
 import Link from "next/link";
+import { WHATSAPP_URL } from "@/lib/site";
 
 interface FAQItemProps {
   question: string;
@@ -103,7 +104,7 @@ export default function FAQ() {
     },
     {
       question: "What is the cost per session?",
-      answer: "Our standard individual therapy sessions are ₹3,000 for 50 minutes. Couples and family sessions are ₹4,500 for 60 to 75 minutes. We believe that mental health care should be accessible, so we reserve a limited number of sliding-scale slots based on financial hardship and student status."
+      answer: "Consultation fees vary by therapist and service, and are shared upfront during your booking or initial consultation. We believe mental health care should be accessible, so please speak with us about sliding-scale options if cost is a barrier."
     },
     {
       question: "How do I cancel or reschedule?",
@@ -178,7 +179,7 @@ export default function FAQ() {
               Contact Us Form
             </Link>
             <a
-              href="https://wa.me/917558493155?text=Hi!%20I%20have%20a%20few%20questions%20about%20your%20services."
+              href={WHATSAPP_URL}
               target="_blank"
               rel="noopener noreferrer"
               className="border border-teal-sage text-teal-sage hover:bg-teal-sage hover:text-warm-sand font-semibold px-8 py-3.5 rounded-full text-sm transition-all btn-shimmer"
