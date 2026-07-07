@@ -27,7 +27,7 @@ export default function AdminLoginPage() {
       const data = await res.json();
 
       if (res.ok) {
-        router.push(data.redirectUrl || "/admin/bookings");
+        router.push(data.redirectUrl || "/admin");
         router.refresh();
       } else {
         setErrorMsg(data.error || "Authentication failed.");

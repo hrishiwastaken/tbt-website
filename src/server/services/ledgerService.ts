@@ -40,14 +40,23 @@ export interface FinancialSummary {
   discountsMinor: number; // magnitude
 }
 
-export async function financialSummary(window: DateWindow = {}): Promise<FinancialSummary> {
+/**
+ * Aggregate ledger totals for a window, optionally scoped to one consultant.
+ * Commission/payout entries carry therapistId directly; revenue-side entries
+ * (gross, discount, refund, tax, platform share) only carry bookingId, so
+ * scoping joins through the booking relation instead of duplicating the
+ * column onto every entry type.
+ */
+export async function financialSummary(window: DateWindow = {}, therapistId?: string): Promise<FinancialSummary> {
   const grouped = await prisma.ledgerEntry.groupBy({
     by: ["entryType"],
     _sum: { amountMinor: true },
-    where:
-      window.from || window.to
+    where: {
+      ...(window.from || window.to
         ? { createdAt: { ...(window.from ? { gte: window.from } : {}), ...(window.to ? { lte: window.to } : {}) } }
-        : undefined,
+        : {}),
+      ...(therapistId ? { OR: [{ therapistId }, { booking: { is: { therapistId } } }] } : {}),
+    },
   });
   const sums = new Map<string, number>(grouped.map((g) => [g.entryType, g._sum.amountMinor ?? 0]));
   const get = (t: LedgerEntryType): number => sums.get(t) ?? 0;

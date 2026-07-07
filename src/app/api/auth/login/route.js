@@ -33,7 +33,7 @@ export async function POST(request) {
       return NextResponse.json({ error: NETLIFY_CONFIG_MESSAGE }, { status: 500 });
     }
 
-    const { email, password } = await request.json();
+    const { email, password, portal } = await request.json();
 
     if (!email || !password) {
       return NextResponse.json(
@@ -64,6 +64,15 @@ export async function POST(request) {
       );
     }
 
+    // The consultant portal is therapist-only; the admin console welcomes
+    // both staff roles (a therapist may still prefer the shared console).
+    if (portal === "therapist" && user.role !== "THERAPIST") {
+      return NextResponse.json(
+        { error: "This login is for consultants only. Use the admin console instead." },
+        { status: 403 }
+      );
+    }
+
     // Generate session JWT
     const token = signToken({
       userId: user.id,
@@ -71,8 +80,7 @@ export async function POST(request) {
       role: user.role,
     });
 
-    // Determine redirect path (both roles redirect to unified admin panel)
-    const redirectUrl = "/admin/bookings";
+    const redirectUrl = portal === "therapist" ? "/therapist" : "/admin";
 
     const response = NextResponse.json({
       message: "Login successful",
