@@ -10,12 +10,12 @@ export default async function BookPage({ searchParams }) {
 
   // Fetch active therapists (which will be Dr. Madhumati Dhumak) and services
   const therapists = await prisma.therapist.findMany({
-    where: { isActive: true },
+    where: { isActive: true, status: "APPROVED" },
     select: {
       id: true,
       name: true,
       slug: true,
-      fees: true,
+      feeMinor: true,
       bio: true,
     },
   });
@@ -26,7 +26,7 @@ export default async function BookPage({ searchParams }) {
       id: true,
       name: true,
       slug: true,
-      price: true,
+      priceMinor: true,
       durationMinutes: true,
       description: true,
     },

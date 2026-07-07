@@ -85,7 +85,7 @@ export default async function BookingConfirmedPage({ searchParams }) {
           <div className="flex justify-between items-center border-b border-mist/10 pb-3">
             <span className="text-xs font-bold uppercase text-sage">Amount</span>
             <span className="text-charcoal font-semibold">
-              ₹{(booking.amount).toLocaleString("en-IN")}
+              ₹{(booking.amountMinor / 100).toLocaleString("en-IN")}
             </span>
           </div>
 

@@ -1,28 +1,39 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
-import { LayoutDashboard, Calendar, Users, CreditCard, LogOut, ShieldAlert } from "lucide-react";
+import {
+  LayoutDashboard,
+  Calendar,
+  Users,
+  CreditCard,
+  LogOut,
+  ShieldAlert,
+  HeartHandshake,
+  Banknote,
+  Settings,
+  Menu,
+  X,
+} from "lucide-react";
 import { SITE_NAME } from "../../lib/site";
 
 export default function AdminLayout({ children }) {
   const router = useRouter();
   const pathname = usePathname();
-  const [adminEmail, setAdminEmail] = useState("");
+  const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const isLoginPage = pathname === "/admin/login";
 
-  useEffect(() => {
-    checkAdminAuth();
-  }, []);
-
-  const checkAdminAuth = async () => {
+  const checkAdminAuth = useCallback(async () => {
     try {
-      const res = await fetch("/api/admin/stats");
+      const res = await fetch("/api/admin/me");
       if (!res.ok) {
         router.push("/admin/login");
       } else {
-        setAdminEmail("admin@thebraintea.com");
+        const data = await res.json();
+        setUser(data.user);
       }
     } catch (err) {
       console.error(err);
@@ -30,7 +41,17 @@ export default function AdminLayout({ children }) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [router]);
+
+  useEffect(() => {
+    if (!isLoginPage) checkAdminAuth();
+  }, [isLoginPage, checkAdminAuth]);
+
+  useEffect(() => {
+    setMenuOpen(false);
+  }, [pathname]);
+
+  if (isLoginPage) return children;
 
   const handleLogout = async () => {
     try {
@@ -47,8 +68,11 @@ export default function AdminLayout({ children }) {
   const menuItems = [
     { name: "Overview", href: "/admin", icon: LayoutDashboard },
     { name: "Appointments", href: "/admin/bookings", icon: Calendar },
+    { name: "Consultants", href: "/admin/consultants", icon: HeartHandshake },
+    { name: "Payouts", href: "/admin/payouts", icon: Banknote },
     { name: "Clients", href: "/admin/clients", icon: Users },
     { name: "Transactions", href: "/admin/payments", icon: CreditCard },
+    { name: "Settings", href: "/admin/settings", icon: Settings },
   ];
 
   if (loading) {
@@ -59,9 +83,50 @@ export default function AdminLayout({ children }) {
     );
   }
 
+  const nav = (
+    <nav className="space-y-1">
+      {menuItems.map((item) => {
+        const Icon = item.icon;
+        const isActive = pathname === item.href;
+        return (
+          <Link
+            key={item.href}
+            href={item.href}
+            className={`flex items-center gap-3 px-3 py-3 rounded-soft text-xs font-semibold uppercase tracking-wider transition-all ${
+              isActive
+                ? "bg-ocean text-white shadow-surface-raised-sm"
+                : "text-ink-muted hover:bg-surface-sunken hover:text-ocean-deep"
+            }`}
+          >
+            <Icon size={14} />
+            {item.name}
+          </Link>
+        );
+      })}
+    </nav>
+  );
+
   return (
     <div className="min-h-screen bg-ivory flex flex-col md:flex-row font-dmsans">
-      <aside className="w-full md:w-64 bg-surface border-b md:border-b-0 md:border-r border-ocean/10 flex flex-col justify-between py-6 px-4 shrink-0">
+      {/* Mobile top bar */}
+      <div className="md:hidden flex items-center justify-between bg-surface border-b border-ocean/10 px-4 py-3">
+        <Link href="/" className="font-cormorant font-semibold text-xl text-ocean-deep">
+          {SITE_NAME}
+        </Link>
+        <button
+          type="button"
+          onClick={() => setMenuOpen((open) => !open)}
+          aria-label="Toggle navigation"
+          className="surface-inset h-9 w-9 rounded-full flex items-center justify-center text-ocean-deep"
+        >
+          {menuOpen ? <X size={16} /> : <Menu size={16} />}
+        </button>
+      </div>
+      {menuOpen && (
+        <div className="md:hidden bg-surface border-b border-ocean/10 px-4 py-4">{nav}</div>
+      )}
+
+      <aside className="hidden md:flex w-64 bg-surface border-r border-ocean/10 flex-col justify-between py-6 px-4 shrink-0 md:sticky md:top-0 md:h-screen">
         <div>
           <div className="px-3 mb-8">
             <Link href="/" className="font-cormorant font-semibold text-2xl text-ocean-deep block hover:opacity-90 leading-tight">
@@ -71,31 +136,11 @@ export default function AdminLayout({ children }) {
               <ShieldAlert size={10} /> Admin Console
             </span>
           </div>
-
-          <nav className="space-y-1">
-            {menuItems.map((item) => {
-              const Icon = item.icon;
-              const isActive = pathname === item.href;
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={`flex items-center gap-3 px-3 py-3 rounded-soft text-xs font-semibold uppercase tracking-wider transition-all ${
-                    isActive
-                      ? "bg-ocean text-white shadow-surface-raised-sm"
-                      : "text-ink-muted hover:bg-surface-sunken hover:text-ocean-deep"
-                  }`}
-                >
-                  <Icon size={14} />
-                  {item.name}
-                </Link>
-              );
-            })}
-          </nav>
+          {nav}
         </div>
 
         <div className="pt-4 border-t border-ocean/10 mt-6 px-3 flex flex-col gap-4">
-          <div className="text-[10px] text-ink-muted font-mono truncate">{adminEmail}</div>
+          <div className="text-[10px] text-ink-muted font-mono truncate">{user?.email}</div>
           <button
             onClick={handleLogout}
             className="flex items-center gap-2 text-ink-muted hover:text-red-700 transition-colors text-xs font-bold tracking-widest uppercase cursor-pointer"
@@ -105,7 +150,7 @@ export default function AdminLayout({ children }) {
         </div>
       </aside>
 
-      <main className="flex-grow p-6 md:p-12 overflow-y-auto max-w-7xl">{children}</main>
+      <main className="flex-grow p-4 md:p-10 overflow-y-auto w-full max-w-7xl mx-auto">{children}</main>
     </div>
   );
 }
