@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/db";
-import { financialSummary, consultantBalances } from "./ledgerService";
+import { financialSummary, consultantBalances, consultantBalance } from "./ledgerService";
 import { bucketKey, bucketKeys, bucketLabel, type ResolvedRange } from "../dateRange";
 
 // Dashboard aggregation. Every number here is derived from persisted rows
@@ -112,7 +112,7 @@ function emptySeries(range: ResolvedRange, metrics: string[]): Map<string, Serie
 }
 
 /** Revenue over time from the ledger: gross, refunds, platform, consultant. */
-export async function revenueSeries(range: ResolvedRange): Promise<SeriesPoint[]> {
+export async function revenueSeries(range: ResolvedRange, therapistId?: string): Promise<SeriesPoint[]> {
   const entries = await prisma.ledgerEntry.findMany({
     where: {
       createdAt: { gte: range.from, lte: range.to },
@@ -126,6 +126,7 @@ export async function revenueSeries(range: ResolvedRange): Promise<SeriesPoint[]
           "COMMISSION_REVERSED",
         ],
       },
+      ...(therapistId ? { OR: [{ therapistId }, { booking: { is: { therapistId } } }] } : {}),
     },
     select: { entryType: true, amountMinor: true, createdAt: true },
   });
@@ -155,9 +156,9 @@ export async function revenueSeries(range: ResolvedRange): Promise<SeriesPoint[]
 }
 
 /** Bookings created per bucket, split by lifecycle outcome. */
-export async function bookingSeries(range: ResolvedRange): Promise<SeriesPoint[]> {
+export async function bookingSeries(range: ResolvedRange, therapistId?: string): Promise<SeriesPoint[]> {
   const bookings = await prisma.booking.findMany({
-    where: { createdAt: { gte: range.from, lte: range.to } },
+    where: { createdAt: { gte: range.from, lte: range.to }, ...(therapistId ? { therapistId } : {}) },
     select: { createdAt: true, status: true },
   });
   const series = emptySeries(range, ["total", "completed", "cancelled"]);
@@ -200,15 +201,82 @@ export interface StatusSlice {
   count: number;
 }
 
-export async function statusDistribution(range: ResolvedRange): Promise<StatusSlice[]> {
+export async function statusDistribution(range: ResolvedRange, therapistId?: string): Promise<StatusSlice[]> {
   const grouped = await prisma.booking.groupBy({
     by: ["status"],
     _count: { _all: true },
-    where: { createdAt: { gte: range.from, lte: range.to } },
+    where: { createdAt: { gte: range.from, lte: range.to }, ...(therapistId ? { therapistId } : {}) },
   });
   return grouped
     .map((g) => ({ status: g.status, count: g._count._all }))
     .sort((a, b) => b.count - a.count);
+}
+
+export interface TherapistOverviewKpis {
+  sessionValueMinor: number; // sum of this consultant's booking amounts in range (their session fees)
+  refundedValueMinor: number;
+  netSessionValueMinor: number;
+  commissionEarnedMinor: number; // their accrued commission in range
+  commissionPaidMinor: number; // lifetime settled payouts
+  payableMinor: number; // current unsettled balance
+  reservedMinor: number; // balance tied up in pending/processing payouts
+  totalBookings: number;
+  completedBookings: number;
+  cancelledBookings: number;
+  noShowBookings: number;
+  refundedBookings: number;
+  todaysSessions: number;
+  upcomingBookings: number;
+  totalClients: number;
+}
+
+/** KPI set for a single consultant's own dashboard — reads never cross into another consultant's data. */
+export async function therapistOverviewKpis(range: ResolvedRange, therapistId: string): Promise<TherapistOverviewKpis> {
+  const bookingWindow = { gte: range.from, lte: range.to };
+  const startOfToday = new Date();
+  startOfToday.setHours(0, 0, 0, 0);
+  const endOfToday = new Date();
+  endOfToday.setHours(23, 59, 59, 999);
+
+  const [rangeFinancials, lifetimeFinancials, balance, bookingsByStatus, todaysSessions, upcomingBookings, clientRows] =
+    await Promise.all([
+      financialSummary({ from: range.from, to: range.to }, therapistId),
+      financialSummary({}, therapistId),
+      consultantBalance(therapistId),
+      prisma.booking.groupBy({
+        by: ["status"],
+        _count: { _all: true },
+        where: { createdAt: bookingWindow, therapistId },
+      }),
+      prisma.booking.count({
+        where: { therapistId, dateTime: { gte: startOfToday, lte: endOfToday }, status: { in: ["CONFIRMED", "COMPLETED"] } },
+      }),
+      prisma.booking.count({
+        where: { therapistId, status: "CONFIRMED", dateTime: { gte: new Date() } },
+      }),
+      prisma.booking.findMany({ where: { therapistId }, select: { clientId: true }, distinct: ["clientId"] }),
+    ]);
+
+  const statusCount = new Map<string, number>(bookingsByStatus.map((b) => [b.status, Number(b._count._all)]));
+  const totalBookings = bookingsByStatus.reduce((sum, b) => sum + Number(b._count._all), 0);
+
+  return {
+    sessionValueMinor: rangeFinancials.grossRevenueMinor,
+    refundedValueMinor: rangeFinancials.refundsMinor,
+    netSessionValueMinor: rangeFinancials.netRevenueMinor,
+    commissionEarnedMinor: rangeFinancials.consultantEarnedMinor,
+    commissionPaidMinor: lifetimeFinancials.consultantPaidMinor,
+    payableMinor: balance.payableMinor,
+    reservedMinor: balance.reservedMinor,
+    totalBookings,
+    completedBookings: statusCount.get("COMPLETED") ?? 0,
+    cancelledBookings: statusCount.get("CANCELLED") ?? 0,
+    noShowBookings: statusCount.get("NO_SHOW") ?? 0,
+    refundedBookings: (statusCount.get("REFUNDED") ?? 0) + (statusCount.get("REFUND_PENDING") ?? 0),
+    todaysSessions,
+    upcomingBookings,
+    totalClients: clientRows.length,
+  };
 }
 
 export interface ConsultantPerformance {

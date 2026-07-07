@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { ZodError, ZodSchema } from "zod";
 import { getSession } from "@/lib/auth";
+import { prisma } from "@/lib/db";
 import { InvalidTransitionError } from "./domain/bookingStatus";
 
 // Shared route-handler plumbing: typed errors, RBAC guards, pagination and
@@ -39,6 +40,23 @@ export async function requireSession(request: Request, roles: Session["role"][])
 
 export const requireAdmin = (request: Request) => requireSession(request, ["ADMIN"]);
 export const requireStaff = (request: Request) => requireSession(request, ["ADMIN", "THERAPIST"]);
+
+export interface TherapistContext {
+  session: Session;
+  therapistId: string;
+}
+
+/**
+ * Resolves the logged-in THERAPIST session to their own Therapist row.
+ * Every /api/therapist/* route scopes reads and writes to this id — a
+ * therapist can never see or mutate another consultant's data.
+ */
+export async function requireTherapist(request: Request): Promise<TherapistContext> {
+  const session = await requireSession(request, ["THERAPIST"]);
+  const therapist = await prisma.therapist.findUnique({ where: { userId: session.userId } });
+  if (!therapist) throw forbidden("No consultant profile is linked to this account");
+  return { session, therapistId: therapist.id };
+}
 
 export function handleApi<T extends unknown[]>(
   handler: (...args: T) => Promise<NextResponse | Response>
