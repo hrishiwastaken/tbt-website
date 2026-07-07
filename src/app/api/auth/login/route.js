@@ -2,8 +2,37 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { comparePasswords, signToken } from "@/lib/auth";
 
+const NETLIFY_CONFIG_MESSAGE =
+  "Database connection is not configured. Set DATABASE_URL, DIRECT_URL, NEXTAUTH_SECRET, and ENCRYPTION_KEY in Netlify, then seed the database.";
+
+function missingRuntimeConfig() {
+  return ["DATABASE_URL", "NEXTAUTH_SECRET"].filter((key) => !process.env[key]);
+}
+
+function authConfigError(error) {
+  const message = error instanceof Error ? error.message : String(error);
+
+  if (
+    message.includes("Environment variable not found") ||
+    message.includes("DATABASE_URL") ||
+    message.includes("Can't reach database server") ||
+    message.includes("Timed out fetching a new connection")
+  ) {
+    return NETLIFY_CONFIG_MESSAGE;
+  }
+
+  return "Internal server error";
+}
+
 export async function POST(request) {
   try {
+    const missing = missingRuntimeConfig();
+
+    if (missing.length > 0) {
+      console.error(`Login API configuration missing: ${missing.join(", ")}`);
+      return NextResponse.json({ error: NETLIFY_CONFIG_MESSAGE }, { status: 500 });
+    }
+
     const { email, password } = await request.json();
 
     if (!email || !password) {
@@ -67,6 +96,6 @@ export async function POST(request) {
     return response;
   } catch (error) {
     console.error("Login API Error:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return NextResponse.json({ error: authConfigError(error) }, { status: 500 });
   }
 }

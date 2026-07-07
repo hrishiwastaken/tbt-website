@@ -22,6 +22,9 @@
   --color-terracotta: #5D768B;
   --color-charcoal: #26333D;
   --color-warm-white: #F8EFE5;
+  --font-cormorant: Georgia, "Times New Roman", serif;
+  --font-dm-sans: Arial, Helvetica, sans-serif;
+  --font-caveat: "Comic Sans MS", "Segoe Print", cursive;
 }
 
 body {
