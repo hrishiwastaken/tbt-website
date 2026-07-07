@@ -16,7 +16,7 @@ export default function BookingWizard({
 
   // Pre-select the sole therapist: Dr. Madhumati Dhumak
   const [selectedTherapist] = useState(
-    therapists[0] || { name: "Dr. Madhumati Dhumak", slug: "dr-madhumati-dhumak", fees: 200.0 }
+    therapists[0] || { name: "Dr. Madhumati Dhumak", slug: "dr-madhumati-dhumak", feeMinor: 150000 }
   );
 
   const [selectedService, setSelectedService] = useState(
@@ -235,7 +235,7 @@ export default function BookingWizard({
                       <p className="text-sage text-xs leading-relaxed mt-1 pr-6">{service.description}</p>
                     </div>
                     <span className="text-terracotta font-semibold text-lg shrink-0">
-                      ₹{(service.price * 80).toLocaleString("en-IN")}
+                      ₹{(service.priceMinor / 100).toLocaleString("en-IN")}
                     </span>
                   </div>
                   <div className="flex justify-between items-center mt-3 pt-3 border-t border-mist/10 text-xs text-sage">
@@ -467,7 +467,7 @@ export default function BookingWizard({
               <div className="flex justify-between items-center pt-2">
                 <span className="text-xs font-bold uppercase text-forest font-bold">Total Amount Due</span>
                 <span className="text-2xl text-terracotta font-bold">
-                  ₹{(selectedService.price * 80).toLocaleString("en-IN")}
+                  ₹{(selectedService.priceMinor / 100).toLocaleString("en-IN")}
                 </span>
               </div>
             </div>
@@ -504,7 +504,7 @@ export default function BookingWizard({
                   <div className="bg-white p-4 rounded-xl border border-mist/20 shadow-sm relative w-[212px] h-[212px] flex items-center justify-center">
                     <img
                       src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(
-                        `upi://pay?pa=millionairemanthan@fam&pn=${encodeURIComponent(SITE_NAME)}&am=${selectedService.price * 80}&cu=INR&tn=${encodeURIComponent(`${SITE_NAME} Session`)}`
+                        `upi://pay?pa=millionairemanthan@fam&pn=${encodeURIComponent(SITE_NAME)}&am=${selectedService.priceMinor / 100}&cu=INR&tn=${encodeURIComponent(`${SITE_NAME} Session`)}`
                       )}`}
                       alt="UPI QR Code"
                       className="w-[180px] h-[180px]"
@@ -513,7 +513,7 @@ export default function BookingWizard({
 
                   <div className="text-center space-y-1">
                     <div className="text-xs text-charcoal">
-                      Amount: <strong className="text-terracotta">₹{(selectedService.price * 80).toLocaleString("en-IN")}</strong>
+                      Amount: <strong className="text-terracotta">₹{(selectedService.priceMinor / 100).toLocaleString("en-IN")}</strong>
                     </div>
                     <div className="text-[11px] text-sage font-mono">
                       UPI ID: <strong className="text-forest">millionairemanthan@fam</strong>

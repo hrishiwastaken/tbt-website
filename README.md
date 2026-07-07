@@ -6,19 +6,36 @@ A premium, modern, fully functional Next.js App Router website for a therapy and
 
 ## 🛠️ Technology Stack
 
-- **Frontend & Backend API**: Next.js (App Router)
-- **Styling**: Tailwind CSS v4 (configured with Sage-grey, Alabaster, Linen, and Rosewood CTA tokens)
-- **Database ORM**: Prisma ORM with native SQLite for zero-dependency local development (compatible with PostgreSQL/Supabase for production)
-- **Authentication**: JWT & HTTP-Only Secure Cookies session management
-- **Payment Gateway**: Razorpay (India-specific gateway with simulated test checkout bypasses)
-- **SMS/WhatsApp notifications**: Twilio WhatsApp API
+- **Frontend & Backend API**: Next.js (App Router), TypeScript service layer under `src/server`
+- **Styling**: Tailwind CSS with The Brain Tea design tokens (ocean/ivory palette, neumorphic surfaces)
+- **Database ORM**: Prisma ORM on PostgreSQL
+- **Financials**: append-only double-entry-style ledger (`LedgerEntry`), integer paise money, commission snapshots per booking, payout settlement records
+- **Payments**: provider-agnostic abstraction (`src/server/payments`) — a `manual` UPI-reference provider ships today; a real gateway (Razorpay/Stripe/…) plugs in later as one adapter without touching booking or revenue logic
+- **Authentication**: JWT & HTTP-Only Secure Cookies, role-based access (ADMIN / THERAPIST)
 - **Encryption**: AES-256-GCM encryption at rest for sensitive patient notes
+- **Testing**: Vitest — pure domain unit tests plus Postgres-backed integration tests (double-booking concurrency, payment idempotency, refund reversal, payout guards)
+
+---
+
+## 🏗️ Backend Architecture
+
+```
+Booking → PaymentRecord → Charge success → LedgerEntry postings
+        → Commission (snapshotted bps) → Consultant payable balance
+        → Payout (PENDING → PAID) → PAYOUT_PAID ledger settlement
+```
+
+- **Booking state machine** (`src/server/domain/bookingStatus.ts`): `PENDING → AWAITING_PAYMENT → CONFIRMED → COMPLETED / CANCELLED / NO_SHOW / REFUND_PENDING → REFUNDED`, journalled in `BookingStatusHistory`.
+- **Double-booking prevention**: a `BookingSlot` row per live hold with a DB unique constraint on `(therapistId, startAt)`, created inside the booking transaction — races lose at the database level.
+- **Idempotency**: unique `idempotencyKey` on payment records, replay-safe charge/refund recording, deduped `WebhookEvent` journal for future gateway webhooks.
+- **Immutable ledger**: refunds and corrections post reversal entries; historical rows are never edited. All dashboard KPIs and charts aggregate these persisted records.
+- **Commission**: platform default (30–35% policy bounds, append-only history) with per-consultant overrides; every booking freezes its rate at creation.
 
 ---
 
 ## ⚙️ Local Setup Instructions
 
-Follow these steps to run the clinic website locally:
+Follow these steps to run the clinic platform locally:
 
 ### 1. Install Dependencies
 Run the package installation using the `--legacy-peer-deps` flag:
@@ -27,17 +44,20 @@ npm install --legacy-peer-deps
 ```
 
 ### 2. Configure Environment Variables
-Copy `.env.example` to `.env` and fill in the required keys:
+Create `.env` with your PostgreSQL connection and secrets:
 ```bash
-cp .env.example .env
+DATABASE_URL="postgresql://postgres:postgres@localhost:5432/braintea"
+DIRECT_URL="postgresql://postgres:postgres@localhost:5432/braintea"
+NEXTAUTH_SECRET="change-me"
+ENCRYPTION_KEY="<32-byte hex key>"
 ```
-Ensure you generate a secure 32-byte hex encryption key for protecting notes at rest:
+Generate a secure 32-byte hex encryption key for protecting notes at rest:
 ```bash
 node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 ```
 
 ### 3. Initialize and Seed the Database
-Synchronize the Prisma models to your local SQLite file and populate mock therapists, services, admin users, and transactions:
+Synchronize the Prisma models and populate a realistic 90-day operating history (consultants, bookings, ledger entries, payouts):
 ```bash
 npx prisma db push
 node prisma/seed.js
@@ -49,6 +69,12 @@ Launch the Next.js development server:
 npm run dev
 ```
 Open [http://localhost:3000](http://localhost:3000) in your web browser.
+
+### 5. Run Tests
+```bash
+npm test
+```
+Domain unit tests always run; the integration suite uses the database from `DATABASE_URL`.
 
 ---
 
@@ -68,18 +94,15 @@ To test the secure dashboards, log in using the following accounts:
 
 ---
 
-## 💸 Razorpay Gateway & Webhook Setup
+## 💸 Payment Gateway Integration (Future)
 
-1. **Dashboard Setup**:
-   - Register a merchant account at [Razorpay](https://razorpay.com).
-   - Switch to **Test Mode** on your dashboard.
-   - Go to **Settings -> API Keys** and click **Generate Key**. Update `RAZORPAY_KEY_ID` and `RAZORPAY_KEY_SECRET` in `.env`.
+No gateway is integrated yet — payments run through the provider-agnostic layer in `src/server/payments` using the `manual` provider (staff-verified UPI references). To integrate a real gateway later:
 
-2. **Webhook Setup**:
-   - Navigate to **Settings -> Webhooks -> Add New Webhook**.
-   - Set Webhook URL to: `https://yourdomain.com/api/webhooks/razorpay`
-   - Set Secret: Define a string and assign it to `RAZORPAY_WEBHOOK_SECRET` in `.env`.
-   - Active Events: Select `order.paid` and `payment.captured`.
+1. Implement the `PaymentProvider` interface (`src/server/payments/types.ts`): intent creation, verification, webhook parsing/signature validation, refunds, status reconciliation.
+2. Register the adapter in `src/server/payments/registry.ts` and set `PAYMENT_PROVIDER=<name>` in `.env`.
+3. Point the gateway's webhooks at `https://yourdomain.com/api/webhooks/<name>` — dedupe, idempotent financial posting and ledger entries are already handled by the payment service.
+
+Booking, revenue, commission and payout logic require **no changes**.
 
 ---
 
