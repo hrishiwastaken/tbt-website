@@ -70,14 +70,14 @@ export default function TherapistLayout({ children }: { children: React.ReactNod
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-ivory flex justify-center items-center font-dmsans text-sm text-ink-muted">
+      <div data-panel className="min-h-screen bg-panel-ivory flex justify-center items-center font-dmsans text-sm text-ink-muted">
         Loading consultant portal...
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-ivory flex flex-col md:flex-row font-dmsans">
+    <div data-panel className="min-h-screen bg-panel-ivory flex flex-col md:flex-row font-dmsans">
       <aside className="w-full md:w-64 bg-surface border-b md:border-b-0 md:border-r border-ocean/10 flex flex-col justify-between py-6 px-4 shrink-0 md:sticky md:top-0 md:h-screen">
         <div>
           <div className="px-3 mb-8">

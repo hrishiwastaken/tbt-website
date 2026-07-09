@@ -11,7 +11,7 @@ export default function InvoicesPage() {
   return (
     <div>
       <PrototypeBanner label="Client Portal" />
-      <h1 className="font-cormorant text-3xl md:text-4xl font-semibold text-ocean-deep mb-8">
+      <h1 className="font-cormorant text-3xl md:text-4xl font-semibold text-forest-slate mb-8">
         Invoices &amp; Receipts
       </h1>
 
@@ -20,16 +20,16 @@ export default function InvoicesPage() {
           {INVOICES.map((inv) => (
             <div key={inv.id} className="p-5 flex flex-wrap items-center justify-between gap-3">
               <div>
-                <p className="text-ocean-deep font-medium">{inv.id}</p>
-                <p className="text-ink-muted text-xs">{inv.date}</p>
+                <p className="text-forest-slate font-medium">{inv.id}</p>
+                <p className="text-charcoal/80 text-xs">{inv.date}</p>
               </div>
               <div className="flex items-center gap-4">
-                <span className="font-cormorant text-lg font-semibold text-ocean-deep">{inv.amount}</span>
+                <span className="font-cormorant text-lg font-semibold text-forest-slate">{inv.amount}</span>
                 <button
                   type="button"
                   disabled
                   title="Prototype -- download not yet wired up"
-                  className="inline-flex items-center gap-1.5 text-sm font-semibold text-ocean disabled:opacity-40 disabled:cursor-not-allowed"
+                  className="inline-flex items-center gap-1.5 text-sm font-semibold text-teal-sage disabled:opacity-40 disabled:cursor-not-allowed"
                 >
                   <Download className="w-4 h-4" /> Download
                 </button>
