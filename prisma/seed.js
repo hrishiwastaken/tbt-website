@@ -1,9 +1,10 @@
 /**
  * Seed script: builds a realistic ~200-day operating history — six
- * consultants at different career stages, ~50 clients, several hundred
- * bookings, a two-era commission-rate history, unavailability blocks, and
- * multi-cycle payout settlements — so every admin/therapist chart and KPI
- * has plentiful, presentable, ledger-accurate data to aggregate.
+ * consultants at different career stages, ~96 clients, a dense stream of
+ * bookings (a rising daily baseline, floored so no operating day is empty),
+ * a two-era commission-rate history, unavailability blocks, and multi-cycle
+ * payout settlements — so every admin/therapist chart and KPI has plentiful,
+ * presentable, ledger-accurate data to aggregate.
  *
  * All money is integer paise. Ledger postings here mirror
  * src/server/domain/postings.ts (kept in plain JS because seeding runs under
@@ -310,9 +311,17 @@ async function main() {
     "Patel", "Joshi", "Verma", "Kulkarni", "Malhotra", "Nair", "Reddy", "Sharma", "Desai", "Bose",
     "Menon", "Pillai", "Kapoor", "Krishnan", "Rao", "Hegde", "Bansal", "Agarwal", "Iyer", "Chauhan",
   ];
+  // Build a wider roster of uniquely-named clients (deterministic via the
+  // seeded PRNG) so the client-growth chart, Clients register, and the pool
+  // that bookings draw from all read as a real, sizeable practice.
+  const CLIENT_COUNT = 96;
   const clientNames = [];
-  for (let i = 0; i < firstNames.length; i++) {
-    clientNames.push(`${firstNames[i]} ${lastNames[i % lastNames.length]}`);
+  const usedNames = new Set();
+  while (clientNames.length < CLIENT_COUNT) {
+    const name = `${pick(firstNames)} ${pick(lastNames)}`;
+    if (usedNames.has(name)) continue;
+    usedNames.add(name);
+    clientNames.push(name);
   }
 
   const clients = [];
@@ -423,11 +432,17 @@ async function main() {
     );
     if (eligible.length === 0) continue;
 
-    // Volume grows gently over time and scales with how many consultants
-    // are open that day, so the practice reads as genuinely busier recently.
+    // Daily volume: a baseline that rises over time and scales with how much
+    // of the roster is open, plus mild day-to-day variance and a floor so no
+    // operating day lands empty. Future days taper down (appointments fill up
+    // as the date nears), keeping the upcoming book realistic. The result is a
+    // dense, steadily-growing history so every ledger-backed chart and KPI
+    // reads as a busy practice rather than a sparse scatter.
     const growth = (dayOffset + HISTORY_DAYS) / (HISTORY_DAYS + FUTURE_DAYS);
     const capacityFactor = eligible.reduce((s, t) => s + t.weight, 0) / bookableTherapists.reduce((s, t) => s + t.weight, 0);
-    const bookingsToday = Math.floor(rand() * (1.5 + growth * 5) * (0.5 + capacityFactor));
+    const futureTaper = dayOffset > 0 ? Math.max(0.35, 1 - dayOffset / (FUTURE_DAYS * 1.5)) : 1;
+    const baseline = (2.5 + growth * 4) * (0.5 + 0.5 * capacityFactor) * futureTaper;
+    const bookingsToday = Math.max(2, Math.round(baseline * (0.75 + rand() * 0.5)));
 
     for (let i = 0; i < bookingsToday; i++) {
       const therapist = weightedPick(eligible.map((t) => ({ item: t, weight: t.weight })));
