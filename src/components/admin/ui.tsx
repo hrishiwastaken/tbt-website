@@ -68,10 +68,10 @@ const STATUS_TONES: Record<string, string> = {
   AWAITING_PAYMENT: "bg-gold/40 text-ocean-deep border-gold/60",
   CONFIRMED: "bg-ocean/10 text-ocean-deep border-ocean/25",
   COMPLETED: "bg-emerald-50 text-emerald-800 border-emerald-200",
-  CANCELLED: "bg-sand/30 text-ink-muted border-sand/50",
+  CANCELLED: "bg-panel-sand/30 text-ink-muted border-panel-sand/50",
   NO_SHOW: "bg-blush/60 text-ocean-deep border-blush",
   REFUND_PENDING: "bg-amber-50 text-amber-800 border-amber-200",
-  REFUNDED: "bg-sand/30 text-ink-muted border-sand/50",
+  REFUNDED: "bg-panel-sand/30 text-ink-muted border-panel-sand/50",
   // payment
   UNPAID: "bg-gold/40 text-ocean-deep border-gold/60",
   PAID: "bg-emerald-50 text-emerald-800 border-emerald-200",

@@ -41,18 +41,18 @@ export default function AdminLoginPage() {
   };
 
   return (
-    <main className="min-h-screen bg-ivory flex flex-col justify-center items-center px-6 relative overflow-hidden font-dmsans">
+    <main data-panel className="min-h-screen bg-panel-ivory flex flex-col justify-center items-center px-6 relative overflow-hidden font-dmsans">
       {/* Decorative background shape */}
       <div className="absolute inset-0 pointer-events-none -z-10 flex items-center justify-center">
-        <div className="w-[600px] h-[600px] rounded-full bg-sand/30 blur-3xl opacity-40"></div>
+        <div className="w-[600px] h-[600px] rounded-full bg-panel-sand/30 blur-3xl opacity-40"></div>
       </div>
 
-      <div className="w-full max-w-md glass-card p-8 md:p-12 rounded-2xl border border-mist/30 shadow-warm-soft text-center relative overflow-hidden">
-        <div className="absolute top-0 left-0 right-0 h-1 bg-forest" />
-        <Link href="/" className="font-cormorant font-semibold text-3xl text-forest hover:opacity-90 transition-opacity block mb-2 leading-none">
+      <div className="w-full max-w-md glass-card-ocean p-8 md:p-12 rounded-2xl border border-panel-mist/30 shadow-warm-soft text-center relative overflow-hidden">
+        <div className="absolute top-0 left-0 right-0 h-1 bg-ocean" />
+        <Link href="/" className="font-cormorant font-semibold text-3xl text-ocean hover:opacity-90 transition-opacity block mb-2 leading-none">
           {SITE_NAME}
         </Link>
-        <span className="text-xs font-bold tracking-widest text-terracotta uppercase block mb-8">
+        <span className="text-xs font-bold tracking-widest text-ocean uppercase block mb-8">
           Admin Portal
         </span>
 
@@ -64,26 +64,26 @@ export default function AdminLoginPage() {
 
         <form onSubmit={handleSubmit} className="space-y-6 text-left">
           <div>
-            <label className="text-xs font-bold tracking-wider uppercase text-sage block mb-1">Email Address</label>
+            <label className="text-xs font-bold tracking-wider uppercase text-panel-sage block mb-1">Email Address</label>
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="admin@thebraintea.com"
-              className="w-full bg-warm-white/50 border-t-0 border-l-0 border-r-0 border-b border-mist/60 focus:ring-0 focus:border-forest text-charcoal py-2 px-0 transition-colors text-base"
+              className="w-full bg-panel-ivory/50 border-t-0 border-l-0 border-r-0 border-b border-panel-mist/60 focus:ring-0 focus:border-ocean text-ink py-2 px-0 transition-colors text-base"
               required
               disabled={loading}
             />
           </div>
 
           <div>
-            <label className="text-xs font-bold tracking-wider uppercase text-sage block mb-1">Password</label>
+            <label className="text-xs font-bold tracking-wider uppercase text-panel-sage block mb-1">Password</label>
             <input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••••••"
-              className="w-full bg-warm-white/50 border-t-0 border-l-0 border-r-0 border-b border-mist/60 focus:ring-0 focus:border-forest text-charcoal py-2 px-0 transition-colors text-base"
+              className="w-full bg-panel-ivory/50 border-t-0 border-l-0 border-r-0 border-b border-panel-mist/60 focus:ring-0 focus:border-ocean text-ink py-2 px-0 transition-colors text-base"
               required
               disabled={loading}
             />
@@ -92,17 +92,17 @@ export default function AdminLoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-forest hover:bg-terracotta text-warm-white font-bold py-4 rounded-full transition-colors mt-4 disabled:opacity-50 shadow-sm"
+            className="w-full bg-ocean hover:bg-ocean-deep text-white font-bold py-4 rounded-full transition-colors mt-4 disabled:opacity-50 shadow-sm"
           >
             {loading ? "Authenticating..." : "Login to Portal"}
           </button>
         </form>
 
-        <div className="mt-8 border-t border-mist/20 pt-4 flex justify-between text-xs text-sage font-medium">
-          <Link href="/" className="hover:text-forest transition-colors">
+        <div className="mt-8 border-t border-panel-mist/20 pt-4 flex justify-between text-xs text-panel-sage font-medium">
+          <Link href="/" className="hover:text-ocean transition-colors">
             ← Main Site
           </Link>
-          <Link href="/therapist/login" className="hover:text-forest transition-colors">
+          <Link href="/therapist/login" className="hover:text-ocean transition-colors">
             Therapist Login →
           </Link>
         </div>

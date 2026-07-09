@@ -77,7 +77,7 @@ export default function AdminLayout({ children }) {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-ivory flex justify-center items-center font-dmsans text-sm text-ink-muted">
+      <div data-panel className="min-h-screen bg-panel-ivory flex justify-center items-center font-dmsans text-sm text-ink-muted">
         Loading admin console...
       </div>
     );
@@ -107,7 +107,7 @@ export default function AdminLayout({ children }) {
   );
 
   return (
-    <div className="min-h-screen bg-ivory flex flex-col md:flex-row font-dmsans">
+    <div data-panel className="min-h-screen bg-panel-ivory flex flex-col md:flex-row font-dmsans">
       {/* Mobile top bar */}
       <div className="md:hidden flex items-center justify-between bg-surface border-b border-ocean/10 px-4 py-3">
         <Link href="/" className="font-cormorant font-semibold text-xl text-ocean-deep">

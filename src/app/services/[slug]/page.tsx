@@ -11,8 +11,9 @@ export function generateStaticParams() {
   return SERVICES.map((service) => ({ slug: service.slug }));
 }
 
-export function generateMetadata({ params }: { params: { slug: string } }) {
-  const service = getServiceBySlug(params.slug);
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  const service = getServiceBySlug(slug);
   if (!service) return {};
   return {
     title: `${service.name} | The Brain Tea`,
@@ -20,8 +21,9 @@ export function generateMetadata({ params }: { params: { slug: string } }) {
   };
 }
 
-export default function ServiceDetail({ params }: { params: { slug: string } }) {
-  const service = getServiceBySlug(params.slug);
+export default async function ServiceDetail({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  const service = getServiceBySlug(slug);
   if (!service) notFound();
 
   return (
@@ -30,14 +32,14 @@ export default function ServiceDetail({ params }: { params: { slug: string } }) 
         <Container className="max-w-3xl">
           <Link
             href="/services"
-            className="inline-flex items-center gap-1.5 text-sm font-medium text-ocean hover:text-ocean-deep mb-8 transition-colors"
+            className="inline-flex items-center gap-1.5 text-sm font-medium text-teal-sage hover:text-forest-slate mb-8 transition-colors"
           >
             <ArrowLeft className="w-4 h-4" /> All Services
           </Link>
-          <h1 className="font-cormorant text-4xl md:text-5xl font-semibold text-ocean-deep leading-tight mb-4 text-balance">
+          <h1 className="font-cormorant text-4xl md:text-5xl font-semibold text-forest-slate leading-tight mb-4 text-balance">
             {service.name}
           </h1>
-          <p className="text-ocean font-medium mb-6">{service.tagline}</p>
+          <p className="text-teal-sage font-medium mb-6">{service.tagline}</p>
           <div className="flex flex-wrap gap-2 mb-8">
             {service.availability.map((mode) => (
               <Badge key={mode} tone="sand">
@@ -46,7 +48,7 @@ export default function ServiceDetail({ params }: { params: { slug: string } }) 
               </Badge>
             ))}
           </div>
-          <p className="text-base md:text-lg text-ink-muted leading-relaxed text-pretty">
+          <p className="text-base md:text-lg text-charcoal/80 leading-relaxed text-pretty">
             {service.description}
           </p>
         </Container>
@@ -55,13 +57,13 @@ export default function ServiceDetail({ params }: { params: { slug: string } }) 
       <section className="pb-24">
         <Container className="max-w-3xl grid grid-cols-1 gap-6">
           <Surface variant="raised" radius="surface" className="p-8">
-            <h2 className="font-cormorant text-xl font-semibold text-ocean-deep mb-4">
+            <h2 className="font-cormorant text-xl font-semibold text-forest-slate mb-4">
               Who this is suitable for
             </h2>
-            <ul className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2 text-sm text-ink-muted">
+            <ul className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2 text-sm text-charcoal/80">
               {service.suitableFor.map((topic) => (
                 <li key={topic} className="flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-ocean shrink-0" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-teal-sage shrink-0" />
                   {topic}
                 </li>
               ))}
@@ -70,8 +72,8 @@ export default function ServiceDetail({ params }: { params: { slug: string } }) 
 
           {service.process && (
             <Surface variant="raised" radius="surface" className="p-8">
-              <h2 className="font-cormorant text-xl font-semibold text-ocean-deep mb-3">Process</h2>
-              <p className="text-sm text-ink-muted leading-relaxed">{service.process}</p>
+              <h2 className="font-cormorant text-xl font-semibold text-forest-slate mb-3">Process</h2>
+              <p className="text-sm text-charcoal/80 leading-relaxed">{service.process}</p>
             </Surface>
           )}
 

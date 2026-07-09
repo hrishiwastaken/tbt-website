@@ -28,13 +28,13 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
 
   return (
     <div className="min-h-screen bg-ivory flex flex-col md:flex-row font-dmsans">
-      <aside className="w-full md:w-64 bg-surface border-b md:border-b-0 md:border-r border-ocean/10 flex flex-col justify-between py-6 px-4 shrink-0">
+      <aside className="w-full md:w-64 bg-warm-white border-b md:border-b-0 md:border-r border-muted-sage/20 flex flex-col justify-between py-6 px-4 shrink-0">
         <div>
           <div className="px-3 mb-8">
-            <Link href="/" className="font-cormorant font-semibold text-2xl text-ocean-deep block leading-tight">
+            <Link href="/" className="font-cormorant font-semibold text-2xl text-forest-slate block leading-tight">
               {SITE_NAME}
             </Link>
-            <span className="font-dmsans text-[10px] text-ocean uppercase tracking-widest font-bold mt-1 block">
+            <span className="font-dmsans text-[10px] text-teal-sage uppercase tracking-widest font-bold mt-1 block">
               Client Portal
             </span>
           </div>
@@ -49,8 +49,8 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
                   href={item.href}
                   className={`flex items-center gap-3 px-3 py-3 rounded-soft text-xs font-semibold uppercase tracking-wider transition-all ${
                     isActive
-                      ? "bg-ocean text-white shadow-surface-raised-sm"
-                      : "text-ink-muted hover:bg-surface-sunken hover:text-ocean-deep"
+                      ? "bg-teal-sage text-white shadow-warm-soft"
+                      : "text-charcoal/80 hover:bg-warm-sand/50 hover:text-forest-slate"
                   }`}
                 >
                   <Icon size={14} />
@@ -61,15 +61,15 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
           </nav>
         </div>
 
-        <div className="pt-4 border-t border-ocean/10 mt-6 px-3 flex flex-col gap-3">
-          <p className="text-[10px] uppercase tracking-widest font-bold text-ink-muted">
+        <div className="pt-4 border-t border-muted-sage/20 mt-6 px-3 flex flex-col gap-3">
+          <p className="text-[10px] uppercase tracking-widest font-bold text-charcoal/80">
             Need to reschedule or cancel?
           </p>
           <a
             href={WHATSAPP_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-2 text-xs font-semibold text-ocean hover:text-ocean-deep transition-colors"
+            className="flex items-center gap-2 text-xs font-semibold text-teal-sage hover:text-forest-slate transition-colors"
           >
             <PhoneCall size={14} /> Contact Clinic ({CONTACT_PHONE})
           </a>

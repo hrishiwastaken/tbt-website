@@ -14,10 +14,10 @@ export default function AppointmentsPage() {
   return (
     <div>
       <PrototypeBanner label="Client Portal" />
-      <h1 className="font-cormorant text-3xl md:text-4xl font-semibold text-ocean-deep mb-2">
+      <h1 className="font-cormorant text-3xl md:text-4xl font-semibold text-forest-slate mb-2">
         My Appointments
       </h1>
-      <p className="text-sm text-ink-muted mb-8 max-w-xl">
+      <p className="text-sm text-charcoal/80 mb-8 max-w-xl">
         To reschedule or cancel a session, please contact the clinic directly -- this can&apos;t be
         done from the portal.
       </p>
@@ -25,7 +25,7 @@ export default function AppointmentsPage() {
       <div className="flex flex-wrap gap-3 mb-8">
         <a
           href={`tel:${CONTACT_PHONE.replace(/\s/g, "")}`}
-          className="inline-flex items-center gap-2 text-sm font-semibold bg-ocean text-white px-5 py-2.5 rounded-full shadow-surface-raised-sm hover:shadow-surface-raised transition-all"
+          className="inline-flex items-center gap-2 text-sm font-semibold bg-teal-sage text-white px-5 py-2.5 rounded-full shadow-warm-soft hover:shadow-warm-soft transition-all"
         >
           <PhoneCall className="w-4 h-4" /> Call Clinic
         </a>
@@ -33,7 +33,7 @@ export default function AppointmentsPage() {
           href={WHATSAPP_URL}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 text-sm font-semibold bg-[#25D366] text-white px-5 py-2.5 rounded-full hover:shadow-surface-raised transition-all"
+          className="inline-flex items-center gap-2 text-sm font-semibold bg-[#25D366] text-white px-5 py-2.5 rounded-full hover:shadow-warm-soft transition-all"
         >
           WhatsApp
         </a>
@@ -44,8 +44,8 @@ export default function AppointmentsPage() {
           {APPOINTMENTS.map((a, i) => (
             <div key={i} className="p-5 flex flex-wrap items-center justify-between gap-3">
               <div>
-                <p className="text-ocean-deep font-medium">{a.service}</p>
-                <p className="text-ink-muted text-xs">
+                <p className="text-forest-slate font-medium">{a.service}</p>
+                <p className="text-charcoal/80 text-xs">
                   {a.date} at {a.time}
                 </p>
               </div>

@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import Surface from "../../../components/ui/Surface";
 import { SITE_NAME } from "../../../lib/site";
 
 export default function TherapistLoginPage() {
@@ -39,8 +38,8 @@ export default function TherapistLoginPage() {
   };
 
   return (
-    <main className="min-h-screen bg-ivory flex flex-col justify-center items-center px-6 font-dmsans">
-      <Surface variant="raised" radius="panel" className="w-full max-w-md p-8 md:p-12">
+    <main data-panel className="min-h-screen bg-panel-ivory flex flex-col justify-center items-center px-6 font-dmsans">
+      <div className="surface-raised rounded-panel w-full max-w-md p-8 md:p-12">
         <div className="text-center mb-8">
           <Link href="/" className="font-cormorant font-semibold text-3xl text-ocean-deep block mb-2">
             {SITE_NAME}
@@ -104,7 +103,7 @@ export default function TherapistLoginPage() {
             Admin Login →
           </Link>
         </div>
-      </Surface>
+      </div>
     </main>
   );
 }

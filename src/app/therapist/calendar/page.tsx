@@ -159,7 +159,7 @@ export default function TherapistCalendarPage() {
                     </p>
                   )}
                   {blocks.map((b) => (
-                    <div key={b.id} className="rounded-soft border border-sand/60 bg-sand/20 px-3 py-2 text-[11px] text-ink-muted">
+                    <div key={b.id} className="rounded-soft border border-panel-sand/60 bg-panel-sand/20 px-3 py-2 text-[11px] text-ink-muted">
                       Blocked{b.reason ? `: ${b.reason}` : ""}
                     </div>
                   ))}

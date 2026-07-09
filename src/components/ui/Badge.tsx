@@ -3,10 +3,10 @@ import { ReactNode } from "react";
 type Tone = "ocean" | "gold" | "blush" | "sand";
 
 const toneClasses: Record<Tone, string> = {
-  ocean: "bg-ocean/10 text-ocean-deep border-ocean/20",
-  gold: "bg-gold/40 text-ocean-deep border-gold/60",
-  blush: "bg-blush/60 text-ocean-deep border-blush",
-  sand: "bg-sand/30 text-ocean-deep border-sand/50",
+  ocean: "bg-teal-sage/10 text-forest-slate border-teal-sage/25",
+  gold: "bg-warm-tan/50 text-forest-slate border-warm-tan/70",
+  blush: "bg-warm-tan/35 text-forest-slate border-warm-tan/60",
+  sand: "bg-warm-sand/50 text-forest-slate border-muted-sage/30",
 };
 
 export default function Badge({
