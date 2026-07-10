@@ -328,5 +328,9 @@ export async function consultantPerformance(range: ResolvedRange): Promise<Consu
     const entry = perf.get(row.therapistId);
     if (entry) entry.commissionMinor += row._sum.amountMinor ?? 0;
   }
-  return [...perf.values()].sort((a, b) => b.grossMinor - a.grossMinor);
+  // Only consultants with activity in the window — idle/pending roster
+  // members would otherwise pad the chart with meaningless ₹0 rows.
+  return [...perf.values()]
+    .filter((p) => p.bookings > 0 || p.grossMinor !== 0 || p.commissionMinor !== 0)
+    .sort((a, b) => b.grossMinor - a.grossMinor);
 }

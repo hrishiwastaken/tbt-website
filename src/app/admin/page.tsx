@@ -142,7 +142,7 @@ export default function AdminDashboardPage() {
             <KpiCard
               label="Net Revenue"
               value={formatINR(kpis.netRevenueMinor)}
-              hint={`After ${formatINR(kpis.refundsMinor)} refunds & discounts`}
+              hint={`After ${formatINR(kpis.grossRevenueMinor - kpis.netRevenueMinor)} refunds & discounts`}
               icon={<Landmark size={16} />}
             />
             <KpiCard
@@ -196,13 +196,14 @@ export default function AdminDashboardPage() {
       {data && (
         <>
           <div className="grid grid-cols-1 items-start gap-6 xl:grid-cols-2">
-            <Panel title="Revenue Trend" subtitle="Gross collections vs platform and consultant share, from ledger entries.">
+            <Panel title="Revenue Trend" subtitle="Gross collections vs platform and consultant share, with refunds, from ledger entries.">
               <LineAreaChart
                 data={data.series.revenue}
                 series={[
                   { key: "gross", label: "Gross", color: CHART_COLORS.blue, area: true },
                   { key: "platform", label: "Platform", color: CHART_COLORS.ochre },
                   { key: "consultant", label: "Consultant", color: CHART_COLORS.violet },
+                  { key: "refunds", label: "Refunds", color: CHART_COLORS.rosewood },
                 ]}
                 valueFormat={compactINR}
               />

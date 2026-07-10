@@ -120,6 +120,34 @@ async function main() {
     },
   });
 
+  // Audit-trail writer mirroring src/server/audit.ts — every simulated admin
+  // action below journals the same rows the live workflow endpoints write,
+  // so the Settings audit trail reflects the seeded history.
+  async function adminAudit(action, entityType, entityId, detail, createdAt) {
+    await prisma.auditLog.create({
+      data: {
+        actorUserId: adminUser.id,
+        actorEmail: adminUser.email,
+        actorRole: "ADMIN",
+        action,
+        entityType,
+        entityId: entityId ?? null,
+        detail: detail ? JSON.stringify(detail) : null,
+        createdAt,
+      },
+    });
+  }
+
+  for (const era of COMMISSION_ERAS) {
+    await adminAudit(
+      "commission.set_default",
+      "CommissionSetting",
+      null,
+      { commissionBps: era.commissionBps },
+      era.effectiveFrom
+    );
+  }
+
   const PHOTO = (seed) => `https://images.unsplash.com/photo-${seed}?auto=format&fit=crop&w=800&q=80`;
 
   // Each spec carries a `weight` (relative booking volume) and an
@@ -329,6 +357,9 @@ async function main() {
   for (const name of clientNames) {
     const createdAt = addDays(new Date(), -Math.floor(rand() * (HISTORY_DAYS + 10)));
     createdAt.setHours(9 + Math.floor(rand() * 10), Math.floor(rand() * 60), 0, 0);
+    // A registration stamped "today" must not land later than the current
+    // clock — no row in the database may carry a future timestamp.
+    if (createdAt > new Date()) createdAt.setTime(Date.now() - Math.floor(rand() * 4 * 3600000));
     let email = name.toLowerCase().replace(/[^a-z]+/g, ".") + "@example.com";
     if (usedEmails.has(email)) email = email.replace("@", `.${clients.length}@`);
     usedEmails.add(email);
@@ -419,6 +450,13 @@ async function main() {
       where: { id: booking.id },
       data: { paymentStatus: "REFUNDED", status: "REFUNDED" },
     });
+    await adminAudit(
+      "payment.refund_executed",
+      "Booking",
+      booking.id,
+      { refundMinor, reason },
+      when
+    );
   }
 
   for (let dayOffset = -HISTORY_DAYS; dayOffset <= FUTURE_DAYS; dayOffset++) {
@@ -469,8 +507,15 @@ async function main() {
       const createdAt = new Date(startAt);
       createdAt.setDate(createdAt.getDate() - (1 + Math.floor(rand() * 6)));
       createdAt.setHours(9 + Math.floor(rand() * 10), Math.floor(rand() * 60), 0, 0);
+      // Upcoming sessions are booked in the recent past — a booking (and the
+      // payment stamped at booking time) must never be dated in the future.
+      // Spread over the trailing ten days so the created-per-day chart stays
+      // smooth instead of spiking at the seed date.
+      if (createdAt > new Date()) {
+        createdAt.setTime(Date.now() - (1 + Math.floor(rand() * 240)) * 3600000);
+      }
       if (createdAt < client.createdAt) createdAt.setTime(client.createdAt.getTime() + 3600000);
-      if (createdAt >= startAt) continue; // guard against pathological clamping
+      if (createdAt >= startAt || createdAt > new Date()) continue; // guard against pathological clamping
 
       const isPast = startAt.getTime() < Date.now();
       const roll = rand();
@@ -533,7 +578,8 @@ async function main() {
       }
 
       if (status === "REFUNDED" && split) {
-        const refundAt = new Date(startAt.getTime() - 24 * 3600000);
+        // Never earlier than the charge it reverses.
+        const refundAt = new Date(Math.max(startAt.getTime() - 24 * 3600000, createdAt.getTime() + 2 * 3600000));
         await prisma.bookingStatusHistory.createMany({
           data: [
             { bookingId: booking.id, fromStatus: "CONFIRMED", toStatus: "REFUND_PENDING", actorType: "CLIENT", reason: "Client cancelled paid session", createdAt: refundAt },
@@ -617,6 +663,20 @@ async function main() {
           createdAt: cutoff,
         },
       });
+      await adminAudit(
+        "payout.create",
+        "Payout",
+        payout.id,
+        { therapistId: therapist.id, amountMinor: toPay },
+        addDays(cutoff, -2)
+      );
+      await adminAudit(
+        "payout.paid",
+        "Payout",
+        payout.id,
+        { from: "PENDING", to: "PAID", reference: payout.reference },
+        cutoff
+      );
       paidSoFar += toPay;
     }
 
@@ -625,7 +685,7 @@ async function main() {
     if (payable > 0) {
       const pendingAmount = Math.round(payable * 0.5);
       if (pendingAmount > 0) {
-        await prisma.payout.create({
+        const pending = await prisma.payout.create({
           data: {
             therapistId: therapist.id,
             amountMinor: pendingAmount,
@@ -635,8 +695,27 @@ async function main() {
             initiatedById: adminUser.id,
           },
         });
+        await adminAudit(
+          "payout.create",
+          "Payout",
+          pending.id,
+          { therapistId: therapist.id, amountMinor: pendingAmount },
+          pending.createdAt
+        );
       }
     }
+  }
+
+  // Journal the roster action behind Dr. Meera's suspension 50 days ago.
+  const meera = therapists.find((t) => t.slug === "dr-meera-iyengar");
+  if (meera) {
+    await adminAudit(
+      "consultant.update",
+      "Therapist",
+      meera.id,
+      { changed: ["status", "isActive"] },
+      addDays(new Date(), -50)
+    );
   }
 
   // ── Testimonials ──────────────────────────────────────────────────────

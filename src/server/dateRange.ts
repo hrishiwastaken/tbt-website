@@ -24,6 +24,21 @@ function endOfDay(d: Date): Date {
   return out;
 }
 
+/**
+ * Snap a range start back to the beginning of its bucket so the first chart
+ * bucket covers a full week/month — otherwise a 90d range starting mid-week
+ * renders a 1-day sliver that reads as a revenue collapse.
+ */
+function snapToBucketStart(d: Date, granularity: Granularity): Date {
+  const out = startOfDay(d);
+  if (granularity === "week") {
+    out.setDate(out.getDate() - ((out.getDay() + 6) % 7)); // back to Monday
+  } else if (granularity === "month") {
+    out.setDate(1);
+  }
+  return out;
+}
+
 export function resolveRange(searchParams: URLSearchParams, now = new Date()): ResolvedRange {
   const key = (searchParams.get("range") || "30d") as RangeKey;
   const to = endOfDay(now);
@@ -34,7 +49,7 @@ export function resolveRange(searchParams: URLSearchParams, now = new Date()): R
     case "30d":
       return { key, from: startOfDay(addDays(now, -29)), to, granularity: "day" };
     case "90d":
-      return { key, from: startOfDay(addDays(now, -89)), to, granularity: "week" };
+      return { key, from: snapToBucketStart(addDays(now, -89), "week"), to, granularity: "week" };
     case "month":
       return { key, from: startOfDay(new Date(now.getFullYear(), now.getMonth(), 1)), to, granularity: "day" };
     case "year":
@@ -49,7 +64,7 @@ export function resolveRange(searchParams: URLSearchParams, now = new Date()): R
       }
       const spanDays = Math.ceil((toDate.getTime() - from.getTime()) / 86400000);
       const granularity: Granularity = spanDays <= 45 ? "day" : spanDays <= 200 ? "week" : "month";
-      return { key, from, to: toDate, granularity };
+      return { key, from: snapToBucketStart(from, granularity), to: toDate, granularity };
     }
     default:
       return { key: "30d", from: startOfDay(addDays(now, -29)), to, granularity: "day" };
@@ -72,8 +87,9 @@ export function bucketKey(date: Date, granularity: Granularity): string {
     const monday = new Date(d);
     const day = (d.getDay() + 6) % 7; // days since Monday
     monday.setDate(d.getDate() - day);
-    monday.setHours(0, 0, 0, 0);
-    return monday.toISOString().slice(0, 10);
+    monday.setHours(12, 0, 0, 0); // noon: immune to the UTC shift below
+    const local = new Date(monday.getTime() - monday.getTimezoneOffset() * 60000);
+    return local.toISOString().slice(0, 10);
   }
   const local = new Date(d.getTime() - d.getTimezoneOffset() * 60000);
   return local.toISOString().slice(0, 10);
@@ -102,6 +118,8 @@ export function bucketLabel(key: string, granularity: Granularity): string {
     const [y, m] = key.split("-").map(Number);
     return new Date(y, m - 1, 1).toLocaleDateString("en-IN", { month: "short", year: "2-digit" });
   }
-  const d = new Date(key);
-  return d.toLocaleDateString("en-IN", { day: "numeric", month: "short" });
+  // Parse parts locally — `new Date("YYYY-MM-DD")` is UTC and can label the
+  // previous day in timezones behind UTC.
+  const [y, m, day] = key.split("-").map(Number);
+  return new Date(y, m - 1, day).toLocaleDateString("en-IN", { day: "numeric", month: "short" });
 }
