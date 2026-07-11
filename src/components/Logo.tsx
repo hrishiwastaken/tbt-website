@@ -15,26 +15,27 @@ export default function Logo({ className = "" }: { className?: string }) {
       role="img"
       aria-label="The Brain Tea"
     >
-      {/* Open circle: from just left of top, counter-clockwise around
-          to the upper right where it terminates */}
+      {/* Near-closed ring with a small gap at the top: sweeps counter-
+          clockwise from just left of top, around the left and bottom, up
+          the right side, terminating at the dot in the top-right. */}
       <path
-        d="M 111.3 20.4 A 100 100 0 1 0 206.6 70"
+        d="M 92 26 A 100 100 0 1 0 172 33"
         stroke="currentColor"
-        strokeWidth="4"
+        strokeWidth="5"
         strokeLinecap="round"
       />
-      {/* Terminal dot in the opening */}
-      <circle cx="197" cy="56" r="8" fill="currentColor" />
+      {/* Terminal dot at the top-right of the opening */}
+      <circle cx="178" cy="28" r="8.5" fill="currentColor" />
 
       {/* Stacked wordmark */}
       <g fill="currentColor" fontFamily="var(--font-dm-sans), sans-serif" fontWeight="400">
-        <text x="72" y="80" fontSize="27" letterSpacing="0.5">
+        <text x="74" y="84" fontSize="28" letterSpacing="0.5">
           The
         </text>
-        <text x="48" y="140" fontSize="54" letterSpacing="0.5">
+        <text x="46" y="144" fontSize="56" letterSpacing="0.5">
           Brain
         </text>
-        <text x="96" y="196" fontSize="54" letterSpacing="0.5">
+        <text x="96" y="200" fontSize="56" letterSpacing="0.5">
           Tea
         </text>
       </g>
