@@ -41,7 +41,10 @@ export default function AdminLoginPage() {
   };
 
   return (
-    <main data-panel className="min-h-screen bg-panel-ivory flex flex-col justify-center items-center px-6 relative overflow-hidden font-dmsans">
+    <main
+      data-panel
+      className="min-h-screen bg-panel-ivory flex flex-col justify-center items-center px-6 relative overflow-hidden font-dmsans"
+    >
       {/* Decorative background shape */}
       <div className="absolute inset-0 pointer-events-none -z-10 flex items-center justify-center">
         <div className="w-[600px] h-[600px] rounded-full bg-panel-sand/30 blur-3xl opacity-40"></div>
@@ -49,7 +52,10 @@ export default function AdminLoginPage() {
 
       <div className="w-full max-w-md glass-card-ocean p-8 md:p-12 rounded-2xl border border-panel-mist/30 shadow-warm-soft text-center relative overflow-hidden">
         <div className="absolute top-0 left-0 right-0 h-1 bg-ocean" />
-        <Link href="/" className="font-cormorant font-semibold text-3xl text-ocean hover:opacity-90 transition-opacity block mb-2 leading-none">
+        <Link
+          href="/"
+          className="font-cormorant font-semibold text-3xl text-ocean hover:opacity-90 transition-opacity block mb-2 leading-none"
+        >
           {SITE_NAME}
         </Link>
         <span className="text-xs font-bold tracking-widest text-ocean uppercase block mb-8">
@@ -64,7 +70,9 @@ export default function AdminLoginPage() {
 
         <form onSubmit={handleSubmit} className="space-y-6 text-left">
           <div>
-            <label className="text-xs font-bold tracking-wider uppercase text-panel-sage block mb-1">Email Address</label>
+            <label className="text-xs font-bold tracking-wider uppercase text-panel-sage block mb-1">
+              Email Address
+            </label>
             <input
               type="email"
               value={email}
@@ -77,7 +85,9 @@ export default function AdminLoginPage() {
           </div>
 
           <div>
-            <label className="text-xs font-bold tracking-wider uppercase text-panel-sage block mb-1">Password</label>
+            <label className="text-xs font-bold tracking-wider uppercase text-panel-sage block mb-1">
+              Password
+            </label>
             <input
               type="password"
               value={password}
@@ -102,7 +112,10 @@ export default function AdminLoginPage() {
           <Link href="/" className="hover:text-ocean transition-colors">
             ← Main Site
           </Link>
-          <Link href="/therapist/login" className="hover:text-ocean transition-colors">
+          <Link
+            href="/therapist/login"
+            className="hover:text-ocean transition-colors"
+          >
             Therapist Login →
           </Link>
         </div>

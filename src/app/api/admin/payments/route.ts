@@ -1,7 +1,12 @@
 import { NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
-import { handleApi, paginated, parsePagination, requireStaff } from "@/server/http";
+import {
+  handleApi,
+  paginated,
+  parsePagination,
+  requireStaff,
+} from "@/server/http";
 import { financialSummary } from "@/server/services/ledgerService";
 
 // Transactions view: payment records with their booking context, plus the
@@ -47,5 +52,8 @@ export const GET = handleApi(async (request: Request) => {
     financialSummary(),
   ]);
 
-  return NextResponse.json({ ...paginated(payments, total, pagination), summary });
+  return NextResponse.json({
+    ...paginated(payments, total, pagination),
+    summary,
+  });
 });

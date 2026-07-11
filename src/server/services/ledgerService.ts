@@ -14,7 +14,7 @@ export async function sumEntries(
   types: LedgerEntryType[],
   window: DateWindow = {},
   therapistId?: string,
-  tx: Prisma.TransactionClient = prisma
+  tx: Prisma.TransactionClient = prisma,
 ): Promise<number> {
   const result = await tx.ledgerEntry.aggregate({
     _sum: { amountMinor: true },
@@ -22,7 +22,12 @@ export async function sumEntries(
       entryType: { in: types },
       ...(therapistId ? { therapistId } : {}),
       ...(window.from || window.to
-        ? { createdAt: { ...(window.from ? { gte: window.from } : {}), ...(window.to ? { lte: window.to } : {}) } }
+        ? {
+            createdAt: {
+              ...(window.from ? { gte: window.from } : {}),
+              ...(window.to ? { lte: window.to } : {}),
+            },
+          }
         : {}),
     },
   });
@@ -47,18 +52,30 @@ export interface FinancialSummary {
  * scoping joins through the booking relation instead of duplicating the
  * column onto every entry type.
  */
-export async function financialSummary(window: DateWindow = {}, therapistId?: string): Promise<FinancialSummary> {
+export async function financialSummary(
+  window: DateWindow = {},
+  therapistId?: string,
+): Promise<FinancialSummary> {
   const grouped = await prisma.ledgerEntry.groupBy({
     by: ["entryType"],
     _sum: { amountMinor: true },
     where: {
       ...(window.from || window.to
-        ? { createdAt: { ...(window.from ? { gte: window.from } : {}), ...(window.to ? { lte: window.to } : {}) } }
+        ? {
+            createdAt: {
+              ...(window.from ? { gte: window.from } : {}),
+              ...(window.to ? { lte: window.to } : {}),
+            },
+          }
         : {}),
-      ...(therapistId ? { OR: [{ therapistId }, { booking: { is: { therapistId } } }] } : {}),
+      ...(therapistId
+        ? { OR: [{ therapistId }, { booking: { is: { therapistId } } }] }
+        : {}),
     },
   });
-  const sums = new Map<string, number>(grouped.map((g) => [g.entryType, g._sum.amountMinor ?? 0]));
+  const sums = new Map<string, number>(
+    grouped.map((g) => [g.entryType, g._sum.amountMinor ?? 0]),
+  );
   const get = (t: LedgerEntryType): number => sums.get(t) ?? 0;
 
   const gross = get("GROSS_REVENUE");
@@ -67,8 +84,10 @@ export async function financialSummary(window: DateWindow = {}, therapistId?: st
     grossRevenueMinor: gross,
     refundsMinor: refunds,
     netRevenueMinor: gross + get("DISCOUNT") + get("REFUND"), // DISCOUNT/REFUND entries are negative
-    platformRevenueMinor: get("PLATFORM_REVENUE") + get("PLATFORM_REVENUE_REVERSED"),
-    consultantEarnedMinor: get("COMMISSION_ACCRUED") + get("COMMISSION_REVERSED"),
+    platformRevenueMinor:
+      get("PLATFORM_REVENUE") + get("PLATFORM_REVENUE_REVERSED"),
+    consultantEarnedMinor:
+      get("COMMISSION_ACCRUED") + get("COMMISSION_REVERSED"),
     consultantPaidMinor: -get("PAYOUT_PAID"),
     taxCollectedMinor: get("TAX_COLLECTED"),
     discountsMinor: -get("DISCOUNT"),
@@ -84,14 +103,18 @@ export interface ConsultantBalance {
 }
 
 /** Lifetime payable balance per consultant, derived entirely from the ledger. */
-export async function consultantBalances(therapistId?: string): Promise<ConsultantBalance[]> {
+export async function consultantBalances(
+  therapistId?: string,
+): Promise<ConsultantBalance[]> {
   const [entries, reservations] = await Promise.all([
     prisma.ledgerEntry.groupBy({
       by: ["therapistId", "entryType"],
       _sum: { amountMinor: true },
       where: {
         therapistId: therapistId ? therapistId : { not: null },
-        entryType: { in: ["COMMISSION_ACCRUED", "COMMISSION_REVERSED", "PAYOUT_PAID"] },
+        entryType: {
+          in: ["COMMISSION_ACCRUED", "COMMISSION_REVERSED", "PAYOUT_PAID"],
+        },
       },
     }),
     prisma.payout.groupBy({
@@ -108,7 +131,13 @@ export async function consultantBalances(therapistId?: string): Promise<Consulta
   const ensure = (id: string): ConsultantBalance => {
     let bal = byTherapist.get(id);
     if (!bal) {
-      bal = { therapistId: id, earnedMinor: 0, paidMinor: 0, reservedMinor: 0, payableMinor: 0 };
+      bal = {
+        therapistId: id,
+        earnedMinor: 0,
+        paidMinor: 0,
+        reservedMinor: 0,
+        payableMinor: 0,
+      };
       byTherapist.set(id, bal);
     }
     return bal;
@@ -130,9 +159,17 @@ export async function consultantBalances(therapistId?: string): Promise<Consulta
   return [...byTherapist.values()];
 }
 
-export async function consultantBalance(therapistId: string): Promise<ConsultantBalance> {
+export async function consultantBalance(
+  therapistId: string,
+): Promise<ConsultantBalance> {
   const [balance] = await consultantBalances(therapistId);
   return (
-    balance ?? { therapistId, earnedMinor: 0, paidMinor: 0, reservedMinor: 0, payableMinor: 0 }
+    balance ?? {
+      therapistId,
+      earnedMinor: 0,
+      paidMinor: 0,
+      reservedMinor: 0,
+      payableMinor: 0,
+    }
   );
 }

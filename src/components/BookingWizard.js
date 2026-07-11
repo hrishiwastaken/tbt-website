@@ -16,11 +16,15 @@ export default function BookingWizard({
 
   // Pre-select the sole therapist: Dr. Madhumati Dhumak
   const [selectedTherapist] = useState(
-    therapists[0] || { name: "Dr. Madhumati Dhumak", slug: "dr-madhumati-dhumak", feeMinor: 150000 }
+    therapists[0] || {
+      name: "Dr. Madhumati Dhumak",
+      slug: "dr-madhumati-dhumak",
+      feeMinor: 150000,
+    },
   );
 
   const [selectedService, setSelectedService] = useState(
-    services.find((s) => s.slug === initialService) || null
+    services.find((s) => s.slug === initialService) || null,
   );
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedSlot, setSelectedSlot] = useState(null);
@@ -46,42 +50,43 @@ export default function BookingWizard({
 
   // Set default tomorrow's date for ease of scheduling on mount
   useEffect(() => {
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    const yyyy = tomorrow.getFullYear();
-    const mm = String(tomorrow.getMonth() + 1).padStart(2, "0");
-    const dd = String(tomorrow.getDate()).padStart(2, "0");
-    setSelectedDate(`${yyyy}-${mm}-${dd}`);
+    const applyDefaultDate = () => {
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      const yyyy = tomorrow.getFullYear();
+      const mm = String(tomorrow.getMonth() + 1).padStart(2, "0");
+      const dd = String(tomorrow.getDate()).padStart(2, "0");
+      setSelectedDate(`${yyyy}-${mm}-${dd}`);
+    };
+    applyDefaultDate();
   }, []);
 
-  // Fetch available slots from backend whenever date changes
+  // Fetch available slots from backend whenever the date changes
   useEffect(() => {
-    if (selectedTherapist && selectedDate) {
-      fetchSlots();
-    }
-  }, [selectedTherapist, selectedDate]);
-
-  const fetchSlots = async () => {
-    setLoadingSlots(true);
-    setErrorMsg("");
-    setSelectedSlot(null);
-    try {
-      const res = await fetch(
-        `/api/bookings/available-slots?therapist=${selectedTherapist.slug}&date=${selectedDate}`
-      );
-      const data = await res.json();
-      if (res.ok) {
-        setSlots(data.slots || []);
-      } else {
-        setErrorMsg(data.error || "Failed to load available slots.");
+    if (!selectedTherapist || !selectedDate) return;
+    const load = async () => {
+      setLoadingSlots(true);
+      setErrorMsg("");
+      setSelectedSlot(null);
+      try {
+        const res = await fetch(
+          `/api/bookings/available-slots?therapist=${selectedTherapist.slug}&date=${selectedDate}`,
+        );
+        const data = await res.json();
+        if (res.ok) {
+          setSlots(data.slots || []);
+        } else {
+          setErrorMsg(data.error || "Failed to load available slots.");
+        }
+      } catch (err) {
+        console.error(err);
+        setErrorMsg("Network error loading available slots.");
+      } finally {
+        setLoadingSlots(false);
       }
-    } catch (err) {
-      console.error(err);
-      setErrorMsg("Network error loading available slots.");
-    } finally {
-      setLoadingSlots(false);
-    }
-  };
+    };
+    load();
+  }, [selectedTherapist, selectedDate]);
 
   const handleClientDetailChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -107,13 +112,16 @@ export default function BookingWizard({
       setErrorMsg("");
       setStep(3);
     } else if (step === 3) {
-      const { name, email, phone, dob, emergencyContact, gdprConsent } = clientDetails;
+      const { name, email, phone, dob, emergencyContact, gdprConsent } =
+        clientDetails;
       if (!name || !email || !phone || !dob || !emergencyContact) {
         setErrorMsg("Please fill out all client information fields.");
         return;
       }
       if (!gdprConsent) {
-        setErrorMsg("You must consent to the Privacy Policy and IT Acts terms.");
+        setErrorMsg(
+          "You must consent to the Privacy Policy and IT Acts terms.",
+        );
         return;
       }
       setErrorMsg("");
@@ -132,7 +140,9 @@ export default function BookingWizard({
 
     if (paymentOption === "PAY_NOW") {
       if (!upiUtr || upiUtr.length !== 12) {
-        setErrorMsg("Please enter a valid 12-digit UPI Reference / UTR Number.");
+        setErrorMsg(
+          "Please enter a valid 12-digit UPI Reference / UTR Number.",
+        );
         return;
       }
     }
@@ -176,8 +186,12 @@ export default function BookingWizard({
     <div className="max-w-3xl mx-auto">
       {/* Header */}
       <div className="text-center mb-12">
-        <h1 className="font-cormorant text-5xl font-semibold text-charcoal mb-3">Reserve Your Space</h1>
-        <p className="text-sage text-base">A deliberate step towards emotional clarity and grounded presence.</p>
+        <h1 className="font-cormorant text-5xl font-semibold text-charcoal mb-3">
+          Reserve Your Space
+        </h1>
+        <p className="text-sage text-base">
+          A deliberate step towards emotional clarity and grounded presence.
+        </p>
       </div>
 
       {/* Progress Indicators */}
@@ -191,12 +205,18 @@ export default function BookingWizard({
           <div
             key={item.stepNum}
             className={`flex flex-col items-center gap-1 transition-all ${
-              step >= item.stepNum ? "opacity-100 font-semibold text-forest" : "opacity-40"
+              step >= item.stepNum
+                ? "opacity-100 font-semibold text-forest"
+                : "opacity-40"
             }`}
           >
-            <span className={`h-8 w-8 rounded-full flex items-center justify-center border ${
-              step >= item.stepNum ? "border-forest bg-forest text-warm-white" : "border-sage/40 text-sage"
-            }`}>
+            <span
+              className={`h-8 w-8 rounded-full flex items-center justify-center border ${
+                step >= item.stepNum
+                  ? "border-forest bg-forest text-warm-white"
+                  : "border-sage/40 text-sage"
+              }`}
+            >
               0{item.stepNum}
             </span>
             <span className="text-[10px] md:text-xs mt-1">{item.label}</span>
@@ -215,9 +235,14 @@ export default function BookingWizard({
         {/* Step 1: Select Service */}
         {step === 1 && (
           <div className="animate-[fadeIn_0.5s_ease-out]">
-            <h2 className="font-cormorant text-3xl font-semibold text-charcoal mb-4 border-b border-mist/20 pb-2">Select a Service</h2>
-            <p className="text-sage mb-6 text-sm">Select from our range of therapeutic and mental wellness practices with Dr. Madhumati Dhumak.</p>
-            
+            <h2 className="font-cormorant text-3xl font-semibold text-charcoal mb-4 border-b border-mist/20 pb-2">
+              Select a Service
+            </h2>
+            <p className="text-sage mb-6 text-sm">
+              Select from our range of therapeutic and mental wellness practices
+              with Dr. Madhumati Dhumak.
+            </p>
+
             <div className="space-y-4 mb-8">
               {services.map((service) => (
                 <div
@@ -231,8 +256,12 @@ export default function BookingWizard({
                 >
                   <div className="flex justify-between items-start">
                     <div>
-                      <h4 className="font-cormorant text-xl font-bold text-charcoal">{service.name}</h4>
-                      <p className="text-sage text-xs leading-relaxed mt-1 pr-6">{service.description}</p>
+                      <h4 className="font-cormorant text-xl font-bold text-charcoal">
+                        {service.name}
+                      </h4>
+                      <p className="text-sage text-xs leading-relaxed mt-1 pr-6">
+                        {service.description}
+                      </p>
                     </div>
                     <span className="text-terracotta font-semibold text-lg shrink-0">
                       ₹{(service.priceMinor / 100).toLocaleString("en-IN")}
@@ -240,7 +269,9 @@ export default function BookingWizard({
                   </div>
                   <div className="flex justify-between items-center mt-3 pt-3 border-t border-mist/10 text-xs text-sage">
                     <span>Duration: {service.durationMinutes} Min</span>
-                    <span className="text-forest font-medium">Dr. Madhumati Dhumak</span>
+                    <span className="text-forest font-medium">
+                      Dr. Madhumati Dhumak
+                    </span>
                   </div>
                 </div>
               ))}
@@ -268,12 +299,16 @@ export default function BookingWizard({
               ← Back to Services
             </button>
 
-            <h2 className="font-cormorant text-3xl font-semibold text-charcoal mb-6 border-b border-mist/20 pb-2">Schedule Session</h2>
+            <h2 className="font-cormorant text-3xl font-semibold text-charcoal mb-6 border-b border-mist/20 pb-2">
+              Schedule Session
+            </h2>
 
             <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start mb-8">
               {/* Date selection */}
               <div className="md:col-span-5 flex flex-col gap-3">
-                <label className="text-xs font-bold tracking-wider uppercase text-sage">Select Appointment Date</label>
+                <label className="text-xs font-bold tracking-wider uppercase text-sage">
+                  Select Appointment Date
+                </label>
                 <input
                   type="date"
                   value={selectedDate}
@@ -285,9 +320,13 @@ export default function BookingWizard({
 
               {/* Slots selection */}
               <div className="md:col-span-7 flex flex-col gap-3">
-                <label className="text-xs font-bold tracking-wider uppercase text-sage">Available Time Slots</label>
+                <label className="text-xs font-bold tracking-wider uppercase text-sage">
+                  Available Time Slots
+                </label>
                 {loadingSlots ? (
-                  <p className="text-sage text-sm italic">Loading available slots...</p>
+                  <p className="text-sage text-sm italic">
+                    Loading available slots...
+                  </p>
                 ) : slots.length > 0 ? (
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                     {slots.map((slot) => (
@@ -300,8 +339,8 @@ export default function BookingWizard({
                           !slot.isAvailable
                             ? "bg-mist/10 text-sage/40 border-mist/10 cursor-not-allowed"
                             : selectedSlot?.id === slot.id
-                            ? "border-forest bg-forest text-warm-white shadow-sm font-semibold"
-                            : "border-mist/40 bg-warm-white/40 hover:border-sage text-charcoal"
+                              ? "border-forest bg-forest text-warm-white shadow-sm font-semibold"
+                              : "border-mist/40 bg-warm-white/40 hover:border-sage text-charcoal"
                         }`}
                       >
                         {slot.startTime}
@@ -310,7 +349,8 @@ export default function BookingWizard({
                   </div>
                 ) : (
                   <p className="text-terracotta text-sm italic bg-red-50 p-4 rounded-xl border border-red-100">
-                    No availability listed for Dr. Madhumati Dhumak on {selectedDate}. Please select another date.
+                    No availability listed for Dr. Madhumati Dhumak on{" "}
+                    {selectedDate}. Please select another date.
                   </p>
                 )}
               </div>
@@ -338,11 +378,15 @@ export default function BookingWizard({
               ← Back to Schedule
             </button>
 
-            <h2 className="font-cormorant text-3xl font-semibold text-charcoal mb-8 border-b border-mist/20 pb-2">Client Details</h2>
-            
+            <h2 className="font-cormorant text-3xl font-semibold text-charcoal mb-8 border-b border-mist/20 pb-2">
+              Client Details
+            </h2>
+
             <form className="space-y-6">
               <div>
-                <label className="text-xs font-bold tracking-wider uppercase text-sage block mb-1">Full Name</label>
+                <label className="text-xs font-bold tracking-wider uppercase text-sage block mb-1">
+                  Full Name
+                </label>
                 <input
                   type="text"
                   name="name"
@@ -356,7 +400,9 @@ export default function BookingWizard({
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div>
-                  <label className="text-xs font-bold tracking-wider uppercase text-sage block mb-1">Email Address</label>
+                  <label className="text-xs font-bold tracking-wider uppercase text-sage block mb-1">
+                    Email Address
+                  </label>
                   <input
                     type="email"
                     name="email"
@@ -368,7 +414,9 @@ export default function BookingWizard({
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-bold tracking-wider uppercase text-sage block mb-1">Phone Number</label>
+                  <label className="text-xs font-bold tracking-wider uppercase text-sage block mb-1">
+                    Phone Number
+                  </label>
                   <input
                     type="tel"
                     name="phone"
@@ -383,7 +431,9 @@ export default function BookingWizard({
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div>
-                  <label className="text-xs font-bold tracking-wider uppercase text-sage block mb-1">Date of Birth</label>
+                  <label className="text-xs font-bold tracking-wider uppercase text-sage block mb-1">
+                    Date of Birth
+                  </label>
                   <input
                     type="date"
                     name="dob"
@@ -394,7 +444,9 @@ export default function BookingWizard({
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-bold tracking-wider uppercase text-sage block mb-1">Emergency Contact</label>
+                  <label className="text-xs font-bold tracking-wider uppercase text-sage block mb-1">
+                    Emergency Contact
+                  </label>
                   <input
                     type="text"
                     name="emergencyContact"
@@ -418,8 +470,15 @@ export default function BookingWizard({
                   className="mt-1 h-5 w-5 text-forest border-mist/60 focus:ring-forest rounded"
                   required
                 />
-                <label htmlFor="gdprConsent" className="text-xs text-sage leading-relaxed select-none">
-                  I consent to the collection and secure storage of my contact and health information in accordance with the <strong>Privacy Policy</strong> and India IT Act guidelines. I understand my records are encrypted and accessible only to my therapist and clinical admins.
+                <label
+                  htmlFor="gdprConsent"
+                  className="text-xs text-sage leading-relaxed select-none"
+                >
+                  I consent to the collection and secure storage of my contact
+                  and health information in accordance with the{" "}
+                  <strong>Privacy Policy</strong> and India IT Act guidelines. I
+                  understand my records are encrypted and accessible only to my
+                  therapist and clinical admins.
                 </label>
               </div>
             </form>
@@ -446,26 +505,41 @@ export default function BookingWizard({
               ← Back to Details
             </button>
 
-            <h2 className="font-cormorant text-3xl font-semibold text-charcoal mb-6 border-b border-mist/20 pb-2">Confirm Booking</h2>
+            <h2 className="font-cormorant text-3xl font-semibold text-charcoal mb-6 border-b border-mist/20 pb-2">
+              Confirm Booking
+            </h2>
 
             {/* Summary */}
             <div className="bg-warm-white/50 p-6 rounded-xl border border-mist/20 flex flex-col gap-4 mb-8">
               <div className="flex justify-between items-center border-b border-mist/10 pb-3">
-                <span className="text-xs font-bold uppercase text-sage">Therapist</span>
-                <span className="text-sm font-bold text-charcoal">{selectedTherapist.name}</span>
-              </div>
-              <div className="flex justify-between items-center border-b border-mist/10 pb-3">
-                <span className="text-xs font-bold uppercase text-sage">Therapeutic Service</span>
-                <span className="text-sm font-bold text-charcoal">{selectedService.name}</span>
-              </div>
-              <div className="flex justify-between items-center border-b border-mist/10 pb-3">
-                <span className="text-xs font-bold uppercase text-sage">Appointment Date & Time</span>
+                <span className="text-xs font-bold uppercase text-sage">
+                  Therapist
+                </span>
                 <span className="text-sm font-bold text-charcoal">
-                  {selectedDate} at {selectedSlot.startTime} ({selectedService.durationMinutes} Min)
+                  {selectedTherapist.name}
+                </span>
+              </div>
+              <div className="flex justify-between items-center border-b border-mist/10 pb-3">
+                <span className="text-xs font-bold uppercase text-sage">
+                  Therapeutic Service
+                </span>
+                <span className="text-sm font-bold text-charcoal">
+                  {selectedService.name}
+                </span>
+              </div>
+              <div className="flex justify-between items-center border-b border-mist/10 pb-3">
+                <span className="text-xs font-bold uppercase text-sage">
+                  Appointment Date & Time
+                </span>
+                <span className="text-sm font-bold text-charcoal">
+                  {selectedDate} at {selectedSlot.startTime} (
+                  {selectedService.durationMinutes} Min)
                 </span>
               </div>
               <div className="flex justify-between items-center pt-2">
-                <span className="text-xs font-bold uppercase text-forest font-bold">Total Amount Due</span>
+                <span className="text-xs font-bold uppercase text-forest font-bold">
+                  Total Amount Due
+                </span>
                 <span className="text-2xl text-terracotta font-bold">
                   ₹{(selectedService.priceMinor / 100).toLocaleString("en-IN")}
                 </span>
@@ -486,9 +560,12 @@ export default function BookingWizard({
                   className="mt-1 text-forest focus:ring-forest"
                 />
                 <div>
-                  <h4 className="text-sm font-bold text-charcoal">Pay Online via UPI Now</h4>
+                  <h4 className="text-sm font-bold text-charcoal">
+                    Pay Online via UPI Now
+                  </h4>
                   <p className="text-xs text-sage mt-1">
-                    Scan the secure UPI QR Code using GPay, PhonePe, Paytm or any UPI app to pay immediately.
+                    Scan the secure UPI QR Code using GPay, PhonePe, Paytm or
+                    any UPI app to pay immediately.
                   </p>
                 </div>
               </label>
@@ -496,15 +573,21 @@ export default function BookingWizard({
               {paymentOption === "PAY_NOW" && (
                 <div className="p-6 bg-mist/10 rounded-xl border border-mist/30 flex flex-col items-center gap-6 animate-[fadeIn_0.3s_ease-out]">
                   <div className="text-center">
-                    <span className="text-[10px] font-bold tracking-wider uppercase text-sage block mb-1">Scan to Pay via UPI</span>
-                    <span className="font-dmsans text-xs text-sage">Scan QR using GPay, PhonePe, BHIM, or Paytm</span>
+                    <span className="text-[10px] font-bold tracking-wider uppercase text-sage block mb-1">
+                      Scan to Pay via UPI
+                    </span>
+                    <span className="font-dmsans text-xs text-sage">
+                      Scan QR using GPay, PhonePe, BHIM, or Paytm
+                    </span>
                   </div>
-                  
-                  {/* QR Image */}
+
+                  {/* QR Image — dynamic external QR (api.qrserver.com) built from
+                      a data-dependent URL; next/image adds no benefit here. */}
                   <div className="bg-white p-4 rounded-xl border border-mist/20 shadow-sm relative w-[212px] h-[212px] flex items-center justify-center">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(
-                        `upi://pay?pa=millionairemanthan@fam&pn=${encodeURIComponent(SITE_NAME)}&am=${selectedService.priceMinor / 100}&cu=INR&tn=${encodeURIComponent(`${SITE_NAME} Session`)}`
+                        `upi://pay?pa=millionairemanthan@fam&pn=${encodeURIComponent(SITE_NAME)}&am=${selectedService.priceMinor / 100}&cu=INR&tn=${encodeURIComponent(`${SITE_NAME} Session`)}`,
                       )}`}
                       alt="UPI QR Code"
                       className="w-[180px] h-[180px]"
@@ -513,10 +596,19 @@ export default function BookingWizard({
 
                   <div className="text-center space-y-1">
                     <div className="text-xs text-charcoal">
-                      Amount: <strong className="text-terracotta">₹{(selectedService.priceMinor / 100).toLocaleString("en-IN")}</strong>
+                      Amount:{" "}
+                      <strong className="text-terracotta">
+                        ₹
+                        {(selectedService.priceMinor / 100).toLocaleString(
+                          "en-IN",
+                        )}
+                      </strong>
                     </div>
                     <div className="text-[11px] text-sage font-mono">
-                      UPI ID: <strong className="text-forest">millionairemanthan@fam</strong>
+                      UPI ID:{" "}
+                      <strong className="text-forest">
+                        millionairemanthan@fam
+                      </strong>
                     </div>
                   </div>
 
@@ -529,18 +621,21 @@ export default function BookingWizard({
                       type="text"
                       maxLength={12}
                       value={upiUtr}
-                      onChange={(e) => setUpiUtr(e.target.value.replace(/\D/g, ""))}
+                      onChange={(e) =>
+                        setUpiUtr(e.target.value.replace(/\D/g, ""))
+                      }
                       placeholder="e.g. 123456789012"
                       className="w-full text-center px-4 py-3 bg-white rounded-lg border border-mist/40 font-mono text-xs text-charcoal focus:outline-none focus:border-forest"
                       required
                     />
                     <span className="text-[9px] text-sage block leading-relaxed text-center">
-                      * You will find the 12-digit UTR/Ref number in your payment transaction details screen on your UPI App.
+                      * You will find the 12-digit UTR/Ref number in your
+                      payment transaction details screen on your UPI App.
                     </span>
                   </div>
                 </div>
               )}
-              
+
               <label className="flex items-start gap-4 p-6 border rounded-xl cursor-pointer transition-colors bg-warm-white/40 border-mist/40 hover:border-forest">
                 <input
                   type="radio"
@@ -553,9 +648,12 @@ export default function BookingWizard({
                   className="mt-1 text-forest focus:ring-forest"
                 />
                 <div>
-                  <h4 className="text-sm font-bold text-charcoal">Pay Post-Session</h4>
+                  <h4 className="text-sm font-bold text-charcoal">
+                    Pay Post-Session
+                  </h4>
                   <p className="text-xs text-sage mt-1">
-                    Hold booking with verification. Session fee is paid after completion at the clinic or via UPI link.
+                    Hold booking with verification. Session fee is paid after
+                    completion at the clinic or via UPI link.
                   </p>
                 </div>
               </label>
@@ -563,12 +661,16 @@ export default function BookingWizard({
 
             <div className="flex flex-col sm:flex-row justify-between gap-4 pt-6 border-t border-mist/20">
               <span className="text-xs text-sage leading-relaxed max-w-sm">
-                * Note: Sessions can be rescheduled or cancelled up to 12 hours before slot start.
+                * Note: Sessions can be rescheduled or cancelled up to 12 hours
+                before slot start.
               </span>
               <button
                 type="button"
                 onClick={handleBookingSubmit}
-                disabled={isSubmitting || (paymentOption === "PAY_NOW" && upiUtr.length !== 12)}
+                disabled={
+                  isSubmitting ||
+                  (paymentOption === "PAY_NOW" && upiUtr.length !== 12)
+                }
                 className="bg-forest hover:bg-terracotta text-warm-white font-medium px-8 py-4 rounded-full transition-colors disabled:opacity-50 min-w-[200px] shadow-sm hover:shadow-md"
               >
                 {isSubmitting ? "Processing..." : "Complete Booking"}

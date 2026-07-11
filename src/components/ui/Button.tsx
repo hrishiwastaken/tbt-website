@@ -11,7 +11,8 @@ const variantClasses: Record<Variant, string> = {
     "bg-warm-white text-forest-slate border border-muted-sage/30 shadow-sm hover:shadow-warm-soft hover:-translate-y-0.5 active:translate-y-0",
   outline:
     "bg-transparent text-forest-slate border border-teal-sage/40 hover:bg-warm-white hover:border-teal-sage/60",
-  ghost: "bg-transparent text-teal-sage hover:text-forest-slate underline-offset-4 hover:underline",
+  ghost:
+    "bg-transparent text-teal-sage hover:text-forest-slate underline-offset-4 hover:underline",
 };
 
 const sizeClasses: Record<Size, string> = {

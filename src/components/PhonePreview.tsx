@@ -32,14 +32,21 @@ export default function PhonePreview() {
 
   useEffect(() => {
     // Never show the toggle inside its own iframe (would recurse)
-    setIsFramed(window.self !== window.top);
+    const detectFrame = () => setIsFramed(window.self !== window.top);
+    detectFrame();
   }, []);
 
   // Fit the phone to the available window height (leave room for controls)
   useEffect(() => {
     if (!isOpen) return;
     const fit = () =>
-      setScale(Math.min(1, (window.innerHeight - 90) / frameH, (window.innerWidth - 48) / frameW));
+      setScale(
+        Math.min(
+          1,
+          (window.innerHeight - 90) / frameH,
+          (window.innerWidth - 48) / frameW,
+        ),
+      );
     fit();
     window.addEventListener("resize", fit);
     return () => window.removeEventListener("resize", fit);
@@ -112,7 +119,10 @@ export default function PhonePreview() {
           </div>
 
           {/* Scaled wrapper keeps layout size while the phone renders at true viewport px */}
-          <div style={{ width: frameW * scale, height: frameH * scale }} className="shrink-0">
+          <div
+            style={{ width: frameW * scale, height: frameH * scale }}
+            className="shrink-0"
+          >
             <div
               className="relative bg-near-black rounded-[52px] shadow-2xl border border-warm-sand/20"
               style={{

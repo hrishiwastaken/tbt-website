@@ -8,11 +8,11 @@ import { ShieldCheck, HeartHandshake, Award } from "lucide-react";
 
 const fadeInUp: Variants = {
   hidden: { opacity: 0, y: 20 },
-  visible: { 
-    opacity: 1, 
+  visible: {
+    opacity: 1,
     y: 0,
-    transition: { duration: 0.6, ease: "easeOut" }
-  }
+    transition: { duration: 0.6, ease: "easeOut" },
+  },
 };
 
 const staggerContainer = {
@@ -20,9 +20,9 @@ const staggerContainer = {
   visible: {
     opacity: 1,
     transition: {
-      staggerChildren: 0.15
-    }
-  }
+      staggerChildren: 0.15,
+    },
+  },
 };
 
 export default function About() {
@@ -31,33 +31,37 @@ export default function About() {
       name: "Dr. Madhumati Dhumak",
       role: "Founding Director & Clinical Psychologist",
       credentials: "M.Phil Clinical Psychology · RCI Licensed",
-      specialisations: ["Anxiety & Stress", "Trauma & PTSD", "Life Transitions"],
+      specialisations: [
+        "Anxiety & Stress",
+        "Trauma & PTSD",
+        "Life Transitions",
+      ],
       bio: "With over 12 years of clinical experience, Dr. Dhumak founded The Brain Tea to create a sanctuary where scientific insight meets deep, non-judgmental human empathy. She specializes in guiding clients through trauma recovery and stress management at their own pace.",
-      image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=600&q=80"
-    }
+      image:
+        "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=600&q=80",
+    },
   ];
 
   const values = [
     {
       icon: <ShieldCheck className="w-8 h-8 text-forest" />,
       title: "Confidentiality First",
-      text: "We protect your stories with absolute discretion. Every conversation, record, and enquiry is guarded under strict clinical confidentiality guidelines, ensuring a completely safe space."
+      text: "We protect your stories with absolute discretion. Every conversation, record, and enquiry is guarded under strict clinical confidentiality guidelines, ensuring a completely safe space.",
     },
     {
       icon: <Award className="w-8 h-8 text-forest" />,
       title: "Evidence-Based Care",
-      text: "Our methodologies are grounded in active research. We employ Cognitive Behavioral, Acceptance & Commitment, and Trauma-Informed modalities that are scientifically validated to support recovery."
+      text: "Our methodologies are grounded in active research. We employ Cognitive Behavioral, Acceptance & Commitment, and Trauma-Informed modalities that are scientifically validated to support recovery.",
     },
     {
       icon: <HeartHandshake className="w-8 h-8 text-forest" />,
       title: "Human-Centred Practice",
-      text: "We believe in people over diagnoses. We never reduce you to a checklist of symptoms. Our therapy is customized to respect your personal history, pace, values, and individual agency."
-    }
+      text: "We believe in people over diagnoses. We never reduce you to a checklist of symptoms. Our therapy is customized to respect your personal history, pace, values, and individual agency.",
+    },
   ];
 
   return (
     <div className="bg-ivory min-h-screen font-dmsans">
-      
       {/* SECTION 1: PAGE HERO */}
       <section className="bg-warm-tan/30 pt-32 pb-20">
         <div className="max-w-4xl mx-auto px-6 text-center">
@@ -73,7 +77,8 @@ export default function About() {
               About The Brain Tea
             </h1>
             <p className="text-forest-slate/85 text-lg md:text-xl max-w-2xl mx-auto leading-relaxed font-dmsans">
-              We believe every person deserves a space where they feel seen, heard, and supported on their journey toward mental well-being.
+              We believe every person deserves a space where they feel seen,
+              heard, and supported on their journey toward mental well-being.
             </p>
           </motion.div>
         </div>
@@ -89,13 +94,30 @@ export default function About() {
             </h2>
             <div className="text-forest-slate/90 text-base md:text-lg space-y-6 leading-relaxed font-dmsans">
               <p>
-                The Brain Tea was founded with a singular, vital goal: to create a therapeutic environment that combines clinical excellence with genuine, authentic warmth. We recognized that traditional clinical spaces often felt cold, intimidating, or sterile. We set out to change that, designing our practice to feel like entering a comfortable, peaceful room where you can catch your breath.
+                The Brain Tea was founded with a singular, vital goal: to create
+                a therapeutic environment that combines clinical excellence with
+                genuine, authentic warmth. We recognized that traditional
+                clinical spaces often felt cold, intimidating, or sterile. We
+                set out to change that, designing our practice to feel like
+                entering a comfortable, peaceful room where you can catch your
+                breath.
               </p>
               <p>
-                Our team is composed of highly qualified, licensed clinical practitioners who share a common philosophy: therapy is not about &ldquo;fixing&rdquo; someone, but about exploring the complex layers of human experience together. We meet you exactly where you are—whether you are dealing with debilitating anxiety, navigating structural relationship conflicts, or seeking to understand yourself on a deeper level.
+                Our team is composed of highly qualified, licensed clinical
+                practitioners who share a common philosophy: therapy is not
+                about &ldquo;fixing&rdquo; someone, but about exploring the
+                complex layers of human experience together. We meet you exactly
+                where you are—whether you are dealing with debilitating anxiety,
+                navigating structural relationship conflicts, or seeking to
+                understand yourself on a deeper level.
               </p>
               <p>
-                Over the years, we have helped hundreds of clients build resilience, develop healthy coping mechanisms, and reclaim their peace of mind. We are deeply committed to providing evidence-based treatment paths tailored uniquely to your life context, ensuring you never feel like a number on a medical chart.
+                Over the years, we have helped hundreds of clients build
+                resilience, develop healthy coping mechanisms, and reclaim their
+                peace of mind. We are deeply committed to providing
+                evidence-based treatment paths tailored uniquely to your life
+                context, ensuring you never feel like a number on a medical
+                chart.
               </p>
             </div>
           </div>
@@ -121,7 +143,8 @@ export default function About() {
               The Principles That Guide Us
             </h2>
             <p className="text-forest-slate/85 text-base md:text-lg">
-              Our core values form the foundation of our clinical practice, dictating how we treat every individual who reaches out.
+              Our core values form the foundation of our clinical practice,
+              dictating how we treat every individual who reaches out.
             </p>
           </div>
 
@@ -158,12 +181,13 @@ export default function About() {
               Meet Our Dedicated Team
             </h2>
             <p className="text-forest-slate/85 text-base md:text-lg">
-              A collaborative, compassionate group of licensed professionals here to walk alongside you.
+              A collaborative, compassionate group of licensed professionals
+              here to walk alongside you.
             </p>
           </div>
 
           {/* Team Grid */}
-          <motion.div 
+          <motion.div
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true, margin: "-100px" }}
@@ -178,7 +202,7 @@ export default function About() {
               >
                 {/* Visual hover border highlighter */}
                 <div className="absolute top-0 left-0 right-0 h-1 bg-transparent group-hover:bg-teal-sage transition-colors duration-300 z-10" />
-                
+
                 {/* Photo */}
                 <div className="relative h-72 w-full bg-warm-tan">
                   <Image
@@ -189,7 +213,7 @@ export default function About() {
                     className="object-cover object-top"
                   />
                 </div>
-                
+
                 {/* Info Content */}
                 <div className="p-8 flex flex-col justify-between flex-grow">
                   <div>
@@ -211,7 +235,7 @@ export default function About() {
                   <div>
                     <div className="border-t border-muted-sage/20 pt-4 flex flex-wrap gap-1.5">
                       {t.specialisations.map((tag) => (
-                        <span 
+                        <span
                           key={tag}
                           className="text-[11px] font-medium text-forest-slate bg-warm-tan/40 border border-muted-sage/20 px-2 py-0.5 rounded-full font-dmsans"
                         >
@@ -234,7 +258,8 @@ export default function About() {
             We are here to support your path forward.
           </h2>
           <p className="text-sm text-forest-slate/80 mb-8 font-dmsans">
-            Speak with one of our coordinators to find the therapist best suited to your needs.
+            Speak with one of our coordinators to find the therapist best suited
+            to your needs.
           </p>
           <Link
             href="/contact"
@@ -244,7 +269,6 @@ export default function About() {
           </Link>
         </div>
       </section>
-
     </div>
   );
 }

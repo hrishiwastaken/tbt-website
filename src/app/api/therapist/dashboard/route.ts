@@ -1,7 +1,12 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { resolveRange } from "@/server/dateRange";
-import { bookingSeries, revenueSeries, statusDistribution, therapistOverviewKpis } from "@/server/services/analyticsService";
+import {
+  bookingSeries,
+  revenueSeries,
+  statusDistribution,
+  therapistOverviewKpis,
+} from "@/server/services/analyticsService";
 import { badRequest, handleApi, requireTherapist } from "@/server/http";
 
 // Own-scoped dashboard: identical shape/approach to the admin analytics
@@ -24,15 +29,27 @@ export const GET = handleApi(async (request: Request) => {
     bookingSeries(range, therapistId),
     statusDistribution(range, therapistId),
     prisma.booking.findMany({
-      where: { therapistId, dateTime: { gte: new Date() }, status: { in: ["PENDING", "AWAITING_PAYMENT", "CONFIRMED"] } },
-      include: { client: { select: { name: true } }, service: { select: { name: true } } },
+      where: {
+        therapistId,
+        dateTime: { gte: new Date() },
+        status: { in: ["PENDING", "AWAITING_PAYMENT", "CONFIRMED"] },
+      },
+      include: {
+        client: { select: { name: true } },
+        service: { select: { name: true } },
+      },
       orderBy: { dateTime: "asc" },
       take: 8,
     }),
   ]);
 
   return NextResponse.json({
-    range: { key: range.key, from: range.from, to: range.to, granularity: range.granularity },
+    range: {
+      key: range.key,
+      from: range.from,
+      to: range.to,
+      granularity: range.granularity,
+    },
     kpis,
     series: { revenue, bookings },
     statusDistribution: statuses,

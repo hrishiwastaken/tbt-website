@@ -1,6 +1,11 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import { handleApi, paginated, parsePagination, requireTherapist } from "@/server/http";
+import {
+  handleApi,
+  paginated,
+  parsePagination,
+  requireTherapist,
+} from "@/server/http";
 
 // A consultant's client list is derived from their own bookings — there is
 // no direct Therapist->Client relation, so we go through distinct clientIds
@@ -53,7 +58,9 @@ export const GET = handleApi(async (request: Request) => {
     _max: { dateTime: true },
     where: { therapistId, clientId: { in: clients.map((c) => c.id) } },
   });
-  const lastSeenMap = new Map(lastSeen.map((r) => [r.clientId, r._max.dateTime]));
+  const lastSeenMap = new Map(
+    lastSeen.map((r) => [r.clientId, r._max.dateTime]),
+  );
   const statsMap = new Map<string, { total: number; completed: number }>();
   for (const row of stats) {
     const entry = statsMap.get(row.clientId) ?? { total: 0, completed: 0 };
@@ -71,7 +78,7 @@ export const GET = handleApi(async (request: Request) => {
         lastSessionAt: lastSeenMap.get(c.id) ?? null,
       })),
       total,
-      pagination
-    )
+      pagination,
+    ),
   );
 });

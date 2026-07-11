@@ -35,7 +35,7 @@ node prisma/seed.js
 Seed creates admin login:
 
 ```bash
-admin@madhumaticlinic.com
+admin@thebraintea.com
 AdminPass123!
 ```
 

@@ -39,7 +39,10 @@ export function middleware(request) {
   }
 
   // Consultant portal: scoped to the therapist's own data, THERAPIST only
-  if (pathname.startsWith("/therapist") && !pathname.startsWith("/therapist/login")) {
+  if (
+    pathname.startsWith("/therapist") &&
+    !pathname.startsWith("/therapist/login")
+  ) {
     return guard(request, {
       prefix: "/therapist",
       loginPath: "/therapist/login",

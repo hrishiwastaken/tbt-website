@@ -25,7 +25,7 @@ const putSchema = z.object({
       dayOfWeek: z.number().int().min(0).max(6),
       startTime: z.string().regex(/^\d{2}:\d{2}$/),
       endTime: z.string().regex(/^\d{2}:\d{2}$/),
-    })
+    }),
   ),
 });
 
@@ -42,8 +42,13 @@ export const PUT = handleApi(async (request: Request) => {
       });
     }
     await recordAudit(
-      { session, action: "consultant.update_own_availability", entityType: "Therapist", entityId: therapistId },
-      tx
+      {
+        session,
+        action: "consultant.update_own_availability",
+        entityType: "Therapist",
+        entityId: therapistId,
+      },
+      tx,
     );
   });
 

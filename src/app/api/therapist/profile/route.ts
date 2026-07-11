@@ -2,7 +2,12 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { comparePasswords, hashPassword } from "@/lib/auth";
-import { badRequest, forbidden, handleApi, requireTherapist } from "@/server/http";
+import {
+  badRequest,
+  forbidden,
+  handleApi,
+  requireTherapist,
+} from "@/server/http";
 import { recordAudit } from "@/server/audit";
 
 // A consultant may edit their own bio/photo and change their password.
@@ -29,13 +34,19 @@ export const PATCH = handleApi(async (request: Request) => {
     if (body.bio !== undefined) profileData.bio = body.bio;
     if (body.photo !== undefined) profileData.photo = body.photo;
     if (Object.keys(profileData).length > 0) {
-      await tx.therapist.update({ where: { id: therapistId }, data: profileData });
+      await tx.therapist.update({
+        where: { id: therapistId },
+        data: profileData,
+      });
     }
 
     if (body.newPassword && body.currentPassword) {
       const user = await tx.user.findUnique({ where: { id: session.userId } });
       if (!user) throw forbidden();
-      const valid = await comparePasswords(body.currentPassword, user.passwordHash);
+      const valid = await comparePasswords(
+        body.currentPassword,
+        user.passwordHash,
+      );
       if (!valid) throw badRequest("Current password is incorrect");
       await tx.user.update({
         where: { id: session.userId },
@@ -49,12 +60,18 @@ export const PATCH = handleApi(async (request: Request) => {
         action: "consultant.update_own_profile",
         entityType: "Therapist",
         entityId: therapistId,
-        detail: { changed: Object.keys(body).filter((k) => k !== "currentPassword" && k !== "newPassword") },
+        detail: {
+          changed: Object.keys(body).filter(
+            (k) => k !== "currentPassword" && k !== "newPassword",
+          ),
+        },
       },
-      tx
+      tx,
     );
   });
 
-  const updated = await prisma.therapist.findUnique({ where: { id: therapistId } });
+  const updated = await prisma.therapist.findUnique({
+    where: { id: therapistId },
+  });
   return NextResponse.json({ consultant: updated });
 });

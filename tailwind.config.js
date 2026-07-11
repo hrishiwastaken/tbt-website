@@ -9,12 +9,12 @@ module.exports = {
     extend: {
       colors: {
         // Public site palette (restored old UI)
-        "warm-sand": "#DAD7CA",      // primary light bg
-        "muted-sage": "#9FACA5",     // secondary bg / divider
-        "warm-tan": "#DCCDB2",       // card bg
-        "teal-sage": "#698E8B",      // buttons, links, accents
-        "forest-slate": "#55665D",   // headings / labels
-        "near-black": "#202623",     // body text
+        "warm-sand": "#DAD7CA", // primary light bg
+        "muted-sage": "#9FACA5", // secondary bg / divider
+        "warm-tan": "#DCCDB2", // card bg
+        "teal-sage": "#698E8B", // buttons, links, accents
+        "forest-slate": "#55665D", // headings / labels
+        "near-black": "#202623", // body text
 
         // Legacy compatibility mappings (public site)
         forest: "#698E8B",
@@ -27,18 +27,18 @@ module.exports = {
         "warm-white": "#FDFBF7",
 
         // Admin / Therapist panel palette (The Brain Tea ocean design system)
-        ocean: "#5D768B",       // Ocean Deep Blue -- primary, CTAs, active states
+        ocean: "#5D768B", // Ocean Deep Blue -- primary, CTAs, active states
         "ocean-deep": "#26333D", // derived near-black shade of ocean -- body text, headings
-        gold: "#E3C9A4",        // Golden Driftwood -- decorative accents, badges
-        blush: "#F2D9C7",       // Soft Seashell Pink -- decorative accents
-        surface: "#FFFCF8",     // raised card surface (warm off-white)
+        gold: "#E3C9A4", // Golden Driftwood -- decorative accents, badges
+        blush: "#F2D9C7", // Soft Seashell Pink -- decorative accents
+        surface: "#FFFCF8", // raised card surface (warm off-white)
         "surface-sunken": "#F1E4D5", // inset/pressed neumorphic surface
-        ink: "#26333D",         // body text
+        ink: "#26333D", // body text
         "ink-muted": "#5C6B74", // secondary text
         "panel-ivory": "#F8EFE5", // panel canvas background
-        "panel-sand": "#C8B39B",  // panel borders, dividers, muted surfaces
-        "panel-mist": "#E9DFD2",  // panel soft dividers
-        "panel-sage": "#8CA0AD",  // panel muted labels
+        "panel-sand": "#C8B39B", // panel borders, dividers, muted surfaces
+        "panel-mist": "#E9DFD2", // panel soft dividers
+        "panel-sage": "#8CA0AD", // panel muted labels
       },
       fontFamily: {
         cormorant: ["var(--font-cormorant)", "serif"],
@@ -53,9 +53,12 @@ module.exports = {
         "warm-soft": "0 4px 24px rgba(46, 74, 56, 0.08)",
         // Soft sculptural neumorphism for the admin/therapist panels, tinted
         // with the panels' ocean blue so shadows read as part of that palette.
-        "surface-raised": "8px 8px 20px rgba(93, 118, 139, 0.16), -8px -8px 20px rgba(255, 255, 255, 0.8)",
-        "surface-raised-sm": "4px 4px 10px rgba(93, 118, 139, 0.14), -4px -4px 10px rgba(255, 255, 255, 0.75)",
-        "surface-inset": "inset 4px 4px 10px rgba(93, 118, 139, 0.16), inset -4px -4px 10px rgba(255, 255, 255, 0.7)",
+        "surface-raised":
+          "8px 8px 20px rgba(93, 118, 139, 0.16), -8px -8px 20px rgba(255, 255, 255, 0.8)",
+        "surface-raised-sm":
+          "4px 4px 10px rgba(93, 118, 139, 0.14), -4px -4px 10px rgba(255, 255, 255, 0.75)",
+        "surface-inset":
+          "inset 4px 4px 10px rgba(93, 118, 139, 0.16), inset -4px -4px 10px rgba(255, 255, 255, 0.7)",
       },
       spacing: {
         18: "4.5rem",

@@ -1,7 +1,8 @@
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 
-const JWT_SECRET = process.env.NEXTAUTH_SECRET || "fallback-secret-key-for-local-development";
+const JWT_SECRET =
+  process.env.NEXTAUTH_SECRET || "fallback-secret-key-for-local-development";
 
 export async function hashPassword(password) {
   return bcrypt.hash(password, 10);

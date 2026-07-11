@@ -1,7 +1,12 @@
 import { NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
-import { handleApi, paginated, parsePagination, requireAdmin } from "@/server/http";
+import {
+  handleApi,
+  paginated,
+  parsePagination,
+  requireAdmin,
+} from "@/server/http";
 
 export const GET = handleApi(async (request: Request) => {
   await requireAdmin(request);

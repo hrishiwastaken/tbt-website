@@ -36,7 +36,10 @@ export const SLOT_HOLDING_STATUSES: BookingStatus[] = [
 ];
 
 /** Terminal statuses that release the calendar slot. */
-export const SLOT_RELEASING_STATUSES: BookingStatus[] = ["CANCELLED", "REFUNDED"];
+export const SLOT_RELEASING_STATUSES: BookingStatus[] = [
+  "CANCELLED",
+  "REFUNDED",
+];
 
 export function isBookingStatus(value: string): value is BookingStatus {
   return (BOOKING_STATUSES as readonly string[]).includes(value);
@@ -49,7 +52,7 @@ export function canTransition(from: BookingStatus, to: BookingStatus): boolean {
 export class InvalidTransitionError extends Error {
   constructor(
     public readonly from: string,
-    public readonly to: string
+    public readonly to: string,
   ) {
     super(`Illegal booking transition ${from} → ${to}`);
     this.name = "InvalidTransitionError";
@@ -57,7 +60,11 @@ export class InvalidTransitionError extends Error {
 }
 
 export function assertTransition(from: string, to: string): void {
-  if (!isBookingStatus(from) || !isBookingStatus(to) || !canTransition(from, to)) {
+  if (
+    !isBookingStatus(from) ||
+    !isBookingStatus(to) ||
+    !canTransition(from, to)
+  ) {
     throw new InvalidTransitionError(from, to);
   }
 }

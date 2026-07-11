@@ -17,13 +17,21 @@ import { SITE_NAME, WHATSAPP_URL, CONTACT_PHONE } from "../../lib/site";
 const NAV = [
   { name: "Dashboard", href: "/portal", icon: LayoutDashboard },
   { name: "Book Appointment", href: "/book", icon: CalendarPlus },
-  { name: "My Appointments", href: "/portal/appointments", icon: CalendarClock },
+  {
+    name: "My Appointments",
+    href: "/portal/appointments",
+    icon: CalendarClock,
+  },
   { name: "Payments", href: "/portal/payments", icon: CreditCard },
   { name: "Invoices", href: "/portal/invoices", icon: FileText },
   { name: "Profile", href: "/portal/profile", icon: User },
 ];
 
-export default function PortalLayout({ children }: { children: React.ReactNode }) {
+export default function PortalLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const pathname = usePathname();
 
   return (
@@ -31,7 +39,10 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
       <aside className="w-full md:w-64 bg-warm-white border-b md:border-b-0 md:border-r border-muted-sage/20 flex flex-col justify-between py-6 px-4 shrink-0">
         <div>
           <div className="px-3 mb-8">
-            <Link href="/" className="font-cormorant font-semibold text-2xl text-forest-slate block leading-tight">
+            <Link
+              href="/"
+              className="font-cormorant font-semibold text-2xl text-forest-slate block leading-tight"
+            >
               {SITE_NAME}
             </Link>
             <span className="font-dmsans text-[10px] text-teal-sage uppercase tracking-widest font-bold mt-1 block">
@@ -76,7 +87,9 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
         </div>
       </aside>
 
-      <main className="flex-grow p-6 md:p-12 overflow-y-auto max-w-7xl">{children}</main>
+      <main className="flex-grow p-6 md:p-12 overflow-y-auto max-w-7xl">
+        {children}
+      </main>
     </div>
   );
 }

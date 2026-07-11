@@ -5,9 +5,27 @@ import PrototypeBanner from "../../../components/PrototypeBanner";
 import { WHATSAPP_URL, CONTACT_PHONE } from "../../../lib/site";
 
 const APPOINTMENTS = [
-  { service: "Individual Counselling", date: "12 Jul 2026", time: "4:30 PM", mode: "Online", status: "Confirmed" },
-  { service: "Individual Counselling", date: "28 Jun 2026", time: "5:00 PM", mode: "Offline", status: "Completed" },
-  { service: "Individual Counselling", date: "14 Jun 2026", time: "5:00 PM", mode: "Offline", status: "Completed" },
+  {
+    service: "Individual Counselling",
+    date: "12 Jul 2026",
+    time: "4:30 PM",
+    mode: "Online",
+    status: "Confirmed",
+  },
+  {
+    service: "Individual Counselling",
+    date: "28 Jun 2026",
+    time: "5:00 PM",
+    mode: "Offline",
+    status: "Completed",
+  },
+  {
+    service: "Individual Counselling",
+    date: "14 Jun 2026",
+    time: "5:00 PM",
+    mode: "Offline",
+    status: "Completed",
+  },
 ];
 
 export default function AppointmentsPage() {
@@ -18,8 +36,8 @@ export default function AppointmentsPage() {
         My Appointments
       </h1>
       <p className="text-sm text-charcoal/80 mb-8 max-w-xl">
-        To reschedule or cancel a session, please contact the clinic directly -- this can&apos;t be
-        done from the portal.
+        To reschedule or cancel a session, please contact the clinic directly --
+        this can&apos;t be done from the portal.
       </p>
 
       <div className="flex flex-wrap gap-3 mb-8">
@@ -42,7 +60,10 @@ export default function AppointmentsPage() {
       <Surface variant="raised" radius="surface" className="overflow-hidden">
         <div className="divide-y divide-ocean/10">
           {APPOINTMENTS.map((a, i) => (
-            <div key={i} className="p-5 flex flex-wrap items-center justify-between gap-3">
+            <div
+              key={i}
+              className="p-5 flex flex-wrap items-center justify-between gap-3"
+            >
               <div>
                 <p className="text-forest-slate font-medium">{a.service}</p>
                 <p className="text-charcoal/80 text-xs">
@@ -51,7 +72,9 @@ export default function AppointmentsPage() {
               </div>
               <div className="flex items-center gap-2">
                 <Badge tone="sand">{a.mode}</Badge>
-                <Badge tone={a.status === "Confirmed" ? "gold" : "ocean"}>{a.status}</Badge>
+                <Badge tone={a.status === "Confirmed" ? "gold" : "ocean"}>
+                  {a.status}
+                </Badge>
               </div>
             </div>
           ))}

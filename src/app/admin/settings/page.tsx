@@ -2,7 +2,14 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { formatDateTime } from "@/lib/format";
-import { ErrorNote, Field, inputClass, LoadingRow, Pager, Panel } from "@/components/admin/ui";
+import {
+  ErrorNote,
+  Field,
+  inputClass,
+  LoadingRow,
+  Pager,
+  Panel,
+} from "@/components/admin/ui";
 
 interface CommissionHistoryRow {
   id: string;
@@ -58,10 +65,16 @@ export default function AdminSettingsPage() {
   }, [logPage]);
 
   useEffect(() => {
-    load();
+    const run = async () => {
+      await load();
+    };
+    run();
   }, [load]);
   useEffect(() => {
-    loadLogs();
+    const run = async () => {
+      await loadLogs();
+    };
+    run();
   }, [loadLogs]);
 
   const save = async () => {
@@ -76,7 +89,9 @@ export default function AdminSettingsPage() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to save");
-      setNotice("Default commission updated. Existing bookings keep their snapshotted rate.");
+      setNotice(
+        "Default commission updated. Existing bookings keep their snapshotted rate.",
+      );
       await load();
       await loadLogs();
     } catch (err) {
@@ -89,8 +104,12 @@ export default function AdminSettingsPage() {
   return (
     <div className="space-y-6 animate-[fadeIn_0.5s_ease-out]">
       <div>
-        <h1 className="mb-2 font-cormorant text-4xl font-semibold text-ocean-deep">Platform Settings</h1>
-        <p className="font-dmsans text-sm text-ink-muted">Commission configuration and the administrative audit trail.</p>
+        <h1 className="mb-2 font-cormorant text-4xl font-semibold text-ocean-deep">
+          Platform Settings
+        </h1>
+        <p className="font-dmsans text-sm text-ink-muted">
+          Commission configuration and the administrative audit trail.
+        </p>
       </div>
 
       <ErrorNote message={error} />
@@ -129,17 +148,27 @@ export default function AdminSettingsPage() {
                 {busy ? "Saving..." : "Save default"}
               </button>
               <span className="pb-2 text-xs text-ink-muted">
-                Current: <strong className="text-ocean-deep">{defaultBps / 100}%</strong>
+                Current:{" "}
+                <strong className="text-ocean-deep">{defaultBps / 100}%</strong>
               </span>
             </div>
 
             <div>
-              <h4 className="mb-2 text-[10px] font-bold uppercase tracking-wider text-ink-muted">Rate history</h4>
+              <h4 className="mb-2 text-[10px] font-bold uppercase tracking-wider text-ink-muted">
+                Rate history
+              </h4>
               <div className="space-y-1.5 text-xs">
                 {history.map((row) => (
-                  <div key={row.id} className="flex items-center gap-3 text-ink-muted">
-                    <span className="font-mono text-[10px]">{formatDateTime(row.effectiveFrom)}</span>
-                    <span className="font-semibold text-ocean-deep">{row.commissionBps / 100}%</span>
+                  <div
+                    key={row.id}
+                    className="flex items-center gap-3 text-ink-muted"
+                  >
+                    <span className="font-mono text-[10px]">
+                      {formatDateTime(row.effectiveFrom)}
+                    </span>
+                    <span className="font-semibold text-ocean-deep">
+                      {row.commissionBps / 100}%
+                    </span>
                   </div>
                 ))}
               </div>
@@ -148,7 +177,10 @@ export default function AdminSettingsPage() {
         )}
       </Panel>
 
-      <Panel title="Audit Trail" subtitle={`${logTotal} recorded administrative actions.`}>
+      <Panel
+        title="Audit Trail"
+        subtitle={`${logTotal} recorded administrative actions.`}
+      >
         {logs.length === 0 ? (
           <LoadingRow label="No audit entries yet." />
         ) : (
@@ -165,14 +197,19 @@ export default function AdminSettingsPage() {
               </thead>
               <tbody>
                 {logs.map((log) => (
-                  <tr key={log.id} className="border-b border-ocean/5 align-top">
+                  <tr
+                    key={log.id}
+                    className="border-b border-ocean/5 align-top"
+                  >
                     <td className="whitespace-nowrap px-3 py-2.5 font-mono text-[10px] text-ink-muted">
                       {formatDateTime(log.createdAt)}
                     </td>
                     <td className="px-3 py-2.5 text-ink">
                       {log.actorEmail || log.actorRole || "system"}
                     </td>
-                    <td className="px-3 py-2.5 font-semibold text-ocean-deep">{log.action}</td>
+                    <td className="px-3 py-2.5 font-semibold text-ocean-deep">
+                      {log.action}
+                    </td>
                     <td className="px-3 py-2.5 text-ink-muted">
                       {log.entityType}
                       {log.entityId ? ` · ${log.entityId.slice(0, 8)}` : ""}
@@ -186,7 +223,12 @@ export default function AdminSettingsPage() {
             </table>
           </div>
         )}
-        <Pager page={logPage} pageCount={logPageCount} total={logTotal} onPage={setLogPage} />
+        <Pager
+          page={logPage}
+          pageCount={logPageCount}
+          total={logTotal}
+          onPage={setLogPage}
+        />
       </Panel>
     </div>
   );

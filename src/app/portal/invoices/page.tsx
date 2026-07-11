@@ -18,13 +18,18 @@ export default function InvoicesPage() {
       <Surface variant="raised" radius="surface" className="overflow-hidden">
         <div className="divide-y divide-ocean/10">
           {INVOICES.map((inv) => (
-            <div key={inv.id} className="p-5 flex flex-wrap items-center justify-between gap-3">
+            <div
+              key={inv.id}
+              className="p-5 flex flex-wrap items-center justify-between gap-3"
+            >
               <div>
                 <p className="text-forest-slate font-medium">{inv.id}</p>
                 <p className="text-charcoal/80 text-xs">{inv.date}</p>
               </div>
               <div className="flex items-center gap-4">
-                <span className="font-cormorant text-lg font-semibold text-forest-slate">{inv.amount}</span>
+                <span className="font-cormorant text-lg font-semibold text-forest-slate">
+                  {inv.amount}
+                </span>
                 <button
                   type="button"
                   disabled

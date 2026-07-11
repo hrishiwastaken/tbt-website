@@ -66,11 +66,12 @@ export const DELETE = handleApi(async (request: Request) => {
         entityId: clientId,
         ip: clientIp(request),
       },
-      tx
+      tx,
     );
   });
 
   return NextResponse.json({
-    message: "Client account and all associated booking records have been permanently erased for compliance.",
+    message:
+      "Client account and all associated booking records have been permanently erased for compliance.",
   });
 });

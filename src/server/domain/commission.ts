@@ -10,12 +10,16 @@ export const MIN_COMMISSION_BPS = 0;
 export const MAX_COMMISSION_BPS = 10000;
 
 export function isValidCommissionBps(bps: number): boolean {
-  return Number.isInteger(bps) && bps >= MIN_COMMISSION_BPS && bps <= MAX_COMMISSION_BPS;
+  return (
+    Number.isInteger(bps) &&
+    bps >= MIN_COMMISSION_BPS &&
+    bps <= MAX_COMMISSION_BPS
+  );
 }
 
 export function resolveCommissionBps(
   therapistOverrideBps: number | null | undefined,
-  platformDefaultBps: number
+  platformDefaultBps: number,
 ): number {
   const resolved = therapistOverrideBps ?? platformDefaultBps;
   if (!isValidCommissionBps(resolved)) {
@@ -45,7 +49,10 @@ export function splitPayment(input: {
   commissionBps: number;
 }): PaymentSplit {
   const grossMinor = assertMinorUnits(input.grossMinor, "grossMinor");
-  const discountMinor = assertMinorUnits(input.discountMinor ?? 0, "discountMinor");
+  const discountMinor = assertMinorUnits(
+    input.discountMinor ?? 0,
+    "discountMinor",
+  );
   const taxMinor = assertMinorUnits(input.taxMinor ?? 0, "taxMinor");
 
   if (!isValidCommissionBps(input.commissionBps)) {
@@ -87,7 +94,7 @@ export function splitRefund(input: {
     return { commissionReversalMinor: 0, platformReversalMinor: 0 };
   }
   const commissionReversalMinor = Math.round(
-    (input.originalCommissionMinor * refundMinor) / input.originalNetMinor
+    (input.originalCommissionMinor * refundMinor) / input.originalNetMinor,
   );
   return {
     commissionReversalMinor,

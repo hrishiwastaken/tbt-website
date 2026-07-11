@@ -11,7 +11,11 @@ export function generateStaticParams() {
   return SERVICES.map((service) => ({ slug: service.slug }));
 }
 
-export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
   const { slug } = await params;
   const service = getServiceBySlug(slug);
   if (!service) return {};
@@ -21,7 +25,11 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   };
 }
 
-export default async function ServiceDetail({ params }: { params: Promise<{ slug: string }> }) {
+export default async function ServiceDetail({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
   const { slug } = await params;
   const service = getServiceBySlug(slug);
   if (!service) notFound();
@@ -43,7 +51,11 @@ export default async function ServiceDetail({ params }: { params: Promise<{ slug
           <div className="flex flex-wrap gap-2 mb-8">
             {service.availability.map((mode) => (
               <Badge key={mode} tone="sand">
-                {mode === "Online" ? <Wifi className="w-3 h-3" /> : <MapPin className="w-3 h-3" />}
+                {mode === "Online" ? (
+                  <Wifi className="w-3 h-3" />
+                ) : (
+                  <MapPin className="w-3 h-3" />
+                )}
                 {mode}
               </Badge>
             ))}
@@ -72,13 +84,20 @@ export default async function ServiceDetail({ params }: { params: Promise<{ slug
 
           {service.process && (
             <Surface variant="raised" radius="surface" className="p-8">
-              <h2 className="font-cormorant text-xl font-semibold text-forest-slate mb-3">Process</h2>
-              <p className="text-sm text-charcoal/80 leading-relaxed">{service.process}</p>
+              <h2 className="font-cormorant text-xl font-semibold text-forest-slate mb-3">
+                Process
+              </h2>
+              <p className="text-sm text-charcoal/80 leading-relaxed">
+                {service.process}
+              </p>
             </Surface>
           )}
 
           <div className="text-center pt-6">
-            <Button href={`/book?service=${encodeURIComponent(service.slug)}`} size="lg">
+            <Button
+              href={`/book?service=${encodeURIComponent(service.slug)}`}
+              size="lg"
+            >
               Book Appointment
             </Button>
           </div>

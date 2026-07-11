@@ -65,10 +65,17 @@ export default function AdminPayoutsPage() {
   }, [page]);
 
   useEffect(() => {
-    fetchAll();
+    const run = async () => {
+      await fetchAll();
+    };
+    run();
   }, [fetchAll]);
 
-  const transition = async (payout: PayoutRow, toStatus: string, reference?: string) => {
+  const transition = async (
+    payout: PayoutRow,
+    toStatus: string,
+    reference?: string,
+  ) => {
     setBusy(true);
     setError("");
     try {
@@ -91,9 +98,12 @@ export default function AdminPayoutsPage() {
   return (
     <div className="space-y-6 animate-[fadeIn_0.5s_ease-out]">
       <div>
-        <h1 className="mb-2 font-cormorant text-4xl font-semibold text-ocean-deep">Consultant Payouts</h1>
+        <h1 className="mb-2 font-cormorant text-4xl font-semibold text-ocean-deep">
+          Consultant Payouts
+        </h1>
         <p className="font-dmsans text-sm text-ink-muted">
-          Settle earned commission. Every settlement posts an immutable ledger entry.
+          Settle earned commission. Every settlement posts an immutable ledger
+          entry.
         </p>
       </div>
 
@@ -108,9 +118,14 @@ export default function AdminPayoutsPage() {
         ) : (
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
             {balances.map((balance) => (
-              <div key={balance.therapistId} className="surface-inset rounded-soft p-5">
+              <div
+                key={balance.therapistId}
+                className="surface-inset rounded-soft p-5"
+              >
                 <div className="mb-3 flex items-start justify-between gap-2">
-                  <span className="font-dmsans text-sm font-semibold text-ocean-deep">{balance.name}</span>
+                  <span className="font-dmsans text-sm font-semibold text-ocean-deep">
+                    {balance.name}
+                  </span>
                   <span className="font-dmsans text-xl font-bold tabular-nums text-ocean-deep">
                     {formatINR(balance.payableMinor)}
                   </span>
@@ -119,17 +134,23 @@ export default function AdminPayoutsPage() {
                   <span>
                     Earned
                     <br />
-                    <strong className="tabular-nums text-ink">{formatINR(balance.earnedMinor)}</strong>
+                    <strong className="tabular-nums text-ink">
+                      {formatINR(balance.earnedMinor)}
+                    </strong>
                   </span>
                   <span>
                     Paid
                     <br />
-                    <strong className="tabular-nums text-ink">{formatINR(balance.paidMinor)}</strong>
+                    <strong className="tabular-nums text-ink">
+                      {formatINR(balance.paidMinor)}
+                    </strong>
                   </span>
                   <span>
                     Reserved
                     <br />
-                    <strong className="tabular-nums text-ink">{formatINR(balance.reservedMinor)}</strong>
+                    <strong className="tabular-nums text-ink">
+                      {formatINR(balance.reservedMinor)}
+                    </strong>
                   </span>
                 </div>
                 <button
@@ -168,13 +189,21 @@ export default function AdminPayoutsPage() {
               <tbody>
                 {payouts.map((payout) => (
                   <tr key={payout.id} className="border-b border-ocean/5">
-                    <td className="px-3 py-3.5 text-xs text-ink-muted">{formatDateTime(payout.createdAt)}</td>
-                    <td className="px-3 py-3.5 font-medium text-ocean-deep">{payout.therapist.name}</td>
+                    <td className="px-3 py-3.5 text-xs text-ink-muted">
+                      {formatDateTime(payout.createdAt)}
+                    </td>
+                    <td className="px-3 py-3.5 font-medium text-ocean-deep">
+                      {payout.therapist.name}
+                    </td>
                     <td className="px-3 py-3.5 text-right font-semibold tabular-nums text-ocean-deep">
                       {formatINR(payout.amountMinor)}
                     </td>
-                    <td className="px-3 py-3.5 text-xs text-ink-muted">{payout.method || "—"}</td>
-                    <td className="px-3 py-3.5 font-mono text-xs text-ink-muted">{payout.reference || "—"}</td>
+                    <td className="px-3 py-3.5 text-xs text-ink-muted">
+                      {payout.method || "—"}
+                    </td>
+                    <td className="px-3 py-3.5 font-mono text-xs text-ink-muted">
+                      {payout.reference || "—"}
+                    </td>
                     <td className="px-3 py-3.5">
                       <StatusPill status={payout.status} />
                     </td>
@@ -182,29 +211,49 @@ export default function AdminPayoutsPage() {
                       <div className="flex justify-end gap-1.5">
                         {payout.status === "PENDING" && (
                           <>
-                            <ActionButton disabled={busy} onClick={() => transition(payout, "PROCESSING")}>
+                            <ActionButton
+                              disabled={busy}
+                              onClick={() => transition(payout, "PROCESSING")}
+                            >
                               Process
                             </ActionButton>
-                            <ActionButton disabled={busy} onClick={() => setMarkingPaid(payout)} primary>
+                            <ActionButton
+                              disabled={busy}
+                              onClick={() => setMarkingPaid(payout)}
+                              primary
+                            >
                               Mark paid
                             </ActionButton>
-                            <ActionButton disabled={busy} onClick={() => transition(payout, "CANCELLED")}>
+                            <ActionButton
+                              disabled={busy}
+                              onClick={() => transition(payout, "CANCELLED")}
+                            >
                               Cancel
                             </ActionButton>
                           </>
                         )}
                         {payout.status === "PROCESSING" && (
                           <>
-                            <ActionButton disabled={busy} onClick={() => setMarkingPaid(payout)} primary>
+                            <ActionButton
+                              disabled={busy}
+                              onClick={() => setMarkingPaid(payout)}
+                              primary
+                            >
                               Mark paid
                             </ActionButton>
-                            <ActionButton disabled={busy} onClick={() => transition(payout, "FAILED")}>
+                            <ActionButton
+                              disabled={busy}
+                              onClick={() => transition(payout, "FAILED")}
+                            >
                               Failed
                             </ActionButton>
                           </>
                         )}
                         {payout.status === "FAILED" && (
-                          <ActionButton disabled={busy} onClick={() => transition(payout, "PROCESSING")}>
+                          <ActionButton
+                            disabled={busy}
+                            onClick={() => transition(payout, "PROCESSING")}
+                          >
                             Retry
                           </ActionButton>
                         )}
@@ -216,7 +265,12 @@ export default function AdminPayoutsPage() {
             </table>
           </div>
         )}
-        <Pager page={page} pageCount={pageCount} total={total} onPage={setPage} />
+        <Pager
+          page={page}
+          pageCount={pageCount}
+          total={total}
+          onPage={setPage}
+        />
       </Panel>
 
       {creating && (
@@ -278,7 +332,9 @@ function CreatePayoutModal({
   onClose: () => void;
   onCreated: () => void;
 }) {
-  const [amountRupees, setAmountRupees] = useState(String(balance.payableMinor / 100));
+  const [amountRupees, setAmountRupees] = useState(
+    String(balance.payableMinor / 100),
+  );
   const [method, setMethod] = useState("BANK_TRANSFER");
   const [note, setNote] = useState("");
   const [error, setError] = useState("");
@@ -292,7 +348,12 @@ function CreatePayoutModal({
       const res = await fetch("/api/admin/payouts", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ therapistId: balance.therapistId, amountMinor, method, note: note || undefined }),
+        body: JSON.stringify({
+          therapistId: balance.therapistId,
+          amountMinor,
+          method,
+          note: note || undefined,
+        }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to create payout");
@@ -309,8 +370,12 @@ function CreatePayoutModal({
       <div className="space-y-4 font-dmsans">
         <ErrorNote message={error} />
         <p className="text-sm text-ink-muted">
-          Payable balance: <strong className="text-ocean-deep">{formatINR(balance.payableMinor)}</strong>. The amount
-          is reserved immediately and hits the ledger when marked paid.
+          Payable balance:{" "}
+          <strong className="text-ocean-deep">
+            {formatINR(balance.payableMinor)}
+          </strong>
+          . The amount is reserved immediately and hits the ledger when marked
+          paid.
         </p>
         <Field label="Amount (₹)">
           <input
@@ -323,17 +388,30 @@ function CreatePayoutModal({
           />
         </Field>
         <Field label="Method">
-          <select value={method} onChange={(e) => setMethod(e.target.value)} className={inputClass}>
+          <select
+            value={method}
+            onChange={(e) => setMethod(e.target.value)}
+            className={inputClass}
+          >
             <option value="BANK_TRANSFER">Bank transfer (NEFT/IMPS)</option>
             <option value="UPI">UPI</option>
             <option value="CHEQUE">Cheque</option>
           </select>
         </Field>
         <Field label="Note (optional)">
-          <input value={note} onChange={(e) => setNote(e.target.value)} className={inputClass} placeholder="e.g. Fortnightly settlement" />
+          <input
+            value={note}
+            onChange={(e) => setNote(e.target.value)}
+            className={inputClass}
+            placeholder="e.g. Fortnightly settlement"
+          />
         </Field>
         <div className="flex justify-end gap-2 pt-2">
-          <button type="button" onClick={onClose} className="rounded-full border border-ocean/25 px-5 py-2.5 text-xs font-bold uppercase tracking-wider text-ocean-deep hover:bg-surface-sunken">
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-full border border-ocean/25 px-5 py-2.5 text-xs font-bold uppercase tracking-wider text-ocean-deep hover:bg-surface-sunken"
+          >
             Cancel
           </button>
           <button
@@ -366,15 +444,28 @@ function MarkPaidModal({
     <Modal title="Confirm Settlement" onClose={onClose}>
       <div className="space-y-4 font-dmsans">
         <p className="text-sm text-ink-muted">
-          Mark <strong className="text-ocean-deep">{formatINR(payout.amountMinor)}</strong> to{" "}
-          <strong className="text-ocean-deep">{payout.therapist.name}</strong> as settled. This posts a permanent
-          ledger entry and cannot be undone.
+          Mark{" "}
+          <strong className="text-ocean-deep">
+            {formatINR(payout.amountMinor)}
+          </strong>{" "}
+          to{" "}
+          <strong className="text-ocean-deep">{payout.therapist.name}</strong>{" "}
+          as settled. This posts a permanent ledger entry and cannot be undone.
         </p>
         <Field label="Transfer reference">
-          <input value={reference} onChange={(e) => setReference(e.target.value)} className={inputClass} placeholder="e.g. NEFT123456" />
+          <input
+            value={reference}
+            onChange={(e) => setReference(e.target.value)}
+            className={inputClass}
+            placeholder="e.g. NEFT123456"
+          />
         </Field>
         <div className="flex justify-end gap-2 pt-2">
-          <button type="button" onClick={onClose} className="rounded-full border border-ocean/25 px-5 py-2.5 text-xs font-bold uppercase tracking-wider text-ocean-deep hover:bg-surface-sunken">
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-full border border-ocean/25 px-5 py-2.5 text-xs font-bold uppercase tracking-wider text-ocean-deep hover:bg-surface-sunken"
+          >
             Back
           </button>
           <button

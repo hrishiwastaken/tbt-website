@@ -19,7 +19,9 @@ export const GET = handleApi(async (request: Request) => {
   const { searchParams } = new URL(request.url);
 
   const fromParam = searchParams.get("from");
-  const from = fromParam ? new Date(`${fromParam}T00:00:00`) : startOfWeek(new Date());
+  const from = fromParam
+    ? new Date(`${fromParam}T00:00:00`)
+    : startOfWeek(new Date());
   const to = new Date(from);
   to.setDate(to.getDate() + 6);
   to.setHours(23, 59, 59, 999);
@@ -29,9 +31,20 @@ export const GET = handleApi(async (request: Request) => {
       where: {
         therapistId,
         dateTime: { gte: from, lte: to },
-        status: { in: ["PENDING", "AWAITING_PAYMENT", "CONFIRMED", "COMPLETED", "NO_SHOW"] },
+        status: {
+          in: [
+            "PENDING",
+            "AWAITING_PAYMENT",
+            "CONFIRMED",
+            "COMPLETED",
+            "NO_SHOW",
+          ],
+        },
       },
-      include: { client: { select: { name: true } }, service: { select: { name: true } } },
+      include: {
+        client: { select: { name: true } },
+        service: { select: { name: true } },
+      },
       orderBy: { dateTime: "asc" },
     }),
     prisma.therapistAvailability.findMany({

@@ -3,28 +3,28 @@
 @tailwind utilities;
 
 :root {
-  --color-warm-sand: #DAD7CA;
-  --color-muted-sage: #9FACA5;
-  --color-warm-tan: #DCCDB2;
-  --color-teal-sage: #698E8B;
-  --color-forest-slate: #55665D;
+  --color-warm-sand: #dad7ca;
+  --color-muted-sage: #9faca5;
+  --color-warm-tan: #dccdb2;
+  --color-teal-sage: #698e8b;
+  --color-forest-slate: #55665d;
   --color-near-black: #202623;
 
   /* Legacy mappings */
-  --color-forest: #698E8B;
-  --color-sage: #9FACA5;
-  --color-mist: #9FACA5;
-  --color-ivory: #FDFBF7;      /* Bright, warm off-white */
-  --color-sand: #DCCDB2;
-  --color-terracotta: #698E8B;
-  --color-charcoal: #55665D;
-  --color-warm-white: #FDFBF7;  /* Bright, warm off-white */
+  --color-forest: #698e8b;
+  --color-sage: #9faca5;
+  --color-mist: #9faca5;
+  --color-ivory: #fdfbf7; /* Bright, warm off-white */
+  --color-sand: #dccdb2;
+  --color-terracotta: #698e8b;
+  --color-charcoal: #55665d;
+  --color-warm-white: #fdfbf7; /* Bright, warm off-white */
 
   /* Admin / Therapist panel palette (ocean design system) */
-  --color-ocean: #5D768B;
-  --color-ocean-deep: #26333D;
-  --color-surface: #FFFCF8;
-  --color-surface-sunken: #F1E4D5;
+  --color-ocean: #5d768b;
+  --color-ocean-deep: #26333d;
+  --color-surface: #fffcf8;
+  --color-surface-sunken: #f1e4d5;
 }
 
 body {
@@ -82,7 +82,12 @@ select:focus {
 }
 
 /* Base styles for standard HTML elements */
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-family: var(--font-cormorant), serif;
   color: var(--color-charcoal);
 }
@@ -101,7 +106,8 @@ a {
 
 /* Float Animations for Organic Background Accents */
 @keyframes float-slow {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateY(0px) rotate(0deg);
   }
   50% {
@@ -110,7 +116,8 @@ a {
 }
 
 @keyframes float-reverse {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateY(0px) rotate(0deg);
   }
   50% {
@@ -128,20 +135,32 @@ a {
 
 /* Glassmorphic Panel Design Token */
 .glass-card {
-  background: linear-gradient(135deg, rgba(220, 205, 178, 0.65), rgba(159, 172, 165, 0.45));
+  background: linear-gradient(
+    135deg,
+    rgba(220, 205, 178, 0.65),
+    rgba(159, 172, 165, 0.45)
+  );
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid rgba(159, 172, 165, 0.55);
-  box-shadow: inset 0 1.5px 0 rgba(255, 255, 255, 0.5), 0 8px 32px rgba(85, 102, 93, 0.08);
+  box-shadow:
+    inset 0 1.5px 0 rgba(255, 255, 255, 0.5),
+    0 8px 32px rgba(85, 102, 93, 0.08);
 }
 
 /* Ocean-tinted glass variant used by the admin panel login */
 .glass-card-ocean {
-  background: linear-gradient(135deg, rgba(227, 201, 164, 0.55), rgba(93, 118, 139, 0.18));
+  background: linear-gradient(
+    135deg,
+    rgba(227, 201, 164, 0.55),
+    rgba(93, 118, 139, 0.18)
+  );
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid rgba(93, 118, 139, 0.25);
-  box-shadow: inset 0 1.5px 0 rgba(255, 255, 255, 0.5), 0 8px 32px rgba(38, 51, 61, 0.08);
+  box-shadow:
+    inset 0 1.5px 0 rgba(255, 255, 255, 0.5),
+    0 8px 32px rgba(38, 51, 61, 0.08);
 }
 
 /* Soft sculptural neumorphic surfaces for the admin/therapist panels --
@@ -149,29 +168,39 @@ a {
 .surface-raised {
   background: var(--color-surface);
   border-radius: 24px;
-  box-shadow: 8px 8px 20px rgba(93, 118, 139, 0.16), -8px -8px 20px rgba(255, 255, 255, 0.8);
+  box-shadow:
+    8px 8px 20px rgba(93, 118, 139, 0.16),
+    -8px -8px 20px rgba(255, 255, 255, 0.8);
   border: 1px solid rgba(93, 118, 139, 0.08);
 }
 
 .surface-inset {
   background: var(--color-surface-sunken);
   border-radius: 16px;
-  box-shadow: inset 4px 4px 10px rgba(93, 118, 139, 0.16), inset -4px -4px 10px rgba(255, 255, 255, 0.7);
+  box-shadow:
+    inset 4px 4px 10px rgba(93, 118, 139, 0.16),
+    inset -4px -4px 10px rgba(255, 255, 255, 0.7);
   border: 1px solid rgba(93, 118, 139, 0.08);
 }
 
 .surface-raised-interactive {
-  transition: transform 0.2s var(--ease-out-soft, cubic-bezier(0.23, 1, 0.32, 1)), box-shadow 0.2s ease;
+  transition:
+    transform 0.2s var(--ease-out-soft, cubic-bezier(0.23, 1, 0.32, 1)),
+    box-shadow 0.2s ease;
 }
 
 .surface-raised-interactive:hover {
   transform: translateY(-2px);
-  box-shadow: 10px 10px 24px rgba(93, 118, 139, 0.18), -10px -10px 24px rgba(255, 255, 255, 0.85);
+  box-shadow:
+    10px 10px 24px rgba(93, 118, 139, 0.18),
+    -10px -10px 24px rgba(255, 255, 255, 0.85);
 }
 
 .surface-raised-interactive:active {
   transform: translateY(0);
-  box-shadow: inset 4px 4px 10px rgba(93, 118, 139, 0.16), inset -4px -4px 10px rgba(255, 255, 255, 0.7);
+  box-shadow:
+    inset 4px 4px 10px rgba(93, 118, 139, 0.16),
+    inset -4px -4px 10px rgba(255, 255, 255, 0.7);
 }
 
 @media (prefers-reduced-motion: reduce) {

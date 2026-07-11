@@ -11,6 +11,7 @@ export default function Header() {
   const pathname = usePathname();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [lastPath, setLastPath] = useState(pathname);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -25,10 +26,20 @@ export default function Header() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Close mobile menu on page transition
-  useEffect(() => {
+  // Close the mobile menu on route change — handled during render (React's
+  // "reset state on change" pattern) so it doesn't require a setState-in-effect.
+  if (pathname !== lastPath) {
+    setLastPath(pathname);
     setIsMobileMenuOpen(false);
-  }, [pathname]);
+  }
+
+  // Lock body scroll while the full-screen mobile menu is open
+  useEffect(() => {
+    document.body.style.overflow = isMobileMenuOpen ? "hidden" : "";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isMobileMenuOpen]);
 
   const isDashboard =
     pathname.startsWith("/admin") ||
@@ -49,14 +60,18 @@ export default function Header() {
       <header
         className={`fixed top-0 left-0 right-0 z-40 transition-all duration-300 ${
           isScrolled
-            ? "bg-warm-sand/90 backdrop-blur-lg border-b border-muted-sage/20 shadow-warm-soft py-4"
-            : "bg-transparent py-6"
+            ? "bg-warm-sand/90 backdrop-blur-lg border-b border-muted-sage/20 shadow-warm-soft py-1.5"
+            : "bg-transparent py-2.5"
         }`}
       >
         <div className="max-w-7xl mx-auto px-6 md:px-12 flex items-center justify-between">
           {/* Logo */}
-          <Link href="/" className="z-50 flex items-center" aria-label="The Brain Tea — Home">
-            <Logo className="w-14 h-14 md:w-16 md:h-16 text-forest-slate shrink-0" />
+          <Link
+            href="/"
+            className="z-50 flex items-center"
+            aria-label="The Brain Tea — Home"
+          >
+            <Logo className="w-12 h-12 md:w-14 md:h-14 shrink-0 ring-1 ring-forest-slate/10 shadow-sm" />
           </Link>
 
           {/* Desktop Navigation */}
@@ -78,7 +93,11 @@ export default function Header() {
                     <motion.div
                       layoutId="activeUnderline"
                       className="absolute bottom-0 left-0 right-0 h-0.5 bg-teal-sage"
-                      transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                      transition={{
+                        type: "spring",
+                        stiffness: 380,
+                        damping: 30,
+                      }}
                     />
                   )}
                 </Link>
@@ -129,6 +148,7 @@ export default function Header() {
                 >
                   <Link
                     href={link.href}
+                    onClick={() => setIsMobileMenuOpen(false)}
                     className="font-cormorant text-3xl font-semibold hover:text-mist transition-colors"
                   >
                     {link.name}
@@ -143,6 +163,7 @@ export default function Header() {
               >
                 <Link
                   href="/book"
+                  onClick={() => setIsMobileMenuOpen(false)}
                   className="inline-block font-dmsans text-lg font-medium bg-warm-white text-forest px-8 py-3 rounded-full hover:bg-mist transition-colors shadow-lg"
                 >
                   Book Appointment

@@ -15,10 +15,15 @@ export default function SectionHeading({
   align = "center",
   className = "",
 }: SectionHeadingProps) {
-  const alignClasses = align === "center" ? "text-center items-center mx-auto" : "text-left items-start";
+  const alignClasses =
+    align === "center"
+      ? "text-center items-center mx-auto"
+      : "text-left items-start";
 
   return (
-    <div className={`flex flex-col gap-4 ${alignClasses} max-w-2xl ${className}`}>
+    <div
+      className={`flex flex-col gap-4 ${alignClasses} max-w-2xl ${className}`}
+    >
       {eyebrow && (
         <span className="text-xs md:text-sm font-semibold uppercase tracking-[0.2em] text-terracotta">
           {eyebrow}

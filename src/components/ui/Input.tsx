@@ -32,7 +32,11 @@ export function Input({
         </label>
       </div>
       {error && (
-        <p id={`${id}-error`} role="alert" className="mt-1.5 text-sm text-red-700">
+        <p
+          id={`${id}-error`}
+          role="alert"
+          className="mt-1.5 text-sm text-red-700"
+        >
           {error}
         </p>
       )}
@@ -67,7 +71,11 @@ export function Textarea({
         </label>
       </div>
       {error && (
-        <p id={`${id}-error`} role="alert" className="mt-1.5 text-sm text-red-700">
+        <p
+          id={`${id}-error`}
+          role="alert"
+          className="mt-1.5 text-sm text-red-700"
+        >
           {error}
         </p>
       )}

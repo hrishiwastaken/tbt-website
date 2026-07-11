@@ -30,7 +30,10 @@ export async function POST(request) {
 
     if (missing.length > 0) {
       console.error(`Login API configuration missing: ${missing.join(", ")}`);
-      return NextResponse.json({ error: NETLIFY_CONFIG_MESSAGE }, { status: 500 });
+      return NextResponse.json(
+        { error: NETLIFY_CONFIG_MESSAGE },
+        { status: 500 },
+      );
     }
 
     const { email, password, portal } = await request.json();
@@ -38,7 +41,7 @@ export async function POST(request) {
     if (!email || !password) {
       return NextResponse.json(
         { error: "Please enter your email and password" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -50,7 +53,7 @@ export async function POST(request) {
     if (!user) {
       return NextResponse.json(
         { error: "Invalid email or password" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -60,7 +63,7 @@ export async function POST(request) {
     if (!isPasswordValid) {
       return NextResponse.json(
         { error: "Invalid email or password" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -68,8 +71,11 @@ export async function POST(request) {
     // both staff roles (a therapist may still prefer the shared console).
     if (portal === "therapist" && user.role !== "THERAPIST") {
       return NextResponse.json(
-        { error: "This login is for consultants only. Use the admin console instead." },
-        { status: 403 }
+        {
+          error:
+            "This login is for consultants only. Use the admin console instead.",
+        },
+        { status: 403 },
       );
     }
 
@@ -98,12 +104,15 @@ export async function POST(request) {
       "Set-Cookie",
       `auth_token=${token}; Path=/; HttpOnly; ${
         isProd ? "Secure;" : ""
-      } SameSite=Strict; Max-Age=${7 * 24 * 60 * 60}`
+      } SameSite=Strict; Max-Age=${7 * 24 * 60 * 60}`,
     );
 
     return response;
   } catch (error) {
     console.error("Login API Error:", error);
-    return NextResponse.json({ error: authConfigError(error) }, { status: 500 });
+    return NextResponse.json(
+      { error: authConfigError(error) },
+      { status: 500 },
+    );
   }
 }

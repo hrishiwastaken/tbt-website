@@ -1,43 +1,25 @@
 import React from "react";
+import Image from "next/image";
 
 /**
- * The Brain Tea logo — faithful SVG recreation of the brand file:
- * an open thin circle sweeping into a dot at the upper right, with
- * the stacked "The Brain Tea" wordmark inside. Inherits currentColor.
+ * The Brain Tea brand logo — the exact brand asset (public/tbt-logo.png),
+ * presented as a circular badge. `className` controls the box size
+ * (e.g. "w-14 h-14"). The image is zoomed slightly so the emblem fills
+ * the circle instead of floating in the file's built-in padding.
  */
 export default function Logo({ className = "" }: { className?: string }) {
   return (
-    <svg
-      viewBox="0 0 240 240"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      className={className}
-      role="img"
-      aria-label="The Brain Tea"
+    <span
+      className={`relative inline-block overflow-hidden rounded-full ${className}`}
     >
-      {/* Open circle: from just left of top, counter-clockwise around
-          to the upper right where it terminates */}
-      <path
-        d="M 111.3 20.4 A 100 100 0 1 0 206.6 70"
-        stroke="currentColor"
-        strokeWidth="4"
-        strokeLinecap="round"
+      <Image
+        src="/tbt-logo.png"
+        alt="The Brain Tea"
+        fill
+        sizes="128px"
+        className="object-cover scale-[1.42]"
+        priority
       />
-      {/* Terminal dot in the opening */}
-      <circle cx="197" cy="56" r="8" fill="currentColor" />
-
-      {/* Stacked wordmark */}
-      <g fill="currentColor" fontFamily="var(--font-dm-sans), sans-serif" fontWeight="400">
-        <text x="72" y="80" fontSize="27" letterSpacing="0.5">
-          The
-        </text>
-        <text x="48" y="140" fontSize="54" letterSpacing="0.5">
-          Brain
-        </text>
-        <text x="96" y="196" fontSize="54" letterSpacing="0.5">
-          Tea
-        </text>
-      </g>
-    </svg>
+    </span>
   );
 }

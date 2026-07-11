@@ -1,18 +1,10 @@
 import React, { Suspense } from "react";
-import { 
-  Phone, 
-  Mail, 
-  MapPin, 
-  Clock, 
-  Instagram, 
-  Linkedin 
-} from "lucide-react";
+import { Phone, Mail, MapPin, Clock, Instagram, Linkedin } from "lucide-react";
 import ContactForm from "@/components/ContactForm";
 
 export default function Contact() {
   return (
     <div className="bg-ivory min-h-screen font-dmsans">
-      
       {/* PAGE HERO */}
       <section className="bg-sand pt-32 pb-20 border-b border-mist/20">
         <div className="max-w-4xl mx-auto px-6 text-center">
@@ -23,7 +15,8 @@ export default function Contact() {
             Contact & Book
           </h1>
           <p className="text-sage text-lg md:text-xl max-w-2xl mx-auto leading-relaxed">
-            Reach out in confidence. We are here to match you with the right support system and address your needs.
+            Reach out in confidence. We are here to match you with the right
+            support system and address your needs.
           </p>
         </div>
       </section>
@@ -31,7 +24,6 @@ export default function Contact() {
       {/* TWO-COLUMN LAYOUT */}
       <section className="py-24 max-w-7xl mx-auto px-6 md:px-12">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-start">
-          
           {/* Left Column: Contact details & Map */}
           <div className="lg:col-span-5 space-y-10">
             <div>
@@ -39,7 +31,9 @@ export default function Contact() {
                 Get In Touch
               </h2>
               <p className="text-sage text-sm md:text-base leading-relaxed mb-8">
-                Whether you want to schedule a session, check pricing tiers, or ask simple questions, we are ready to guide you. Use any of the options below.
+                Whether you want to schedule a session, check pricing tiers, or
+                ask simple questions, we are ready to guide you. Use any of the
+                options below.
               </p>
             </div>
 
@@ -50,7 +44,9 @@ export default function Contact() {
                   <MapPin className="w-5 h-5" />
                 </div>
                 <div>
-                  <h4 className="font-cormorant text-lg font-semibold text-charcoal">Clinic Address</h4>
+                  <h4 className="font-cormorant text-lg font-semibold text-charcoal">
+                    Clinic Address
+                  </h4>
                   <p className="font-dmsans text-sm text-sage leading-relaxed mt-1">
                     12, Green Meadow Lane, Sector 4,
                     <br />
@@ -64,7 +60,9 @@ export default function Contact() {
                   <Phone className="w-5 h-5" />
                 </div>
                 <div>
-                  <h4 className="font-cormorant text-lg font-semibold text-charcoal">Phone & WhatsApp</h4>
+                  <h4 className="font-cormorant text-lg font-semibold text-charcoal">
+                    Phone & WhatsApp
+                  </h4>
                   <p className="font-dmsans text-sm text-sage leading-relaxed mt-1">
                     +91 75584 93155
                   </p>
@@ -76,7 +74,9 @@ export default function Contact() {
                   <Mail className="w-5 h-5" />
                 </div>
                 <div>
-                  <h4 className="font-cormorant text-lg font-semibold text-charcoal">Email Communication</h4>
+                  <h4 className="font-cormorant text-lg font-semibold text-charcoal">
+                    Email Communication
+                  </h4>
                   <p className="font-dmsans text-sm text-sage leading-relaxed mt-1">
                     contact@thebraintea.com
                   </p>
@@ -88,7 +88,9 @@ export default function Contact() {
                   <Clock className="w-5 h-5" />
                 </div>
                 <div>
-                  <h4 className="font-cormorant text-lg font-semibold text-charcoal">Operating Hours</h4>
+                  <h4 className="font-cormorant text-lg font-semibold text-charcoal">
+                    Operating Hours
+                  </h4>
                   <p className="font-dmsans text-sm text-sage leading-relaxed mt-1">
                     Monday – Friday: 9:00 AM – 7:00 PM
                     <br />
@@ -100,18 +102,18 @@ export default function Contact() {
 
             {/* Social Icons */}
             <div className="flex items-center gap-4 pt-2">
-              <a 
-                href="https://instagram.com" 
-                target="_blank" 
+              <a
+                href="https://instagram.com"
+                target="_blank"
                 rel="noopener noreferrer"
                 className="p-3 bg-sand hover:bg-mist/30 hover:text-forest rounded-full text-sage transition-all"
                 aria-label="Instagram Link"
               >
                 <Instagram className="w-5 h-5" />
               </a>
-              <a 
-                href="https://linkedin.com" 
-                target="_blank" 
+              <a
+                href="https://linkedin.com"
+                target="_blank"
                 rel="noopener noreferrer"
                 className="p-3 bg-sand hover:bg-mist/30 hover:text-forest rounded-full text-sage transition-all"
                 aria-label="LinkedIn Link"
@@ -128,7 +130,10 @@ export default function Contact() {
                 src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3502.5620138981146!2d77.218224!3d28.613939!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x390cfd5d34190c1f%3A0x63351ec30c5e7b57!2sConnaught%20Place%2C%20New%20Delhi%2C%20Delhi%20110001!5e0!3m2!1sen!2sin!4v1700000000000!5m2!1sen!2sin"
                 width="100%"
                 height="100%"
-                style={{ border: 0, filter: "grayscale(1) contrast(0.9) brightness(0.95)" }}
+                style={{
+                  border: 0,
+                  filter: "grayscale(1) contrast(0.9) brightness(0.95)",
+                }}
                 allowFullScreen={false}
                 loading="lazy"
                 referrerPolicy="no-referrer-when-downgrade"
@@ -138,18 +143,18 @@ export default function Contact() {
 
           {/* Right Column: Appointment Request Form */}
           <div className="lg:col-span-7">
-            <Suspense fallback={
-              <div className="bg-warm-white p-8 rounded-2xl shadow-warm-soft border border-mist/20 text-center py-20 font-dmsans text-sage">
-                Loading Request Form...
-              </div>
-            }>
+            <Suspense
+              fallback={
+                <div className="bg-warm-white p-8 rounded-2xl shadow-warm-soft border border-mist/20 text-center py-20 font-dmsans text-sage">
+                  Loading Request Form...
+                </div>
+              }
+            >
               <ContactForm />
             </Suspense>
           </div>
-
         </div>
       </section>
-
     </div>
   );
 }

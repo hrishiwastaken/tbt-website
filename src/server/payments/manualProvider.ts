@@ -24,7 +24,11 @@ export const manualProvider: PaymentProvider = {
   async createIntent(input: CreateIntentInput): Promise<PaymentIntentResult> {
     // Deterministic order id from the idempotency key: retrying the same
     // request yields the same order instead of a duplicate.
-    const hash = crypto.createHash("sha256").update(input.idempotencyKey).digest("hex").slice(0, 16);
+    const hash = crypto
+      .createHash("sha256")
+      .update(input.idempotencyKey)
+      .digest("hex")
+      .slice(0, 16);
     return {
       providerOrderId: `manual_${hash}`,
       clientAction: { type: "none" },
@@ -34,7 +38,10 @@ export const manualProvider: PaymentProvider = {
   async verifyPayment(input: VerifyPaymentInput): Promise<VerificationResult> {
     const utr = input.proof?.utr ?? input.providerPaymentId;
     if (!utr || !UTR_PATTERN.test(utr)) {
-      return { ok: false, reason: "A valid 12-digit UPI reference (UTR) is required" };
+      return {
+        ok: false,
+        reason: "A valid 12-digit UPI reference (UTR) is required",
+      };
     }
     return { ok: true, providerPaymentId: utr };
   },
@@ -46,8 +53,16 @@ export const manualProvider: PaymentProvider = {
 
   async refund(input: RefundInput): Promise<RefundResult> {
     // Refunds are executed out-of-band; record intent immediately.
-    const hash = crypto.createHash("sha256").update(input.idempotencyKey).digest("hex").slice(0, 16);
-    return { ok: true, providerRefundId: `manual_rf_${hash}`, status: "SUCCEEDED" };
+    const hash = crypto
+      .createHash("sha256")
+      .update(input.idempotencyKey)
+      .digest("hex")
+      .slice(0, 16);
+    return {
+      ok: true,
+      providerRefundId: `manual_rf_${hash}`,
+      status: "SUCCEEDED",
+    };
   },
 
   async fetchPaymentStatus(): Promise<"UNKNOWN"> {

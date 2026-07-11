@@ -20,8 +20,9 @@ export default function InternshipApplicationForm() {
           Thanks for your interest!
         </h3>
         <p className="text-sm text-charcoal/80 leading-relaxed">
-          This is a prototype of the application flow -- our real intake process isn&apos;t
-          connected yet. Please reach out via the Contact page in the meantime.
+          This is a prototype of the application flow -- our real intake process
+          isn&apos;t connected yet. Please reach out via the Contact page in the
+          meantime.
         </p>
       </Surface>
     );
@@ -44,7 +45,10 @@ export default function InternshipApplicationForm() {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <label htmlFor="internshipType" className="text-xs font-bold tracking-wider uppercase text-charcoal/80 block mb-2">
+            <label
+              htmlFor="internshipType"
+              className="text-xs font-bold tracking-wider uppercase text-charcoal/80 block mb-2"
+            >
               Internship Type *
             </label>
             <select
@@ -57,14 +61,24 @@ export default function InternshipApplicationForm() {
                 Select one
               </option>
               <option value="graduate">Graduate -- Administrative Focus</option>
-              <option value="postgraduate">Postgraduate -- Clinical Focus</option>
+              <option value="postgraduate">
+                Postgraduate -- Clinical Focus
+              </option>
             </select>
           </div>
-          <Input label="Preferred Start Date" id="startDate" type="date" required />
+          <Input
+            label="Preferred Start Date"
+            id="startDate"
+            type="date"
+            required
+          />
         </div>
         <Textarea label="Statement of Purpose" id="sop" required rows={5} />
         <div>
-          <label htmlFor="resume" className="text-xs font-bold tracking-wider uppercase text-charcoal/80 block mb-2">
+          <label
+            htmlFor="resume"
+            className="text-xs font-bold tracking-wider uppercase text-charcoal/80 block mb-2"
+          >
             Resume Upload *
           </label>
           <input

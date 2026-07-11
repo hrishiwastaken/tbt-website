@@ -42,7 +42,9 @@ export interface PaymentSuccessInput {
 }
 
 /** Postings for a successfully collected charge. */
-export function paymentSuccessPostings(input: PaymentSuccessInput): LedgerPosting[] {
+export function paymentSuccessPostings(
+  input: PaymentSuccessInput,
+): LedgerPosting[] {
   const split = splitPayment(input);
   const ref = input.invoiceNumber ? ` (${input.invoiceNumber})` : "";
   const base = {
@@ -87,7 +89,7 @@ export function paymentSuccessPostings(input: PaymentSuccessInput): LedgerPostin
       entryType: "PLATFORM_REVENUE",
       amountMinor: split.platformMinor,
       description: `Platform share recognised${ref}`,
-    }
+    },
   );
   return postings;
 }

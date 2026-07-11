@@ -16,7 +16,7 @@ export interface AuditInput {
 
 export async function recordAudit(
   input: AuditInput,
-  tx: Prisma.TransactionClient = prisma
+  tx: Prisma.TransactionClient = prisma,
 ): Promise<void> {
   await tx.auditLog.create({
     data: {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   IndianRupee,
   Landmark,
@@ -54,7 +54,11 @@ interface Kpis {
 
 interface AnalyticsPayload {
   kpis: Kpis;
-  series: { revenue: ChartDatum[]; bookings: ChartDatum[]; clients: ChartDatum[] };
+  series: {
+    revenue: ChartDatum[];
+    bookings: ChartDatum[];
+    clients: ChartDatum[];
+  };
   statusDistribution: { status: string; count: number }[];
   consultantPerformance: {
     therapistId: string;
@@ -87,30 +91,32 @@ export default function AdminDashboardPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  const fetchAnalytics = useCallback(async () => {
-    if (range === "custom" && (!custom.from || !custom.to)) return;
-    setLoading(true);
-    setError("");
-    try {
-      const params = new URLSearchParams({ range });
-      if (range === "custom") {
-        params.set("from", custom.from);
-        params.set("to", custom.to);
-      }
-      const res = await fetch(`/api/admin/analytics?${params}`);
-      const payload = await res.json();
-      if (!res.ok) throw new Error(payload.error || "Failed to load analytics");
-      setData(payload);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load analytics");
-    } finally {
-      setLoading(false);
-    }
-  }, [range, custom]);
-
   useEffect(() => {
-    fetchAnalytics();
-  }, [fetchAnalytics]);
+    if (range === "custom" && (!custom.from || !custom.to)) return;
+    const load = async () => {
+      setLoading(true);
+      setError("");
+      try {
+        const params = new URLSearchParams({ range });
+        if (range === "custom") {
+          params.set("from", custom.from);
+          params.set("to", custom.to);
+        }
+        const res = await fetch(`/api/admin/analytics?${params}`);
+        const payload = await res.json();
+        if (!res.ok)
+          throw new Error(payload.error || "Failed to load analytics");
+        setData(payload);
+      } catch (err) {
+        setError(
+          err instanceof Error ? err.message : "Failed to load analytics",
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
+  }, [range, custom]);
 
   const kpis = data?.kpis;
 
@@ -118,12 +124,19 @@ export default function AdminDashboardPage() {
     <div className="space-y-8 animate-[fadeIn_0.5s_ease-out]">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="mb-2 font-cormorant text-4xl font-semibold text-ocean-deep">Practice Overview</h1>
+          <h1 className="mb-2 font-cormorant text-4xl font-semibold text-ocean-deep">
+            Practice Overview
+          </h1>
           <p className="font-dmsans text-sm text-ink-muted">
             Live financials and clinical operations, aggregated from the ledger.
           </p>
         </div>
-        <RangeFilter value={range} onChange={setRange} custom={custom} onCustomChange={setCustom} />
+        <RangeFilter
+          value={range}
+          onChange={setRange}
+          custom={custom}
+          onCustomChange={setCustom}
+        />
       </div>
 
       <ErrorNote message={error} />
@@ -161,15 +174,28 @@ export default function AdminDashboardPage() {
 
           {/* Payables + bookings KPIs */}
           <div className="grid grid-cols-2 gap-5 sm:grid-cols-3 lg:grid-cols-6">
-            <KpiCard label="Consultant Payable" value={formatINR(kpis.consultantPayableMinor)} hint="Unsettled balance" />
+            <KpiCard
+              label="Consultant Payable"
+              value={formatINR(kpis.consultantPayableMinor)}
+              hint="Unsettled balance"
+            />
             <KpiCard
               label="Pending Payouts"
               value={formatINR(kpis.pendingPayoutsMinor)}
               hint="Queued for settlement"
               icon={<Hourglass size={14} />}
             />
-            <KpiCard label="Paid Out" value={formatINR(kpis.consultantPaidMinor)} hint="Lifetime settled" />
-            <KpiCard label="Refunds" value={formatINR(kpis.refundsMinor)} hint={`${kpis.refundedBookings} bookings`} icon={<Undo2 size={14} />} />
+            <KpiCard
+              label="Paid Out"
+              value={formatINR(kpis.consultantPaidMinor)}
+              hint="Lifetime settled"
+            />
+            <KpiCard
+              label="Refunds"
+              value={formatINR(kpis.refundsMinor)}
+              hint={`${kpis.refundedBookings} bookings`}
+              icon={<Undo2 size={14} />}
+            />
             <KpiCard
               label="Bookings"
               value={kpis.totalBookings}
@@ -185,10 +211,29 @@ export default function AdminDashboardPage() {
           </div>
 
           <div className="grid grid-cols-2 gap-5 lg:grid-cols-4">
-            <KpiCard label="Active Consultants" value={kpis.activeConsultants} hint="Approved & accepting bookings" icon={<HeartHandshake size={14} />} />
-            <KpiCard label="Active Clients" value={kpis.activeClients} hint="Booked within period" icon={<Users size={14} />} />
-            <KpiCard label="New Clients" value={kpis.newClients} hint="Registered within period" icon={<UserPlus size={14} />} />
-            <KpiCard label="Total Clients" value={kpis.totalClients} hint="All-time registrations" />
+            <KpiCard
+              label="Active Consultants"
+              value={kpis.activeConsultants}
+              hint="Approved & accepting bookings"
+              icon={<HeartHandshake size={14} />}
+            />
+            <KpiCard
+              label="Active Clients"
+              value={kpis.activeClients}
+              hint="Booked within period"
+              icon={<Users size={14} />}
+            />
+            <KpiCard
+              label="New Clients"
+              value={kpis.newClients}
+              hint="Registered within period"
+              icon={<UserPlus size={14} />}
+            />
+            <KpiCard
+              label="Total Clients"
+              value={kpis.totalClients}
+              hint="All-time registrations"
+            />
           </div>
         </>
       )}
@@ -196,30 +241,60 @@ export default function AdminDashboardPage() {
       {data && (
         <>
           <div className="grid grid-cols-1 items-start gap-6 xl:grid-cols-2">
-            <Panel title="Revenue Trend" subtitle="Gross collections vs platform and consultant share, from ledger entries.">
+            <Panel
+              title="Revenue Trend"
+              subtitle="Gross collections vs platform and consultant share, from ledger entries."
+            >
               <LineAreaChart
                 data={data.series.revenue}
                 series={[
-                  { key: "gross", label: "Gross", color: CHART_COLORS.blue, area: true },
-                  { key: "platform", label: "Platform", color: CHART_COLORS.ochre },
-                  { key: "consultant", label: "Consultant", color: CHART_COLORS.violet },
+                  {
+                    key: "gross",
+                    label: "Gross",
+                    color: CHART_COLORS.blue,
+                    area: true,
+                  },
+                  {
+                    key: "platform",
+                    label: "Platform",
+                    color: CHART_COLORS.ochre,
+                  },
+                  {
+                    key: "consultant",
+                    label: "Consultant",
+                    color: CHART_COLORS.violet,
+                  },
                 ]}
                 valueFormat={compactINR}
               />
             </Panel>
 
-            <Panel title="Bookings" subtitle="Sessions booked per period, with completions and cancellations.">
+            <Panel
+              title="Bookings"
+              subtitle="Sessions booked per period, with completions and cancellations."
+            >
               <BarChart
                 data={data.series.bookings}
                 series={[
                   { key: "total", label: "Booked", color: CHART_COLORS.blue },
-                  { key: "completed", label: "Completed", color: CHART_COLORS.ochre },
-                  { key: "cancelled", label: "Cancelled", color: CHART_COLORS.rosewood },
+                  {
+                    key: "completed",
+                    label: "Completed",
+                    color: CHART_COLORS.ochre,
+                  },
+                  {
+                    key: "cancelled",
+                    label: "Cancelled",
+                    color: CHART_COLORS.rosewood,
+                  },
                 ]}
               />
             </Panel>
 
-            <Panel title="Appointment Status" subtitle="Lifecycle outcome of bookings created in the period.">
+            <Panel
+              title="Appointment Status"
+              subtitle="Lifecycle outcome of bookings created in the period."
+            >
               <DonutChart
                 centerLabel="Bookings"
                 slices={data.statusDistribution.map((s) => ({
@@ -230,18 +305,29 @@ export default function AdminDashboardPage() {
               />
             </Panel>
 
-            <Panel title="Client Growth" subtitle="New registrations and cumulative client base.">
+            <Panel
+              title="Client Growth"
+              subtitle="New registrations and cumulative client base."
+            >
               <LineAreaChart
                 data={data.series.clients}
                 series={[
-                  { key: "cumulative", label: "Total clients", color: CHART_COLORS.blue, area: true },
+                  {
+                    key: "cumulative",
+                    label: "Total clients",
+                    color: CHART_COLORS.blue,
+                    area: true,
+                  },
                   { key: "new", label: "New", color: CHART_COLORS.ochre },
                 ]}
               />
             </Panel>
           </div>
 
-          <Panel title="Consultant Performance" subtitle="Gross revenue attributed per consultant in the period, with accrued commission.">
+          <Panel
+            title="Consultant Performance"
+            subtitle="Gross revenue attributed per consultant in the period, with accrued commission."
+          >
             <HBarList
               items={data.consultantPerformance.map((c) => ({
                 label: c.name,

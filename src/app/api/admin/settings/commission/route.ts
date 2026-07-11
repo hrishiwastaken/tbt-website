@@ -2,7 +2,10 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { handleApi, parseBody, requireAdmin } from "@/server/http";
-import { getDefaultCommissionBps, setDefaultCommissionBps } from "@/server/services/commissionService";
+import {
+  getDefaultCommissionBps,
+  setDefaultCommissionBps,
+} from "@/server/services/commissionService";
 
 export const GET = handleApi(async (request: Request) => {
   await requireAdmin(request);
