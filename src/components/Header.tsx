@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X } from "lucide-react";
 import Logo from "./Logo";
+import { NavLink } from "./ui/NavLink";
 
 export default function Header() {
   const pathname = usePathname();
@@ -64,7 +65,7 @@ export default function Header() {
             {navLinks.map((link) => {
               const isActive = pathname === link.href;
               return (
-                <Link
+                <NavLink
                   key={link.name}
                   href={link.href}
                   className={`font-dmsans text-sm font-medium tracking-wide transition-colors relative py-1 ${
@@ -81,7 +82,7 @@ export default function Header() {
                       transition={{ type: "spring", stiffness: 380, damping: 30 }}
                     />
                   )}
-                </Link>
+                </NavLink>
               );
             })}
 
@@ -127,12 +128,12 @@ export default function Header() {
                   transition={{ delay: 0.1 * index }}
                   key={link.name}
                 >
-                  <Link
+                  <NavLink
                     href={link.href}
                     className="font-cormorant text-3xl font-semibold hover:text-mist transition-colors"
                   >
                     {link.name}
-                  </Link>
+                  </NavLink>
                 </motion.div>
               ))}
 
