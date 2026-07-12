@@ -20,7 +20,8 @@ export interface PaymentIntentResult {
    * What the client should do next. "none" providers (manual/offline)
    * complete out-of-band; gateway providers return a checkout payload.
    */
-  clientAction: { type: "none" } | { type: "checkout"; payload: Record<string, unknown> };
+  clientAction:
+    { type: "none" } | { type: "checkout"; payload: Record<string, unknown> };
 }
 
 export interface VerifyPaymentInput {
@@ -31,8 +32,7 @@ export interface VerifyPaymentInput {
 }
 
 export type VerificationResult =
-  | { ok: true; providerPaymentId: string }
-  | { ok: false; reason: string };
+  { ok: true; providerPaymentId: string } | { ok: false; reason: string };
 
 export interface WebhookParseResult {
   /** Provider's unique event id — used for replay-safe dedupe. */
@@ -60,8 +60,13 @@ export interface PaymentProvider {
   createIntent(input: CreateIntentInput): Promise<PaymentIntentResult>;
   verifyPayment(input: VerifyPaymentInput): Promise<VerificationResult>;
   /** Validate signature + parse a raw webhook request body. Throws on bad signature. */
-  parseWebhook(rawBody: string, headers: Record<string, string>): Promise<WebhookParseResult>;
+  parseWebhook(
+    rawBody: string,
+    headers: Record<string, string>,
+  ): Promise<WebhookParseResult>;
   refund(input: RefundInput): Promise<RefundResult>;
   /** Poll provider for the authoritative status of a payment (reconciliation). */
-  fetchPaymentStatus(providerPaymentId: string): Promise<"SUCCEEDED" | "FAILED" | "PENDING" | "UNKNOWN">;
+  fetchPaymentStatus(
+    providerPaymentId: string,
+  ): Promise<"SUCCEEDED" | "FAILED" | "PENDING" | "UNKNOWN">;
 }

@@ -3,7 +3,9 @@
 
 export function assertMinorUnits(value: number, label = "amount"): number {
   if (!Number.isSafeInteger(value)) {
-    throw new Error(`${label} must be an integer amount in minor units, got ${value}`);
+    throw new Error(
+      `${label} must be an integer amount in minor units, got ${value}`,
+    );
   }
   return value;
 }
@@ -17,7 +19,10 @@ export function minorToRupees(minor: number): number {
 }
 
 /** "₹1,234.50" — for API payloads consumed directly by the UI. */
-export function formatINR(minor: number, opts: { showPaise?: boolean } = {}): string {
+export function formatINR(
+  minor: number,
+  opts: { showPaise?: boolean } = {},
+): string {
   const { showPaise = false } = opts;
   const rupees = minor / 100;
   return rupees.toLocaleString("en-IN", {

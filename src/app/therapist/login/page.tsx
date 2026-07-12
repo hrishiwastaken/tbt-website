@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import Surface from "../../../components/ui/Surface";
 import { SITE_NAME } from "../../../lib/site";
 
 export default function TherapistLoginPage() {
@@ -39,10 +38,16 @@ export default function TherapistLoginPage() {
   };
 
   return (
-    <main className="min-h-screen bg-ivory flex flex-col justify-center items-center px-6 font-dmsans">
-      <Surface variant="raised" radius="panel" className="w-full max-w-md p-8 md:p-12">
+    <main
+      data-panel
+      className="min-h-screen bg-panel-ivory flex flex-col justify-center items-center px-6 font-dmsans"
+    >
+      <div className="surface-raised rounded-panel w-full max-w-md p-8 md:p-12">
         <div className="text-center mb-8">
-          <Link href="/" className="font-cormorant font-semibold text-3xl text-ocean-deep block mb-2">
+          <Link
+            href="/"
+            className="font-cormorant font-semibold text-3xl text-ocean-deep block mb-2"
+          >
             {SITE_NAME}
           </Link>
           <span className="text-xs font-bold tracking-widest text-ocean uppercase block">
@@ -65,7 +70,7 @@ export default function TherapistLoginPage() {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="you@madhumaticlinic.com"
+              placeholder="you@thebraintea.com"
               className="w-full bg-surface border-t-0 border-l-0 border-r-0 border-b border-ocean/25 focus:ring-0 focus:border-ocean text-ink py-2 px-0 transition-colors text-base"
               required
               disabled={loading}
@@ -100,11 +105,14 @@ export default function TherapistLoginPage() {
           <Link href="/" className="hover:text-ocean-deep transition-colors">
             ← Main Site
           </Link>
-          <Link href="/admin/login" className="hover:text-ocean-deep transition-colors">
+          <Link
+            href="/admin/login"
+            className="hover:text-ocean-deep transition-colors"
+          >
             Admin Login →
           </Link>
         </div>
-      </Surface>
+      </div>
     </main>
   );
 }

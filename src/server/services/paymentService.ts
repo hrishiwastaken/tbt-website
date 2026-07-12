@@ -1,7 +1,11 @@
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { assertTransition } from "../domain/bookingStatus";
-import { paymentSuccessPostings, refundPostings, type LedgerPosting } from "../domain/postings";
+import {
+  paymentSuccessPostings,
+  refundPostings,
+  type LedgerPosting,
+} from "../domain/postings";
 import { getPaymentProvider } from "../payments/registry";
 import { badRequest, conflict, notFound, type Session } from "../http";
 import { recordAudit } from "../audit";
@@ -13,7 +17,7 @@ import { recordAudit } from "../audit";
 
 export async function insertPostings(
   tx: Prisma.TransactionClient,
-  postings: LedgerPosting[]
+  postings: LedgerPosting[],
 ): Promise<void> {
   // createMany keeps the postings a single statement inside the enclosing tx
   await tx.ledgerEntry.createMany({
@@ -45,7 +49,9 @@ export async function createCharge(input: {
   tx?: Prisma.TransactionClient;
 }) {
   const db = input.tx ?? prisma;
-  const existing = await db.paymentRecord.findUnique({ where: { idempotencyKey: input.idempotencyKey } });
+  const existing = await db.paymentRecord.findUnique({
+    where: { idempotencyKey: input.idempotencyKey },
+  });
   if (existing) return existing;
 
   const booking = await db.booking.findUnique({
@@ -59,7 +65,11 @@ export async function createCharge(input: {
     bookingId: booking.id,
     amountMinor: booking.amountMinor - booking.discountMinor,
     currency: booking.currency,
-    customer: { name: booking.client.name, email: booking.client.email, phone: booking.client.phone },
+    customer: {
+      name: booking.client.name,
+      email: booking.client.email,
+      phone: booking.client.phone,
+    },
     idempotencyKey: input.idempotencyKey,
   });
 
@@ -129,7 +139,7 @@ export async function recordChargeSuccess(input: {
         taxMinor: booking.taxMinor,
         commissionBps: booking.commissionBps,
         invoiceNumber,
-      })
+      }),
     );
 
     const bookingUpdate: Prisma.BookingUpdateInput = {
@@ -159,9 +169,12 @@ export async function recordChargeSuccess(input: {
         action: "payment.charge_succeeded",
         entityType: "PaymentRecord",
         entityId: record.id,
-        detail: { bookingId: booking.id, providerPaymentId: input.providerPaymentId },
+        detail: {
+          bookingId: booking.id,
+          providerPaymentId: input.providerPaymentId,
+        },
       },
-      tx
+      tx,
     );
 
     return updated;
@@ -186,7 +199,9 @@ export async function executeRefund(input: {
     });
     if (!booking) throw notFound("Booking not found");
     if (booking.status !== "REFUND_PENDING") {
-      throw conflict("Booking must be in REFUND_PENDING before a refund can be executed");
+      throw conflict(
+        "Booking must be in REFUND_PENDING before a refund can be executed",
+      );
     }
 
     const charge = await tx.paymentRecord.findFirst({
@@ -199,19 +214,29 @@ export async function executeRefund(input: {
 
     // Original economics from the immutable ledger, not recomputed rates.
     const [grossEntry, commissionEntry] = await Promise.all([
-      tx.ledgerEntry.findFirst({ where: { paymentRecordId: charge.id, entryType: "GROSS_REVENUE" } }),
-      tx.ledgerEntry.findFirst({ where: { paymentRecordId: charge.id, entryType: "COMMISSION_ACCRUED" } }),
+      tx.ledgerEntry.findFirst({
+        where: { paymentRecordId: charge.id, entryType: "GROSS_REVENUE" },
+      }),
+      tx.ledgerEntry.findFirst({
+        where: { paymentRecordId: charge.id, entryType: "COMMISSION_ACCRUED" },
+      }),
     ]);
-    if (!grossEntry || !commissionEntry) throw conflict("Ledger entries for the original payment are missing");
+    if (!grossEntry || !commissionEntry)
+      throw conflict("Ledger entries for the original payment are missing");
 
-    const originalNetMinor = booking.amountMinor - booking.discountMinor - booking.taxMinor;
+    const originalNetMinor =
+      booking.amountMinor - booking.discountMinor - booking.taxMinor;
     const refundMinor = input.amountMinor ?? originalNetMinor;
     if (refundMinor <= 0 || refundMinor > originalNetMinor) {
-      throw badRequest("Refund amount must be positive and within the collected amount");
+      throw badRequest(
+        "Refund amount must be positive and within the collected amount",
+      );
     }
 
     const idempotencyKey = `refund:${booking.id}:${refundMinor}`;
-    const existing = await tx.paymentRecord.findUnique({ where: { idempotencyKey } });
+    const existing = await tx.paymentRecord.findUnique({
+      where: { idempotencyKey },
+    });
     if (existing && existing.status === "SUCCEEDED") return existing; // replay
 
     const provider = getPaymentProvider(charge.provider);
@@ -235,7 +260,9 @@ export async function executeRefund(input: {
           status: "SUCCEEDED",
           providerPaymentId: result.providerRefundId,
           idempotencyKey,
-          metadata: input.reason ? JSON.stringify({ reason: input.reason }) : null,
+          metadata: input.reason
+            ? JSON.stringify({ reason: input.reason })
+            : null,
         },
       }));
 
@@ -249,7 +276,7 @@ export async function executeRefund(input: {
         originalNetMinor,
         originalCommissionMinor: commissionEntry.amountMinor,
         reason: input.reason,
-      })
+      }),
     );
 
     assertTransition(booking.status, "REFUNDED");
@@ -280,7 +307,7 @@ export async function executeRefund(input: {
         entityId: booking.id,
         detail: { refundMinor, reason: input.reason },
       },
-      tx
+      tx,
     );
 
     return refundRecord;
@@ -291,7 +318,11 @@ export async function executeRefund(input: {
  * Webhook ingestion for future gateway adapters. Deduplicates on the
  * provider's event id, so replays are recorded but never re-processed.
  */
-export async function processWebhook(providerName: string, rawBody: string, headers: Record<string, string>) {
+export async function processWebhook(
+  providerName: string,
+  rawBody: string,
+  headers: Record<string, string>,
+) {
   const provider = getPaymentProvider(providerName);
   const parsed = await provider.parseWebhook(rawBody, headers); // throws on bad signature
 
@@ -305,7 +336,10 @@ export async function processWebhook(providerName: string, rawBody: string, head
       },
     });
   } catch (err) {
-    if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2002") {
+    if (
+      err instanceof Prisma.PrismaClientKnownRequestError &&
+      err.code === "P2002"
+    ) {
       return { status: "SKIPPED" as const, reason: "duplicate event" };
     }
     throw err;
@@ -314,7 +348,11 @@ export async function processWebhook(providerName: string, rawBody: string, head
   try {
     if (parsed.status === "SUCCEEDED" && parsed.providerOrderId) {
       const record = await prisma.paymentRecord.findFirst({
-        where: { provider: provider.name, providerOrderId: parsed.providerOrderId, kind: "CHARGE" },
+        where: {
+          provider: provider.name,
+          providerOrderId: parsed.providerOrderId,
+          kind: "CHARGE",
+        },
       });
       if (record && parsed.providerPaymentId) {
         await recordChargeSuccess({
@@ -324,14 +362,27 @@ export async function processWebhook(providerName: string, rawBody: string, head
       }
     }
     await prisma.webhookEvent.update({
-      where: { provider_externalId: { provider: provider.name, externalId: parsed.externalId } },
+      where: {
+        provider_externalId: {
+          provider: provider.name,
+          externalId: parsed.externalId,
+        },
+      },
       data: { status: "PROCESSED", processedAt: new Date() },
     });
     return { status: "PROCESSED" as const };
   } catch (err) {
     await prisma.webhookEvent.update({
-      where: { provider_externalId: { provider: provider.name, externalId: parsed.externalId } },
-      data: { status: "FAILED", error: err instanceof Error ? err.message : String(err) },
+      where: {
+        provider_externalId: {
+          provider: provider.name,
+          externalId: parsed.externalId,
+        },
+      },
+      data: {
+        status: "FAILED",
+        error: err instanceof Error ? err.message : String(err),
+      },
     });
     throw err;
   }

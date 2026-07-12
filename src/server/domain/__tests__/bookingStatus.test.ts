@@ -31,8 +31,12 @@ describe("booking state machine", () => {
   it("rejects nonsense transitions", () => {
     expect(canTransition("COMPLETED", "CONFIRMED")).toBe(false);
     expect(canTransition("CANCELLED", "CONFIRMED")).toBe(false);
-    expect(() => assertTransition("COMPLETED", "PENDING")).toThrow(InvalidTransitionError);
-    expect(() => assertTransition("GARBAGE", "CONFIRMED")).toThrow(InvalidTransitionError);
+    expect(() => assertTransition("COMPLETED", "PENDING")).toThrow(
+      InvalidTransitionError,
+    );
+    expect(() => assertTransition("GARBAGE", "CONFIRMED")).toThrow(
+      InvalidTransitionError,
+    );
   });
 
   it("releases slots only on terminal cancel/refund", () => {

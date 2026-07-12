@@ -4,9 +4,9 @@ type Variant = "raised" | "inset" | "flat";
 type Radius = "soft" | "surface" | "panel";
 
 const variantClasses: Record<Variant, string> = {
-  raised: "surface-raised",
-  inset: "surface-inset",
-  flat: "bg-surface border border-ocean/10",
+  raised: "glass-card shadow-warm-soft",
+  inset: "bg-warm-sand/40 border border-muted-sage/25",
+  flat: "bg-warm-white border border-muted-sage/25",
 };
 
 const radiusClasses: Record<Radius, string> = {
@@ -34,7 +34,9 @@ export default function Surface({
   return (
     <Component
       className={`${variantClasses[variant]} ${radiusClasses[radius]} ${
-        interactive && variant === "raised" ? "surface-raised-interactive" : ""
+        interactive && variant === "raised"
+          ? "transition-all duration-300 hover:-translate-y-1 hover:shadow-md"
+          : ""
       } ${className}`}
     >
       {children}

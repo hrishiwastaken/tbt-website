@@ -6,7 +6,11 @@ import {
   type BookingStatus,
 } from "../domain/bookingStatus";
 import { resolveBookingCommissionBps } from "./commissionService";
-import { createCharge, recordChargeSuccess, invoiceNumberFor } from "./paymentService";
+import {
+  createCharge,
+  recordChargeSuccess,
+  invoiceNumberFor,
+} from "./paymentService";
 import { getPaymentProvider } from "../payments/registry";
 import { badRequest, conflict, notFound, type Session } from "../http";
 import { recordAudit } from "../audit";
@@ -39,7 +43,9 @@ export interface CreateBookingInput {
  * Cancel AWAITING_PAYMENT holds whose TTL lapsed, freeing their slots.
  * Runs lazily ahead of availability reads and booking writes.
  */
-export async function releaseExpiredReservations(tx: Prisma.TransactionClient = prisma): Promise<number> {
+export async function releaseExpiredReservations(
+  tx: Prisma.TransactionClient = prisma,
+): Promise<number> {
   const expired = await tx.booking.findMany({
     where: { status: "AWAITING_PAYMENT", expiresAt: { lt: new Date() } },
     select: { id: true, status: true },
@@ -47,7 +53,10 @@ export async function releaseExpiredReservations(tx: Prisma.TransactionClient = 
   for (const booking of expired) {
     await tx.booking.update({
       where: { id: booking.id },
-      data: { status: "CANCELLED", cancellationReason: "Payment window expired" },
+      data: {
+        status: "CANCELLED",
+        cancellationReason: "Payment window expired",
+      },
     });
     await tx.bookingStatusHistory.create({
       data: {
@@ -64,14 +73,16 @@ export async function releaseExpiredReservations(tx: Prisma.TransactionClient = 
 }
 
 function isUniqueViolation(err: unknown): boolean {
-  return err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2002";
+  return (
+    err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2002"
+  );
 }
 
 async function validateSlotWithinSchedule(
   tx: Prisma.TransactionClient,
   therapistId: string,
   dateTime: Date,
-  durationMinutes: number
+  durationMinutes: number,
 ): Promise<void> {
   if (dateTime.getTime() <= Date.now()) {
     throw badRequest("Sessions must be booked for a future time");
@@ -83,27 +94,42 @@ async function validateSlotWithinSchedule(
   const slot = await tx.therapistAvailability.findFirst({
     where: { therapistId, dayOfWeek: dateTime.getDay(), startTime },
   });
-  if (!slot) throw conflict("The selected time is outside the consultant's working hours");
+  if (!slot)
+    throw conflict(
+      "The selected time is outside the consultant's working hours",
+    );
 
   const end = new Date(dateTime.getTime() + durationMinutes * 60000);
   const block = await tx.slotBlock.findFirst({
     where: { therapistId, startAt: { lt: end }, endAt: { gt: dateTime } },
   });
-  if (block) throw conflict("The consultant is unavailable at the selected time");
+  if (block)
+    throw conflict("The consultant is unavailable at the selected time");
 }
 
 export async function createBooking(input: CreateBookingInput) {
   const result = await prisma.$transaction(async (tx) => {
     await releaseExpiredReservations(tx);
 
-    const therapist = await tx.therapist.findUnique({ where: { slug: input.therapistSlug } });
+    const therapist = await tx.therapist.findUnique({
+      where: { slug: input.therapistSlug },
+    });
     if (!therapist || !therapist.isActive || therapist.status !== "APPROVED") {
-      throw notFound("Consultant not found or not currently accepting bookings");
+      throw notFound(
+        "Consultant not found or not currently accepting bookings",
+      );
     }
-    const service = await tx.service.findUnique({ where: { slug: input.serviceSlug } });
+    const service = await tx.service.findUnique({
+      where: { slug: input.serviceSlug },
+    });
     if (!service || !service.isActive) throw notFound("Service not found");
 
-    await validateSlotWithinSchedule(tx, therapist.id, input.dateTime, service.durationMinutes);
+    await validateSlotWithinSchedule(
+      tx,
+      therapist.id,
+      input.dateTime,
+      service.durationMinutes,
+    );
 
     const client = await tx.client.upsert({
       where: { email: input.client.email },
@@ -118,7 +144,9 @@ export async function createBooking(input: CreateBookingInput) {
 
     const commissionBps = await resolveBookingCommissionBps(therapist, tx);
     const payNow = input.paymentOption === "PAY_NOW";
-    const initialStatus: BookingStatus = payNow ? "AWAITING_PAYMENT" : "CONFIRMED";
+    const initialStatus: BookingStatus = payNow
+      ? "AWAITING_PAYMENT"
+      : "CONFIRMED";
 
     const booking = await tx.booking.create({
       data: {
@@ -131,7 +159,9 @@ export async function createBooking(input: CreateBookingInput) {
         commissionBps,
         status: initialStatus,
         paymentStatus: "UNPAID",
-        expiresAt: payNow ? new Date(Date.now() + RESERVATION_TTL_MINUTES * 60000) : null,
+        expiresAt: payNow
+          ? new Date(Date.now() + RESERVATION_TTL_MINUTES * 60000)
+          : null,
         invoiceNumber: payNow ? null : undefined,
       },
     });
@@ -148,18 +178,27 @@ export async function createBooking(input: CreateBookingInput) {
         fromStatus: null,
         toStatus: initialStatus,
         actorType: "CLIENT",
-        reason: payNow ? "Reservation created, awaiting payment" : "Booked with pay-at-clinic",
+        reason: payNow
+          ? "Reservation created, awaiting payment"
+          : "Booked with pay-at-clinic",
       },
     });
 
     // DB-level double-booking guard: unique(therapistId, startAt).
     try {
       await tx.bookingSlot.create({
-        data: { therapistId: therapist.id, startAt: input.dateTime, bookingId: booking.id },
+        data: {
+          therapistId: therapist.id,
+          startAt: input.dateTime,
+          bookingId: booking.id,
+        },
       });
     } catch (err) {
       if (isUniqueViolation(err)) {
-        throw conflict("The selected time slot is no longer available. Please pick another slot.", "SLOT_TAKEN");
+        throw conflict(
+          "The selected time slot is no longer available. Please pick another slot.",
+          "SLOT_TAKEN",
+        );
       }
       throw err;
     }
@@ -172,11 +211,16 @@ export async function createBooking(input: CreateBookingInput) {
   // reservation that expires and frees the slot automatically.
   if (input.paymentOption === "PAY_NOW") {
     const idempotencyKey = `charge:${result.booking.id}`;
-    const charge = await createCharge({ bookingId: result.booking.id, idempotencyKey });
+    const charge = await createCharge({
+      bookingId: result.booking.id,
+      idempotencyKey,
+    });
     const provider = getPaymentProvider(charge.provider);
     const verification = await provider.verifyPayment({
       providerOrderId: charge.providerOrderId ?? "",
-      proof: input.paymentProof?.utr ? { utr: input.paymentProof.utr } : undefined,
+      proof: input.paymentProof?.utr
+        ? { utr: input.paymentProof.utr }
+        : undefined,
     });
     if (verification.ok === false) {
       throw badRequest(verification.reason, "PAYMENT_VERIFICATION_FAILED");
@@ -221,7 +265,10 @@ export async function transitionBooking(input: {
       data.expiresAt = null;
     }
 
-    const updated = await tx.booking.update({ where: { id: booking.id }, data });
+    const updated = await tx.booking.update({
+      where: { id: booking.id },
+      data,
+    });
     await tx.bookingStatusHistory.create({
       data: {
         bookingId: booking.id,
@@ -241,10 +288,14 @@ export async function transitionBooking(input: {
         action: `booking.${input.toStatus.toLowerCase()}`,
         entityType: "Booking",
         entityId: booking.id,
-        detail: { from: booking.status, to: input.toStatus, reason: input.reason },
+        detail: {
+          from: booking.status,
+          to: input.toStatus,
+          reason: input.reason,
+        },
         ip: input.ip,
       },
-      tx
+      tx,
     );
     return updated;
   });
@@ -266,22 +317,38 @@ export async function rescheduleBooking(input: {
       include: { slot: true },
     });
     if (!booking) throw notFound("Booking not found");
-    if (!["PENDING", "AWAITING_PAYMENT", "CONFIRMED"].includes(booking.status)) {
-      throw conflict(`A ${booking.status.toLowerCase()} booking cannot be rescheduled`);
+    if (
+      !["PENDING", "AWAITING_PAYMENT", "CONFIRMED"].includes(booking.status)
+    ) {
+      throw conflict(
+        `A ${booking.status.toLowerCase()} booking cannot be rescheduled`,
+      );
     }
 
-    await validateSlotWithinSchedule(tx, booking.therapistId, input.newDateTime, booking.durationMinutes);
+    await validateSlotWithinSchedule(
+      tx,
+      booking.therapistId,
+      input.newDateTime,
+      booking.durationMinutes,
+    );
 
     if (booking.slot) {
       await tx.bookingSlot.delete({ where: { id: booking.slot.id } });
     }
     try {
       await tx.bookingSlot.create({
-        data: { therapistId: booking.therapistId, startAt: input.newDateTime, bookingId: booking.id },
+        data: {
+          therapistId: booking.therapistId,
+          startAt: input.newDateTime,
+          bookingId: booking.id,
+        },
       });
     } catch (err) {
       if (isUniqueViolation(err)) {
-        throw conflict("The new time slot is no longer available", "SLOT_TAKEN");
+        throw conflict(
+          "The new time slot is no longer available",
+          "SLOT_TAKEN",
+        );
       }
       throw err;
     }
@@ -309,10 +376,13 @@ export async function rescheduleBooking(input: {
         action: "booking.reschedule",
         entityType: "Booking",
         entityId: booking.id,
-        detail: { from: previous.toISOString(), to: input.newDateTime.toISOString() },
+        detail: {
+          from: previous.toISOString(),
+          to: input.newDateTime.toISOString(),
+        },
         ip: input.ip,
       },
-      tx
+      tx,
     );
     return updated;
   });

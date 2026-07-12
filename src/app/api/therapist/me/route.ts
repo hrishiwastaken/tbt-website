@@ -6,7 +6,9 @@ import { getDefaultCommissionBps } from "@/server/services/commissionService";
 export const GET = handleApi(async (request: Request) => {
   const { session, therapistId } = await requireTherapist(request);
 
-  const therapist = await prisma.therapist.findUnique({ where: { id: therapistId } });
+  const therapist = await prisma.therapist.findUnique({
+    where: { id: therapistId },
+  });
   if (!therapist) throw notFound("Consultant profile not found");
 
   const defaultBps = await getDefaultCommissionBps();

@@ -22,12 +22,24 @@ export function KpiCard({
   return (
     <div className="surface-raised rounded-surface flex flex-col justify-between p-5">
       <div className="mb-3 flex items-start justify-between gap-2">
-        <span className="font-dmsans text-[10px] font-bold uppercase tracking-wider text-ink-muted">{label}</span>
-        {icon && <span className="surface-inset flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-ocean">{icon}</span>}
+        <span className="font-dmsans text-[10px] font-bold uppercase tracking-wider text-ink-muted">
+          {label}
+        </span>
+        {icon && (
+          <span className="surface-inset flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-ocean">
+            {icon}
+          </span>
+        )}
       </div>
       <div>
-        <span className="block font-dmsans text-2xl font-bold tabular-nums text-ocean-deep">{value}</span>
-        {hint && <span className="mt-0.5 block font-dmsans text-[11px] font-medium text-ink-muted/80">{hint}</span>}
+        <span className="block font-dmsans text-2xl font-bold tabular-nums text-ocean-deep">
+          {value}
+        </span>
+        {hint && (
+          <span className="mt-0.5 block font-dmsans text-[11px] font-medium text-ink-muted/80">
+            {hint}
+          </span>
+        )}
       </div>
     </div>
   );
@@ -47,11 +59,19 @@ export function Panel({
   className?: string;
 }) {
   return (
-    <section className={`surface-raised rounded-surface p-6 md:p-8 ${className}`}>
+    <section
+      className={`surface-raised rounded-surface p-6 md:p-8 ${className}`}
+    >
       <div className="mb-5 flex flex-wrap items-start justify-between gap-3 border-b border-ocean/10 pb-3">
         <div>
-          <h3 className="font-cormorant text-2xl font-semibold text-ocean-deep">{title}</h3>
-          {subtitle && <p className="mt-0.5 font-dmsans text-xs text-ink-muted">{subtitle}</p>}
+          <h3 className="font-cormorant text-2xl font-semibold text-ocean-deep">
+            {title}
+          </h3>
+          {subtitle && (
+            <p className="mt-0.5 font-dmsans text-xs text-ink-muted">
+              {subtitle}
+            </p>
+          )}
         </div>
         {actions}
       </div>
@@ -68,10 +88,10 @@ const STATUS_TONES: Record<string, string> = {
   AWAITING_PAYMENT: "bg-gold/40 text-ocean-deep border-gold/60",
   CONFIRMED: "bg-ocean/10 text-ocean-deep border-ocean/25",
   COMPLETED: "bg-emerald-50 text-emerald-800 border-emerald-200",
-  CANCELLED: "bg-sand/30 text-ink-muted border-sand/50",
+  CANCELLED: "bg-panel-sand/30 text-ink-muted border-panel-sand/50",
   NO_SHOW: "bg-blush/60 text-ocean-deep border-blush",
   REFUND_PENDING: "bg-amber-50 text-amber-800 border-amber-200",
-  REFUNDED: "bg-sand/30 text-ink-muted border-sand/50",
+  REFUNDED: "bg-panel-sand/30 text-ink-muted border-panel-sand/50",
   // payment
   UNPAID: "bg-gold/40 text-ocean-deep border-gold/60",
   PAID: "bg-emerald-50 text-emerald-800 border-emerald-200",
@@ -85,9 +105,12 @@ const STATUS_TONES: Record<string, string> = {
 };
 
 export function StatusPill({ status }: { status: string }) {
-  const tone = STATUS_TONES[status] ?? "bg-ocean/10 text-ocean-deep border-ocean/20";
+  const tone =
+    STATUS_TONES[status] ?? "bg-ocean/10 text-ocean-deep border-ocean/20";
   return (
-    <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 font-dmsans text-[10px] font-bold uppercase tracking-wide ${tone}`}>
+    <span
+      className={`inline-flex items-center rounded-full border px-2.5 py-0.5 font-dmsans text-[10px] font-bold uppercase tracking-wide ${tone}`}
+    >
       {titleCase(status)}
     </span>
   );
@@ -138,7 +161,9 @@ export function RangeFilter({
           <input
             type="date"
             value={custom.from}
-            onChange={(e) => onCustomChange({ ...custom, from: e.target.value })}
+            onChange={(e) =>
+              onCustomChange({ ...custom, from: e.target.value })
+            }
             className="rounded-soft border border-ocean/20 bg-surface px-3 py-1.5 text-ink"
           />
           <span className="text-ink-muted">to</span>
@@ -176,7 +201,10 @@ export function Modal({
   }, [onClose]);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-ocean-deep/40 p-4 backdrop-blur-sm md:p-10" onMouseDown={onClose}>
+    <div
+      className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-ocean-deep/40 p-4 backdrop-blur-sm md:p-10"
+      onMouseDown={onClose}
+    >
       <div
         className={`surface-raised w-full rounded-panel bg-surface p-6 md:p-8 ${wide ? "max-w-4xl" : "max-w-xl"} animate-[fadeIn_0.2s_ease-out]`}
         onMouseDown={(e) => e.stopPropagation()}
@@ -184,7 +212,9 @@ export function Modal({
         aria-modal="true"
       >
         <div className="mb-5 flex items-center justify-between gap-4 border-b border-ocean/10 pb-3">
-          <h3 className="font-cormorant text-2xl font-semibold text-ocean-deep">{title}</h3>
+          <h3 className="font-cormorant text-2xl font-semibold text-ocean-deep">
+            {title}
+          </h3>
           <button
             type="button"
             onClick={onClose}
@@ -238,10 +268,18 @@ export function Pager({
   );
 }
 
-export function Field({ label, children }: { label: string; children: ReactNode }) {
+export function Field({
+  label,
+  children,
+}: {
+  label: string;
+  children: ReactNode;
+}) {
   return (
     <label className="block font-dmsans">
-      <span className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-ink-muted">{label}</span>
+      <span className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-ink-muted">
+        {label}
+      </span>
       {children}
     </label>
   );
@@ -260,5 +298,9 @@ export function ErrorNote({ message }: { message: string }) {
 }
 
 export function LoadingRow({ label = "Loading..." }: { label?: string }) {
-  return <div className="py-10 text-center font-dmsans text-sm italic text-ink-muted">{label}</div>;
+  return (
+    <div className="py-10 text-center font-dmsans text-sm italic text-ink-muted">
+      {label}
+    </div>
+  );
 }

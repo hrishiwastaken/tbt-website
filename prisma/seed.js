@@ -1,9 +1,10 @@
 /**
  * Seed script: builds a realistic ~200-day operating history — six
- * consultants at different career stages, ~50 clients, several hundred
- * bookings, a two-era commission-rate history, unavailability blocks, and
- * multi-cycle payout settlements — so every admin/therapist chart and KPI
- * has plentiful, presentable, ledger-accurate data to aggregate.
+ * consultants at different career stages, ~96 clients, a dense stream of
+ * bookings (a rising daily baseline, floored so no operating day is empty),
+ * a two-era commission-rate history, unavailability blocks, and multi-cycle
+ * payout settlements — so every admin/therapist chart and KPI has plentiful,
+ * presentable, ledger-accurate data to aggregate.
  *
  * All money is integer paise. Ledger postings here mirror
  * src/server/domain/postings.ts (kept in plain JS because seeding runs under
@@ -41,13 +42,23 @@ const addDays = (d, days) => {
   return out;
 };
 
-function splitPayment({ grossMinor, discountMinor = 0, taxMinor = 0, commissionBps }) {
+function splitPayment({
+  grossMinor,
+  discountMinor = 0,
+  taxMinor = 0,
+  commissionBps,
+}) {
   const netMinor = grossMinor - discountMinor - taxMinor;
   const commissionMinor = Math.round((netMinor * commissionBps) / 10000);
-  return { netMinor, commissionMinor, platformMinor: netMinor - commissionMinor };
+  return {
+    netMinor,
+    commissionMinor,
+    platformMinor: netMinor - commissionMinor,
+  };
 }
 
-const invoiceNumberFor = (bookingId, year) => `INV-${year}-${bookingId.slice(0, 6).toUpperCase()}`;
+const invoiceNumberFor = (bookingId, year) =>
+  `INV-${year}-${bookingId.slice(0, 6).toUpperCase()}`;
 
 // ── Commission rate history: two eras, oldest first ─────────────────────
 // Bookings snapshot whichever rate was in effect at their creation time
@@ -91,35 +102,78 @@ async function main() {
   // ── Commission default history (append-only) ──────────────────────────
   for (const era of COMMISSION_ERAS) {
     await prisma.commissionSetting.create({
-      data: { scope: "DEFAULT", commissionBps: era.commissionBps, effectiveFrom: era.effectiveFrom },
+      data: {
+        scope: "DEFAULT",
+        commissionBps: era.commissionBps,
+        effectiveFrom: era.effectiveFrom,
+      },
     });
   }
 
   // ── Services (prices in paise) ────────────────────────────────────────
   const serviceRows = [
-    ["Individual Therapy", "A focused, one-on-one session designed to explore personal narratives, address psychological blocks, and cultivate self-awareness.", 50, 150000, "individual-therapy"],
-    ["Couples Counseling", "Structured mediation to enhance relational dynamics, dismantle communication barriers, and restore intimacy.", 60, 220000, "couples-counseling"],
-    ["Somatic Experiencing", "A body-centric therapy focusing on trauma resolution, releasing trapped nervous system stress, and restoring equilibrium.", 50, 180000, "somatic-experiencing"],
-    ["Mental Health Assessment", "Comprehensive diagnostic evaluations using standardized psychometric tools to guide customized treatment plans.", 75, 250000, "mental-health-assessment"],
-    ["Career & Academic Counselling", "Structured guidance for career transitions, academic stress, and decision-making clarity.", 45, 140000, "career-academic-counselling"],
+    [
+      "Individual Therapy",
+      "A focused, one-on-one session designed to explore personal narratives, address psychological blocks, and cultivate self-awareness.",
+      50,
+      150000,
+      "individual-therapy",
+    ],
+    [
+      "Couples Counseling",
+      "Structured mediation to enhance relational dynamics, dismantle communication barriers, and restore intimacy.",
+      60,
+      220000,
+      "couples-counseling",
+    ],
+    [
+      "Somatic Experiencing",
+      "A body-centric therapy focusing on trauma resolution, releasing trapped nervous system stress, and restoring equilibrium.",
+      50,
+      180000,
+      "somatic-experiencing",
+    ],
+    [
+      "Mental Health Assessment",
+      "Comprehensive diagnostic evaluations using standardized psychometric tools to guide customized treatment plans.",
+      75,
+      250000,
+      "mental-health-assessment",
+    ],
+    [
+      "Career & Academic Counselling",
+      "Structured guidance for career transitions, academic stress, and decision-making clarity.",
+      45,
+      140000,
+      "career-academic-counselling",
+    ],
   ];
   const services = [];
-  for (const [name, description, durationMinutes, priceMinor, slug] of serviceRows) {
+  for (const [
+    name,
+    description,
+    durationMinutes,
+    priceMinor,
+    slug,
+  ] of serviceRows) {
     services.push(
-      await prisma.service.create({ data: { name, description, durationMinutes, priceMinor, slug } })
+      await prisma.service.create({
+        data: { name, description, durationMinutes, priceMinor, slug },
+      }),
     );
   }
 
   // ── Users & consultants ───────────────────────────────────────────────
   const adminUser = await prisma.user.create({
     data: {
-      email: "admin@madhumaticlinic.com",
+      email: "admin@thebraintea.com",
       passwordHash: await bcrypt.hash("AdminPass123!", 10),
       role: "ADMIN",
     },
   });
 
-  const PHOTO = (seed) => `https://images.unsplash.com/photo-${seed}?auto=format&fit=crop&w=800&q=80`;
+  const PHOTO = (seed) =>
+    `https://images.unsplash.com/photo-${seed}?auto=format&fit=crop&w=800&q=80`;
 
   // Each spec carries a `weight` (relative booking volume) and an
   // `activeFrom`/`activeTo` window bounding when they take bookings, so the
@@ -128,7 +182,7 @@ async function main() {
   // suspended partway through, and a pending applicant not yet bookable.
   const consultantSpecs = [
     {
-      email: "madhumati@madhumaticlinic.com",
+      email: "madhumati@thebraintea.com",
       password: "DrMadhumati123!",
       name: "Dr. Madhumati Dhumak",
       slug: "dr-madhumati-dhumak",
@@ -143,7 +197,7 @@ async function main() {
       schedule: { days: [1, 2, 3, 4, 5], hours: [9, 10, 11, 13, 14, 15, 16] },
     },
     {
-      email: "rohan@madhumaticlinic.com",
+      email: "rohan@thebraintea.com",
       password: "DrRohan123!",
       name: "Dr. Rohan Gupta",
       slug: "dr-rohan-gupta",
@@ -158,7 +212,7 @@ async function main() {
       schedule: { days: [1, 2, 3, 4, 5, 6], hours: [9, 10, 11] },
     },
     {
-      email: "kavita@madhumaticlinic.com",
+      email: "kavita@thebraintea.com",
       password: "DrKavita123!",
       name: "Dr. Kavita Rao",
       slug: "dr-kavita-rao",
@@ -173,7 +227,7 @@ async function main() {
       schedule: { days: [1, 2, 3, 4], hours: [10, 11, 13, 14, 15] },
     },
     {
-      email: "vikram@madhumaticlinic.com",
+      email: "vikram@thebraintea.com",
       password: "DrVikram123!",
       name: "Dr. Vikram Nair",
       slug: "dr-vikram-nair",
@@ -188,7 +242,7 @@ async function main() {
       schedule: { days: [2, 3, 4, 5], hours: [14, 15, 16] },
     },
     {
-      email: "meera@madhumaticlinic.com",
+      email: "meera@thebraintea.com",
       password: "DrMeera123!",
       name: "Dr. Meera Iyengar",
       slug: "dr-meera-iyengar",
@@ -300,28 +354,108 @@ async function main() {
 
   // ── Clients registered over the operating history ────────────────────
   const firstNames = [
-    "Amit", "Neha", "Rahul", "Sneha", "Vikram", "Priya", "Arjun", "Kavya", "Rohit", "Ishita",
-    "Sanjay", "Divya", "Karan", "Meera", "Aditya", "Pooja", "Nikhil", "Ritu", "Ananya", "Varun",
-    "Simran", "Aarav", "Tanvi", "Yash", "Riya", "Dev", "Anjali", "Siddharth", "Kritika", "Manish",
-    "Shreya", "Gaurav", "Nisha", "Ravi", "Payal", "Harsh", "Swati", "Abhishek", "Deepika", "Rajesh",
-    "Komal", "Suresh", "Anita", "Vinay", "Preeti", "Ajay", "Sunita", "Mohit", "Kiran", "Lakshmi",
+    "Amit",
+    "Neha",
+    "Rahul",
+    "Sneha",
+    "Vikram",
+    "Priya",
+    "Arjun",
+    "Kavya",
+    "Rohit",
+    "Ishita",
+    "Sanjay",
+    "Divya",
+    "Karan",
+    "Meera",
+    "Aditya",
+    "Pooja",
+    "Nikhil",
+    "Ritu",
+    "Ananya",
+    "Varun",
+    "Simran",
+    "Aarav",
+    "Tanvi",
+    "Yash",
+    "Riya",
+    "Dev",
+    "Anjali",
+    "Siddharth",
+    "Kritika",
+    "Manish",
+    "Shreya",
+    "Gaurav",
+    "Nisha",
+    "Ravi",
+    "Payal",
+    "Harsh",
+    "Swati",
+    "Abhishek",
+    "Deepika",
+    "Rajesh",
+    "Komal",
+    "Suresh",
+    "Anita",
+    "Vinay",
+    "Preeti",
+    "Ajay",
+    "Sunita",
+    "Mohit",
+    "Kiran",
+    "Lakshmi",
   ];
   const lastNames = [
-    "Patel", "Joshi", "Verma", "Kulkarni", "Malhotra", "Nair", "Reddy", "Sharma", "Desai", "Bose",
-    "Menon", "Pillai", "Kapoor", "Krishnan", "Rao", "Hegde", "Bansal", "Agarwal", "Iyer", "Chauhan",
+    "Patel",
+    "Joshi",
+    "Verma",
+    "Kulkarni",
+    "Malhotra",
+    "Nair",
+    "Reddy",
+    "Sharma",
+    "Desai",
+    "Bose",
+    "Menon",
+    "Pillai",
+    "Kapoor",
+    "Krishnan",
+    "Rao",
+    "Hegde",
+    "Bansal",
+    "Agarwal",
+    "Iyer",
+    "Chauhan",
   ];
+  // Build a wider roster of uniquely-named clients (deterministic via the
+  // seeded PRNG) so the client-growth chart, Clients register, and the pool
+  // that bookings draw from all read as a real, sizeable practice.
+  const CLIENT_COUNT = 96;
   const clientNames = [];
-  for (let i = 0; i < firstNames.length; i++) {
-    clientNames.push(`${firstNames[i]} ${lastNames[i % lastNames.length]}`);
+  const usedNames = new Set();
+  while (clientNames.length < CLIENT_COUNT) {
+    const name = `${pick(firstNames)} ${pick(lastNames)}`;
+    if (usedNames.has(name)) continue;
+    usedNames.add(name);
+    clientNames.push(name);
   }
 
   const clients = [];
   const usedEmails = new Set();
   for (const name of clientNames) {
-    const createdAt = addDays(new Date(), -Math.floor(rand() * (HISTORY_DAYS + 10)));
-    createdAt.setHours(9 + Math.floor(rand() * 10), Math.floor(rand() * 60), 0, 0);
+    const createdAt = addDays(
+      new Date(),
+      -Math.floor(rand() * (HISTORY_DAYS + 10)),
+    );
+    createdAt.setHours(
+      9 + Math.floor(rand() * 10),
+      Math.floor(rand() * 60),
+      0,
+      0,
+    );
     let email = name.toLowerCase().replace(/[^a-z]+/g, ".") + "@example.com";
-    if (usedEmails.has(email)) email = email.replace("@", `.${clients.length}@`);
+    if (usedEmails.has(email))
+      email = email.replace("@", `.${clients.length}@`);
     usedEmails.add(email);
     clients.push(
       await prisma.client.create({
@@ -334,14 +468,21 @@ async function main() {
           gdprConsent: true,
           createdAt,
         },
-      })
+      }),
     );
   }
 
   // ── Bookings across the full operating history ────────────────────────
   const year = new Date().getFullYear();
   const usedSlots = new Set(); // therapistId|iso
-  const counters = { total: 0, completed: 0, refunded: 0, cancelled: 0, noShow: 0, upcoming: 0 };
+  const counters = {
+    total: 0,
+    completed: 0,
+    refunded: 0,
+    cancelled: 0,
+    noShow: 0,
+    upcoming: 0,
+  };
 
   async function recordChargeSuccess(booking, therapistId, when) {
     const invoiceNumber = invoiceNumberFor(booking.id, year);
@@ -353,7 +494,9 @@ async function main() {
         amountMinor: booking.amountMinor - booking.discountMinor,
         status: "SUCCEEDED",
         providerOrderId: `manual_seed_${booking.id.slice(0, 12)}`,
-        providerPaymentId: String(100000000000 + Math.floor(rand() * 899999999999)),
+        providerPaymentId: String(
+          100000000000 + Math.floor(rand() * 899999999999),
+        ),
         providerRef: String(100000000000 + Math.floor(rand() * 899999999999)),
         idempotencyKey: `charge:${booking.id}`,
         createdAt: when,
@@ -365,15 +508,42 @@ async function main() {
       discountMinor: booking.discountMinor,
       commissionBps: booking.commissionBps,
     });
-    const base = { bookingId: booking.id, paymentRecordId: payment.id, createdAt: when };
+    const base = {
+      bookingId: booking.id,
+      paymentRecordId: payment.id,
+      createdAt: when,
+    };
     await prisma.ledgerEntry.createMany({
       data: [
-        { ...base, entryType: "GROSS_REVENUE", amountMinor: booking.amountMinor, description: `Gross booking amount collected (${invoiceNumber})` },
+        {
+          ...base,
+          entryType: "GROSS_REVENUE",
+          amountMinor: booking.amountMinor,
+          description: `Gross booking amount collected (${invoiceNumber})`,
+        },
         ...(booking.discountMinor > 0
-          ? [{ ...base, entryType: "DISCOUNT", amountMinor: -booking.discountMinor, description: `Discount applied (${invoiceNumber})` }]
+          ? [
+              {
+                ...base,
+                entryType: "DISCOUNT",
+                amountMinor: -booking.discountMinor,
+                description: `Discount applied (${invoiceNumber})`,
+              },
+            ]
           : []),
-        { ...base, entryType: "COMMISSION_ACCRUED", amountMinor: split.commissionMinor, therapistId, description: `Consultant commission accrued at ${booking.commissionBps / 100}% (${invoiceNumber})` },
-        { ...base, entryType: "PLATFORM_REVENUE", amountMinor: split.platformMinor, description: `Platform share recognised (${invoiceNumber})` },
+        {
+          ...base,
+          entryType: "COMMISSION_ACCRUED",
+          amountMinor: split.commissionMinor,
+          therapistId,
+          description: `Consultant commission accrued at ${booking.commissionBps / 100}% (${invoiceNumber})`,
+        },
+        {
+          ...base,
+          entryType: "PLATFORM_REVENUE",
+          amountMinor: split.platformMinor,
+          description: `Platform share recognised (${invoiceNumber})`,
+        },
       ],
     });
     await prisma.booking.update({
@@ -398,12 +568,32 @@ async function main() {
         updatedAt: when,
       },
     });
-    const base = { bookingId: booking.id, paymentRecordId: refund.id, createdAt: when };
+    const base = {
+      bookingId: booking.id,
+      paymentRecordId: refund.id,
+      createdAt: when,
+    };
     await prisma.ledgerEntry.createMany({
       data: [
-        { ...base, entryType: "REFUND", amountMinor: -refundMinor, description: `Refund issued — ${reason}` },
-        { ...base, entryType: "COMMISSION_REVERSED", amountMinor: -split.commissionMinor, therapistId, description: `Consultant commission reversed on refund` },
-        { ...base, entryType: "PLATFORM_REVENUE_REVERSED", amountMinor: -split.platformMinor, description: `Platform share reversed on refund` },
+        {
+          ...base,
+          entryType: "REFUND",
+          amountMinor: -refundMinor,
+          description: `Refund issued — ${reason}`,
+        },
+        {
+          ...base,
+          entryType: "COMMISSION_REVERSED",
+          amountMinor: -split.commissionMinor,
+          therapistId,
+          description: `Consultant commission reversed on refund`,
+        },
+        {
+          ...base,
+          entryType: "PLATFORM_REVENUE_REVERSED",
+          amountMinor: -split.platformMinor,
+          description: `Platform share reversed on refund`,
+        },
       ],
     });
     await prisma.booking.update({
@@ -419,18 +609,36 @@ async function main() {
 
     // Which consultants are actually operating on this calendar day.
     const eligible = bookableTherapists.filter(
-      (t) => dayOffset >= t.activeFromDay && dayOffset <= t.activeToDay && t.schedule.days.includes(dayOfWeek)
+      (t) =>
+        dayOffset >= t.activeFromDay &&
+        dayOffset <= t.activeToDay &&
+        t.schedule.days.includes(dayOfWeek),
     );
     if (eligible.length === 0) continue;
 
-    // Volume grows gently over time and scales with how many consultants
-    // are open that day, so the practice reads as genuinely busier recently.
+    // Daily volume: a baseline that rises over time and scales with how much
+    // of the roster is open, plus mild day-to-day variance and a floor so no
+    // operating day lands empty. Future days taper down (appointments fill up
+    // as the date nears), keeping the upcoming book realistic. The result is a
+    // dense, steadily-growing history so every ledger-backed chart and KPI
+    // reads as a busy practice rather than a sparse scatter.
     const growth = (dayOffset + HISTORY_DAYS) / (HISTORY_DAYS + FUTURE_DAYS);
-    const capacityFactor = eligible.reduce((s, t) => s + t.weight, 0) / bookableTherapists.reduce((s, t) => s + t.weight, 0);
-    const bookingsToday = Math.floor(rand() * (1.5 + growth * 5) * (0.5 + capacityFactor));
+    const capacityFactor =
+      eligible.reduce((s, t) => s + t.weight, 0) /
+      bookableTherapists.reduce((s, t) => s + t.weight, 0);
+    const futureTaper =
+      dayOffset > 0 ? Math.max(0.35, 1 - dayOffset / (FUTURE_DAYS * 1.5)) : 1;
+    const baseline =
+      (2.5 + growth * 4) * (0.5 + 0.5 * capacityFactor) * futureTaper;
+    const bookingsToday = Math.max(
+      2,
+      Math.round(baseline * (0.75 + rand() * 0.5)),
+    );
 
     for (let i = 0; i < bookingsToday; i++) {
-      const therapist = weightedPick(eligible.map((t) => ({ item: t, weight: t.weight })));
+      const therapist = weightedPick(
+        eligible.map((t) => ({ item: t, weight: t.weight })),
+      );
       const hour = pick(therapist.schedule.hours);
       const startAt = new Date(day);
       startAt.setHours(hour, 0, 0, 0);
@@ -440,8 +648,12 @@ async function main() {
 
       // Skip if this slot falls inside one of the seeded unavailability blocks.
       const blocked =
-        (therapist.slug === "dr-rohan-gupta" && startAt >= addDays(new Date(), -25) && startAt < addDays(new Date(), -20)) ||
-        (therapist.slug === "dr-kavita-rao" && startAt >= addDays(new Date(), 5) && startAt < addDays(new Date(), 7));
+        (therapist.slug === "dr-rohan-gupta" &&
+          startAt >= addDays(new Date(), -25) &&
+          startAt < addDays(new Date(), -20)) ||
+        (therapist.slug === "dr-kavita-rao" &&
+          startAt >= addDays(new Date(), 5) &&
+          startAt < addDays(new Date(), 7));
       if (blocked) continue;
 
       const service = pick(services);
@@ -453,8 +665,14 @@ async function main() {
 
       const createdAt = new Date(startAt);
       createdAt.setDate(createdAt.getDate() - (1 + Math.floor(rand() * 6)));
-      createdAt.setHours(9 + Math.floor(rand() * 10), Math.floor(rand() * 60), 0, 0);
-      if (createdAt < client.createdAt) createdAt.setTime(client.createdAt.getTime() + 3600000);
+      createdAt.setHours(
+        9 + Math.floor(rand() * 10),
+        Math.floor(rand() * 60),
+        0,
+        0,
+      );
+      if (createdAt < client.createdAt)
+        createdAt.setTime(client.createdAt.getTime() + 3600000);
       if (createdAt >= startAt) continue; // guard against pathological clamping
 
       const isPast = startAt.getTime() < Date.now();
@@ -496,9 +714,15 @@ async function main() {
         data: {
           bookingId: booking.id,
           fromStatus: null,
-          toStatus: paidUpfront ? "CONFIRMED" : status === "REFUNDED" ? "CONFIRMED" : status,
+          toStatus: paidUpfront
+            ? "CONFIRMED"
+            : status === "REFUNDED"
+              ? "CONFIRMED"
+              : status,
           actorType: "CLIENT",
-          reason: paidUpfront ? "Booked and paid online" : "Booked with pay-at-clinic",
+          reason: paidUpfront
+            ? "Booked and paid online"
+            : "Booked with pay-at-clinic",
           createdAt,
         },
       });
@@ -512,8 +736,14 @@ async function main() {
 
       let split = null;
       if (paidUpfront || (status === "COMPLETED" && rand() < 0.9)) {
-        const paidAt = paidUpfront ? createdAt : new Date(startAt.getTime() + 3600000);
-        const result = await recordChargeSuccess({ ...booking, discountMinor, commissionBps }, therapist.id, paidAt);
+        const paidAt = paidUpfront
+          ? createdAt
+          : new Date(startAt.getTime() + 3600000);
+        const result = await recordChargeSuccess(
+          { ...booking, discountMinor, commissionBps },
+          therapist.id,
+          paidAt,
+        );
         split = result.split;
       }
 
@@ -521,22 +751,52 @@ async function main() {
         const refundAt = new Date(startAt.getTime() - 24 * 3600000);
         await prisma.bookingStatusHistory.createMany({
           data: [
-            { bookingId: booking.id, fromStatus: "CONFIRMED", toStatus: "REFUND_PENDING", actorType: "CLIENT", reason: "Client cancelled paid session", createdAt: refundAt },
-            { bookingId: booking.id, fromStatus: "REFUND_PENDING", toStatus: "REFUNDED", actorType: "ADMIN", actorId: adminUser.id, reason: "Refund executed", createdAt: refundAt },
+            {
+              bookingId: booking.id,
+              fromStatus: "CONFIRMED",
+              toStatus: "REFUND_PENDING",
+              actorType: "CLIENT",
+              reason: "Client cancelled paid session",
+              createdAt: refundAt,
+            },
+            {
+              bookingId: booking.id,
+              fromStatus: "REFUND_PENDING",
+              toStatus: "REFUNDED",
+              actorType: "ADMIN",
+              actorId: adminUser.id,
+              reason: "Refund executed",
+              createdAt: refundAt,
+            },
           ],
         });
-        await recordRefund(booking, therapist.id, split, refundAt, "client cancellation");
+        await recordRefund(
+          booking,
+          therapist.id,
+          split,
+          refundAt,
+          "client cancellation",
+        );
         counters.refunded++;
       } else if (["COMPLETED", "CANCELLED", "NO_SHOW"].includes(status)) {
-        const transitionedAt = new Date(startAt.getTime() + (status === "CANCELLED" ? -20 * 3600000 : 2 * 3600000));
-        await prisma.booking.update({ where: { id: booking.id }, data: { status } });
+        const transitionedAt = new Date(
+          startAt.getTime() +
+            (status === "CANCELLED" ? -20 * 3600000 : 2 * 3600000),
+        );
+        await prisma.booking.update({
+          where: { id: booking.id },
+          data: { status },
+        });
         await prisma.bookingStatusHistory.create({
           data: {
             bookingId: booking.id,
             fromStatus: "CONFIRMED",
             toStatus: status,
             actorType: status === "CANCELLED" ? "CLIENT" : "THERAPIST",
-            reason: status === "CANCELLED" ? "Cancelled ahead of the 12h window" : null,
+            reason:
+              status === "CANCELLED"
+                ? "Cancelled ahead of the 12h window"
+                : null,
             createdAt: transitionedAt,
           },
         });
@@ -557,7 +817,10 @@ async function main() {
   // instead of a single lump sum.
   for (const therapist of therapists) {
     const entries = await prisma.ledgerEntry.findMany({
-      where: { therapistId: therapist.id, entryType: { in: ["COMMISSION_ACCRUED", "COMMISSION_REVERSED"] } },
+      where: {
+        therapistId: therapist.id,
+        entryType: { in: ["COMMISSION_ACCRUED", "COMMISSION_REVERSED"] },
+      },
       orderBy: { createdAt: "asc" },
     });
     if (entries.length === 0) continue;
@@ -627,23 +890,67 @@ async function main() {
   // ── Testimonials ──────────────────────────────────────────────────────
   await prisma.testimonial.createMany({
     data: [
-      { clientName: "Aarav Sharma", quote: "The environment is calm and feels like a sanctuary. Dr. Madhumati helped me reconcile long-standing emotional challenges through mindful, evidence-based steps.", status: "APPROVED", rating: 5 },
-      { clientName: "Priyanka Roy", quote: "Dr. Rohan's somatic practices changed how I handle work-related stress. The physical deceleration exercises have had a lasting impact on my day-to-day life.", status: "APPROVED", rating: 5 },
-      { clientName: "Vikram Malhotra", quote: "Incredibly professional and highly secure. The booking system was clean, and my session notes are locked down. Absolute privacy.", status: "APPROVED", rating: 5 },
-      { clientName: "Rhea Kapadia", quote: "Dr. Kavita helped my partner and I rebuild trust with structured, compassionate guidance. We finally feel heard.", status: "APPROVED", rating: 5 },
-      { clientName: "Nikhil Bansal", quote: "Dr. Vikram made career anxiety feel manageable again. Practical, grounded, and never judgmental.", status: "APPROVED", rating: 4 },
+      {
+        clientName: "Aarav Sharma",
+        quote:
+          "The environment is calm and feels like a sanctuary. Dr. Madhumati helped me reconcile long-standing emotional challenges through mindful, evidence-based steps.",
+        status: "APPROVED",
+        rating: 5,
+      },
+      {
+        clientName: "Priyanka Roy",
+        quote:
+          "Dr. Rohan's somatic practices changed how I handle work-related stress. The physical deceleration exercises have had a lasting impact on my day-to-day life.",
+        status: "APPROVED",
+        rating: 5,
+      },
+      {
+        clientName: "Vikram Malhotra",
+        quote:
+          "Incredibly professional and highly secure. The booking system was clean, and my session notes are locked down. Absolute privacy.",
+        status: "APPROVED",
+        rating: 5,
+      },
+      {
+        clientName: "Rhea Kapadia",
+        quote:
+          "Dr. Kavita helped my partner and I rebuild trust with structured, compassionate guidance. We finally feel heard.",
+        status: "APPROVED",
+        rating: 5,
+      },
+      {
+        clientName: "Nikhil Bansal",
+        quote:
+          "Dr. Vikram made career anxiety feel manageable again. Practical, grounded, and never judgmental.",
+        status: "APPROVED",
+        rating: 4,
+      },
     ],
   });
 
-  console.log(`Consultants: ${therapists.length} (${bookableTherapists.length} bookable)`);
+  console.log(
+    `Consultants: ${therapists.length} (${bookableTherapists.length} bookable)`,
+  );
   console.log(`Clients: ${clients.length}`);
   console.log(`Bookings created: ${counters.total}`);
-  const totals = await prisma.booking.groupBy({ by: ["status"], _count: { _all: true } });
-  console.log("Bookings by status:", Object.fromEntries(totals.map((t) => [t.status, t._count._all])));
+  const totals = await prisma.booking.groupBy({
+    by: ["status"],
+    _count: { _all: true },
+  });
+  console.log(
+    "Bookings by status:",
+    Object.fromEntries(totals.map((t) => [t.status, t._count._all])),
+  );
   const ledgerTotal = await prisma.ledgerEntry.count();
   console.log(`Ledger entries: ${ledgerTotal}`);
-  const payoutTotals = await prisma.payout.groupBy({ by: ["status"], _count: { _all: true } });
-  console.log("Payouts by status:", Object.fromEntries(payoutTotals.map((p) => [p.status, p._count._all])));
+  const payoutTotals = await prisma.payout.groupBy({
+    by: ["status"],
+    _count: { _all: true },
+  });
+  console.log(
+    "Payouts by status:",
+    Object.fromEntries(payoutTotals.map((p) => [p.status, p._count._all])),
+  );
   console.log("Database seeded successfully!");
 }
 

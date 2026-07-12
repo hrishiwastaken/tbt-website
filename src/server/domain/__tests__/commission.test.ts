@@ -36,23 +36,40 @@ describe("splitPayment", () => {
     for (const grossMinor of [99999, 10001, 33333, 1, 7]) {
       for (const commissionBps of [3000, 3250, 3333, 3500]) {
         const split = splitPayment({ grossMinor, commissionBps });
-        expect(split.commissionMinor + split.platformMinor).toBe(split.netMinor);
+        expect(split.commissionMinor + split.platformMinor).toBe(
+          split.netMinor,
+        );
         expect(Number.isSafeInteger(split.commissionMinor)).toBe(true);
       }
     }
   });
 
   it("commission is computed on net of discounts and tax", () => {
-    const split = splitPayment({ grossMinor: 150000, discountMinor: 10000, taxMinor: 5000, commissionBps: 3000 });
+    const split = splitPayment({
+      grossMinor: 150000,
+      discountMinor: 10000,
+      taxMinor: 5000,
+      commissionBps: 3000,
+    });
     expect(split.netMinor).toBe(135000);
     expect(split.commissionMinor).toBe(40500);
     expect(split.platformMinor).toBe(94500);
   });
 
   it("rejects floats and over-discounts", () => {
-    expect(() => splitPayment({ grossMinor: 100.5, commissionBps: 3000 })).toThrow();
-    expect(() => splitPayment({ grossMinor: 100, discountMinor: 200, commissionBps: 3000 })).toThrow();
-    expect(() => splitPayment({ grossMinor: -5, commissionBps: 3000 })).toThrow();
+    expect(() =>
+      splitPayment({ grossMinor: 100.5, commissionBps: 3000 }),
+    ).toThrow();
+    expect(() =>
+      splitPayment({
+        grossMinor: 100,
+        discountMinor: 200,
+        commissionBps: 3000,
+      }),
+    ).toThrow();
+    expect(() =>
+      splitPayment({ grossMinor: -5, commissionBps: 3000 }),
+    ).toThrow();
   });
 });
 
@@ -79,7 +96,11 @@ describe("splitRefund", () => {
 
   it("rejects refunds above the collected amount", () => {
     expect(() =>
-      splitRefund({ refundMinor: 200000, originalNetMinor: 150000, originalCommissionMinor: 45000 })
+      splitRefund({
+        refundMinor: 200000,
+        originalNetMinor: 150000,
+        originalCommissionMinor: 45000,
+      }),
     ).toThrow();
   });
 });

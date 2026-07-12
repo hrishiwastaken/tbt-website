@@ -5,7 +5,7 @@ export const WHATSAPP_NUMBER = "917558493155";
 export const WHATSAPP_MESSAGE =
   "Hello! I'd like to book an appointment at The Brain Tea. Could you please let me know your availability?";
 export const WHATSAPP_URL = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
-  WHATSAPP_MESSAGE
+  WHATSAPP_MESSAGE,
 )}`;
 
 export const CONTACT_PHONE = "+91 75584 93155";

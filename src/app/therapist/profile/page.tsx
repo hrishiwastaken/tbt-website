@@ -2,7 +2,13 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { formatINR } from "@/lib/format";
-import { ErrorNote, Field, inputClass, LoadingRow, Panel } from "@/components/admin/ui";
+import {
+  ErrorNote,
+  Field,
+  inputClass,
+  LoadingRow,
+  Panel,
+} from "@/components/admin/ui";
 
 interface Consultant {
   id: string;
@@ -42,7 +48,10 @@ export default function TherapistProfilePage() {
   }, []);
 
   useEffect(() => {
-    load();
+    const run = async () => {
+      await load();
+    };
+    run();
   }, [load]);
 
   const saveProfile = async () => {
@@ -82,7 +91,9 @@ export default function TherapistProfilePage() {
       setCurrentPassword("");
       setNewPassword("");
     } catch (err) {
-      setPasswordError(err instanceof Error ? err.message : "Failed to change password");
+      setPasswordError(
+        err instanceof Error ? err.message : "Failed to change password",
+      );
     } finally {
       setPasswordBusy(false);
     }
@@ -91,8 +102,12 @@ export default function TherapistProfilePage() {
   return (
     <div className="space-y-6 animate-[fadeIn_0.5s_ease-out]">
       <div>
-        <h1 className="mb-2 font-cormorant text-4xl font-semibold text-ocean-deep">Your Profile</h1>
-        <p className="font-dmsans text-sm text-ink-muted">Public bio and photo shown on the practice website.</p>
+        <h1 className="mb-2 font-cormorant text-4xl font-semibold text-ocean-deep">
+          Your Profile
+        </h1>
+        <p className="font-dmsans text-sm text-ink-muted">
+          Public bio and photo shown on the practice website.
+        </p>
       </div>
 
       <ErrorNote message={error} />
@@ -105,16 +120,28 @@ export default function TherapistProfilePage() {
             <div className="space-y-4 font-dmsans">
               <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
                 <div className="surface-inset rounded-soft p-3 text-center">
-                  <div className="text-[10px] font-bold uppercase tracking-wider text-ink-muted">Session Fee</div>
-                  <div className="mt-1 text-lg font-bold tabular-nums text-ocean-deep">{formatINR(consultant.feeMinor)}</div>
+                  <div className="text-[10px] font-bold uppercase tracking-wider text-ink-muted">
+                    Session Fee
+                  </div>
+                  <div className="mt-1 text-lg font-bold tabular-nums text-ocean-deep">
+                    {formatINR(consultant.feeMinor)}
+                  </div>
                 </div>
                 <div className="surface-inset rounded-soft p-3 text-center">
-                  <div className="text-[10px] font-bold uppercase tracking-wider text-ink-muted">Commission</div>
-                  <div className="mt-1 text-lg font-bold tabular-nums text-ocean-deep">{consultant.effectiveCommissionBps / 100}%</div>
+                  <div className="text-[10px] font-bold uppercase tracking-wider text-ink-muted">
+                    Commission
+                  </div>
+                  <div className="mt-1 text-lg font-bold tabular-nums text-ocean-deep">
+                    {consultant.effectiveCommissionBps / 100}%
+                  </div>
                 </div>
                 <div className="surface-inset rounded-soft p-3 text-center">
-                  <div className="text-[10px] font-bold uppercase tracking-wider text-ink-muted">Status</div>
-                  <div className="mt-1 text-lg font-bold text-ocean-deep">{consultant.status}</div>
+                  <div className="text-[10px] font-bold uppercase tracking-wider text-ink-muted">
+                    Status
+                  </div>
+                  <div className="mt-1 text-lg font-bold text-ocean-deep">
+                    {consultant.status}
+                  </div>
                 </div>
               </div>
               <p className="text-[11px] italic text-ink-muted">
@@ -122,7 +149,12 @@ export default function TherapistProfilePage() {
               </p>
 
               <Field label="Photo URL">
-                <input value={photo} onChange={(e) => setPhoto(e.target.value)} className={inputClass} placeholder="https://..." />
+                <input
+                  value={photo}
+                  onChange={(e) => setPhoto(e.target.value)}
+                  className={inputClass}
+                  placeholder="https://..."
+                />
               </Field>
               <Field label="Bio">
                 <textarea
@@ -132,7 +164,9 @@ export default function TherapistProfilePage() {
                   className={`${inputClass} resize-none`}
                 />
               </Field>
-              {notice && <p className="text-xs font-medium text-emerald-700">{notice}</p>}
+              {notice && (
+                <p className="text-xs font-medium text-emerald-700">{notice}</p>
+              )}
               <button
                 type="button"
                 disabled={busy}
@@ -147,7 +181,11 @@ export default function TherapistProfilePage() {
           <Panel title="Change Password">
             <div className="max-w-sm space-y-4 font-dmsans">
               <ErrorNote message={passwordError} />
-              {passwordNotice && <p className="text-xs font-medium text-emerald-700">{passwordNotice}</p>}
+              {passwordNotice && (
+                <p className="text-xs font-medium text-emerald-700">
+                  {passwordNotice}
+                </p>
+              )}
               <Field label="Current password">
                 <input
                   type="password"
@@ -166,7 +204,9 @@ export default function TherapistProfilePage() {
               </Field>
               <button
                 type="button"
-                disabled={passwordBusy || !currentPassword || newPassword.length < 10}
+                disabled={
+                  passwordBusy || !currentPassword || newPassword.length < 10
+                }
                 onClick={changePassword}
                 className="rounded-full bg-ocean px-6 py-2.5 text-xs font-bold uppercase tracking-wider text-white shadow-surface-raised-sm transition-all hover:-translate-y-0.5 disabled:opacity-40"
               >

@@ -2,7 +2,13 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { hashPassword } from "@/lib/auth";
-import { handleApi, badRequest, parseBody, requireAdmin, requireStaff } from "@/server/http";
+import {
+  handleApi,
+  badRequest,
+  parseBody,
+  requireAdmin,
+  requireStaff,
+} from "@/server/http";
 import { consultantBalances } from "@/server/services/ledgerService";
 import { getDefaultCommissionBps } from "@/server/services/commissionService";
 import { isValidCommissionBps } from "@/server/domain/commission";
@@ -25,7 +31,9 @@ export const GET = handleApi(async (request: Request) => {
   ]);
 
   const balanceMap = new Map(balances.map((b) => [b.therapistId, b]));
-  const countMap = new Map(bookingCounts.map((c) => [c.therapistId, c._count._all]));
+  const countMap = new Map(
+    bookingCounts.map((c) => [c.therapistId, c._count._all]),
+  );
 
   return NextResponse.json({
     defaultCommissionBps: defaultBps,
@@ -74,7 +82,9 @@ export const POST = handleApi(async (request: Request) => {
     throw badRequest("Commission must be between 0 and 10000 bps");
   }
   if (body.email && !body.password) {
-    throw badRequest("A password is required when creating a login for the consultant");
+    throw badRequest(
+      "A password is required when creating a login for the consultant",
+    );
   }
 
   const therapist = await prisma.$transaction(async (tx) => {
@@ -120,7 +130,7 @@ export const POST = handleApi(async (request: Request) => {
         entityId: created.id,
         detail: { name: body.name, status: body.status },
       },
-      tx
+      tx,
     );
     return created;
   });

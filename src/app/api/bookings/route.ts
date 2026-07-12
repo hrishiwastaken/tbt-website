@@ -14,7 +14,9 @@ const bookingSchema = z.object({
   phone: z.string().min(8).max(20),
   dob: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Expected YYYY-MM-DD"),
   emergencyContact: z.string().min(3).max(200),
-  gdprConsent: z.literal(true, { message: "Consent is mandatory to book a session" }),
+  gdprConsent: z.literal(true, {
+    message: "Consent is mandatory to book a session",
+  }),
   paymentOption: z.enum(["PAY_NOW", "PAY_LATER"]),
   upiUtr: z.string().optional(),
 });
@@ -23,8 +25,10 @@ export const POST = handleApi(async (request: Request) => {
   const { isBlocked } = rateLimiter(clientIp(request), 5, 60000);
   if (isBlocked) {
     return NextResponse.json(
-      { error: "Too many booking requests. Please wait a minute and try again." },
-      { status: 429 }
+      {
+        error: "Too many booking requests. Please wait a minute and try again.",
+      },
+      { status: 429 },
     );
   }
 

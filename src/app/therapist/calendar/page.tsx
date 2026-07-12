@@ -1,9 +1,14 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { formatTime, titleCase } from "@/lib/format";
-import { ErrorNote, LoadingRow, Panel, StatusPill } from "@/components/admin/ui";
+import {
+  ErrorNote,
+  LoadingRow,
+  Panel,
+  StatusPill,
+} from "@/components/admin/ui";
 
 interface Booking {
   id: string;
@@ -55,24 +60,28 @@ export default function TherapistCalendarPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  const fetchWeek = useCallback(async () => {
-    setLoading(true);
-    setError("");
-    try {
-      const res = await fetch(`/api/therapist/calendar?from=${toDateParam(weekStart)}`);
-      const payload = await res.json();
-      if (!res.ok) throw new Error(payload.error || "Failed to load calendar");
-      setData(payload);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load calendar");
-    } finally {
-      setLoading(false);
-    }
-  }, [weekStart]);
-
   useEffect(() => {
-    fetchWeek();
-  }, [fetchWeek]);
+    const load = async () => {
+      setLoading(true);
+      setError("");
+      try {
+        const res = await fetch(
+          `/api/therapist/calendar?from=${toDateParam(weekStart)}`,
+        );
+        const payload = await res.json();
+        if (!res.ok)
+          throw new Error(payload.error || "Failed to load calendar");
+        setData(payload);
+      } catch (err) {
+        setError(
+          err instanceof Error ? err.message : "Failed to load calendar",
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
+  }, [weekStart]);
 
   const days = Array.from({ length: 7 }, (_, i) => {
     const d = new Date(weekStart);
@@ -93,23 +102,42 @@ export default function TherapistCalendarPage() {
     (data?.blocks || []).filter((b) => {
       const start = new Date(b.startAt);
       const end = new Date(b.endAt);
-      return start.toDateString() === day.toDateString() || (start <= day && end >= day);
+      return (
+        start.toDateString() === day.toDateString() ||
+        (start <= day && end >= day)
+      );
     });
 
   return (
     <div className="space-y-6 animate-[fadeIn_0.5s_ease-out]">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="mb-2 font-cormorant text-4xl font-semibold text-ocean-deep">Calendar</h1>
+          <h1 className="mb-2 font-cormorant text-4xl font-semibold text-ocean-deep">
+            Calendar
+          </h1>
           <p className="font-dmsans text-sm text-ink-muted">
-            {weekStart.toLocaleDateString("en-IN", { day: "numeric", month: "short" })} –{" "}
-            {days[6].toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
+            {weekStart.toLocaleDateString("en-IN", {
+              day: "numeric",
+              month: "short",
+            })}{" "}
+            –{" "}
+            {days[6].toLocaleDateString("en-IN", {
+              day: "numeric",
+              month: "short",
+              year: "numeric",
+            })}
           </p>
         </div>
         <div className="surface-inset flex items-center gap-1 rounded-full p-1">
           <button
             type="button"
-            onClick={() => setWeekStart((d) => { const n = new Date(d); n.setDate(n.getDate() - 7); return n; })}
+            onClick={() =>
+              setWeekStart((d) => {
+                const n = new Date(d);
+                n.setDate(n.getDate() - 7);
+                return n;
+              })
+            }
             className="flex h-8 w-8 items-center justify-center rounded-full text-ocean-deep transition-colors hover:bg-surface-sunken"
           >
             <ChevronLeft size={14} />
@@ -123,7 +151,13 @@ export default function TherapistCalendarPage() {
           </button>
           <button
             type="button"
-            onClick={() => setWeekStart((d) => { const n = new Date(d); n.setDate(n.getDate() + 7); return n; })}
+            onClick={() =>
+              setWeekStart((d) => {
+                const n = new Date(d);
+                n.setDate(n.getDate() + 7);
+                return n;
+              })
+            }
             className="flex h-8 w-8 items-center justify-center rounded-full text-ocean-deep transition-colors hover:bg-surface-sunken"
           >
             <ChevronRight size={14} />
@@ -147,19 +181,34 @@ export default function TherapistCalendarPage() {
               <Panel
                 key={i}
                 title={`${DAY_LABELS[i]} ${day.getDate()}`}
-                subtitle={isToday ? "Today" : day.toLocaleDateString("en-IN", { month: "short", year: "numeric" })}
+                subtitle={
+                  isToday
+                    ? "Today"
+                    : day.toLocaleDateString("en-IN", {
+                        month: "short",
+                        year: "numeric",
+                      })
+                }
                 className={isToday ? "ring-2 ring-ocean/30" : ""}
               >
                 <div className="space-y-3">
                   {availability.length === 0 ? (
-                    <p className="text-[11px] italic text-ink-muted">No working hours</p>
+                    <p className="text-[11px] italic text-ink-muted">
+                      No working hours
+                    </p>
                   ) : (
                     <p className="text-[11px] text-ink-muted">
-                      Hours: {availability.map((a) => `${a.startTime}–${a.endTime}`).join(", ")}
+                      Hours:{" "}
+                      {availability
+                        .map((a) => `${a.startTime}–${a.endTime}`)
+                        .join(", ")}
                     </p>
                   )}
                   {blocks.map((b) => (
-                    <div key={b.id} className="rounded-soft border border-sand/60 bg-sand/20 px-3 py-2 text-[11px] text-ink-muted">
+                    <div
+                      key={b.id}
+                      className="rounded-soft border border-panel-sand/60 bg-panel-sand/20 px-3 py-2 text-[11px] text-ink-muted"
+                    >
                       Blocked{b.reason ? `: ${b.reason}` : ""}
                     </div>
                   ))}
@@ -168,12 +217,19 @@ export default function TherapistCalendarPage() {
                   ) : (
                     <div className="space-y-2">
                       {bookings.map((b) => (
-                        <div key={b.id} className="surface-inset rounded-soft p-2.5">
+                        <div
+                          key={b.id}
+                          className="surface-inset rounded-soft p-2.5"
+                        >
                           <div className="flex items-center justify-between gap-2">
-                            <span className="font-dmsans text-xs font-bold text-ocean-deep">{formatTime(b.dateTime)}</span>
+                            <span className="font-dmsans text-xs font-bold text-ocean-deep">
+                              {formatTime(b.dateTime)}
+                            </span>
                             <StatusPill status={b.status} />
                           </div>
-                          <p className="mt-1 text-xs font-medium text-ink">{b.client.name}</p>
+                          <p className="mt-1 text-xs font-medium text-ink">
+                            {b.client.name}
+                          </p>
                           <p className="text-[11px] text-ink-muted">
                             {b.service.name} · {b.durationMinutes} min
                           </p>

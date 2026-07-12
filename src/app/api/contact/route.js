@@ -23,7 +23,7 @@ export async function POST(request) {
     if (isBlocked) {
       return NextResponse.json(
         { error: "Too many inquiries. Please wait a minute and try again." },
-        { status: 429 }
+        { status: 429 },
       );
     }
 
@@ -32,13 +32,19 @@ export async function POST(request) {
 
     // 2. Validate input existence
     if (!name || !email || !subject || !message) {
-      return NextResponse.json({ error: "All fields are required" }, { status: 400 });
+      return NextResponse.json(
+        { error: "All fields are required" },
+        { status: 400 },
+      );
     }
 
     // 3. Email format regex verification
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
-      return NextResponse.json({ error: "Please enter a valid email address" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Please enter a valid email address" },
+        { status: 400 },
+      );
     }
 
     // 4. Sanitize strings to neutralize injection payloads
@@ -66,10 +72,13 @@ IP: ${ip}
           "X-RateLimit-Limit": "5",
           "X-RateLimit-Remaining": String(remaining),
         },
-      }
+      },
     );
   } catch (error) {
     console.error("Contact API Error:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 },
+    );
   }
 }

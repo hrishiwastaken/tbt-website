@@ -3,13 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  SITE_NAME,
-  CONTACT_ADDRESS,
-  CONTACT_EMAIL,
-  CONTACT_PHONE,
-  CONTACT_HOURS,
-} from "../lib/site";
+import Logo from "./Logo";
 
 export default function Footer() {
   const pathname = usePathname();
@@ -22,85 +16,119 @@ export default function Footer() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="bg-ocean-deep text-ivory pt-20 pb-8 border-t border-ocean/20 relative z-10">
+    <footer className="bg-forest-slate text-warm-sand pt-20 pb-8 border-t border-muted-sage/20 relative z-10">
       <div className="max-w-7xl mx-auto px-6 md:px-12 grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-8 mb-16">
+        {/* Column 1: Brand & Tagline */}
         <div className="flex flex-col space-y-4">
-          <Link href="/">
-            <span className="font-cormorant font-semibold text-3xl tracking-tight">
-              {SITE_NAME}
-            </span>
+          <Link
+            href="/"
+            className="flex items-center"
+            aria-label="The Brain Tea — Home"
+          >
+            <Logo className="w-24 h-24 shadow-warm-soft ring-1 ring-warm-sand/20 shrink-0" />
           </Link>
-          <p className="font-dmsans text-sm text-ivory/80 leading-relaxed max-w-sm">
-            A calm, modern space for therapy, psychiatric support, and psychological growth --
-            dedicated to supporting individuals, couples, and families through evidence-based
-            care.
+          <p className="font-dmsans text-sm text-warm-sand/80 leading-relaxed max-w-sm">
+            A compassionate, safe, and professional mental health practice
+            dedicated to supporting individuals, couples, and families through
+            evidence-based psychotherapy.
           </p>
-          <p className="font-dmsans text-xs text-ivory/50">
-            Licensed practitioners under RCI guidelines.
+          <p className="font-dmsans text-xs text-warm-sand/50">
+            Licensed practitioner under RCI guidelines.
           </p>
         </div>
 
-        <div className="flex flex-col space-y-4 md:border-l md:border-ivory/15 md:pl-12">
-          <h4 className="font-cormorant text-xl font-semibold tracking-wide text-ivory">
+        {/* Column 2: Quick Links */}
+        <div className="flex flex-col space-y-4 md:border-l md:border-muted-sage/20 md:pl-12">
+          <h4 className="font-cormorant text-xl font-semibold tracking-wide text-warm-sand">
             Quick Links
           </h4>
           <nav className="flex flex-col space-y-2.5">
-            <Link href="/" className="font-dmsans text-sm text-ivory/80 hover:text-ivory transition-colors">
+            <Link
+              href="/"
+              className="font-dmsans text-sm text-warm-sand/80 hover:text-warm-sand transition-colors"
+            >
               Home
             </Link>
-            <Link href="/about" className="font-dmsans text-sm text-ivory/80 hover:text-ivory transition-colors">
-              About Us
+            <Link
+              href="/about"
+              className="font-dmsans text-sm text-warm-sand/80 hover:text-warm-sand transition-colors"
+            >
+              About the Practice
             </Link>
-            <Link href="/services" className="font-dmsans text-sm text-ivory/80 hover:text-ivory transition-colors">
+            <Link
+              href="/services"
+              className="font-dmsans text-sm text-warm-sand/80 hover:text-warm-sand transition-colors"
+            >
               Our Services
             </Link>
-            <Link href="/internship" className="font-dmsans text-sm text-ivory/80 hover:text-ivory transition-colors">
+            <Link
+              href="/internship"
+              className="font-dmsans text-sm text-warm-sand/80 hover:text-warm-sand transition-colors"
+            >
               Internship Program
             </Link>
-            <Link href="/faq" className="font-dmsans text-sm text-ivory/80 hover:text-ivory transition-colors">
+            <Link
+              href="/faq"
+              className="font-dmsans text-sm text-warm-sand/80 hover:text-warm-sand transition-colors"
+            >
               Frequently Asked Questions
             </Link>
-            <Link href="/book" className="font-dmsans text-sm text-ivory/80 hover:text-ivory transition-colors">
+            <Link
+              href="/book"
+              className="font-dmsans text-sm text-warm-sand/80 hover:text-warm-sand transition-colors"
+            >
               Book Appointment
             </Link>
-            <Link href="/admin/login" className="font-dmsans text-sm text-ivory/80 hover:text-ivory transition-colors">
+            <Link
+              href="/admin/login"
+              className="font-dmsans text-sm text-warm-sand/80 hover:text-warm-sand transition-colors"
+            >
               Admin Portal
             </Link>
           </nav>
         </div>
 
-        <div className="flex flex-col space-y-4 md:border-l md:border-ivory/15 md:pl-12">
-          <h4 className="font-cormorant text-xl font-semibold tracking-wide text-ivory">
+        {/* Column 3: Contact Info */}
+        <div className="flex flex-col space-y-4 md:border-l md:border-muted-sage/20 md:pl-12">
+          <h4 className="font-cormorant text-xl font-semibold tracking-wide text-warm-sand">
             Contact Info
           </h4>
-          <div className="font-dmsans text-sm text-ivory/80 space-y-3 leading-relaxed">
+          <div className="font-dmsans text-sm text-warm-sand/80 space-y-3 leading-relaxed">
             <p>
-              <span className="block font-medium text-ivory">Address:</span>
-              {CONTACT_ADDRESS.line1}
+              <span className="block font-medium text-warm-sand">Address:</span>
+              12, Green Meadow Lane, Sector 4,
               <br />
-              {CONTACT_ADDRESS.line2}
+              New Delhi, DL 110001
             </p>
             <p>
-              <span className="block font-medium text-ivory">Phone / WhatsApp:</span>
-              {CONTACT_PHONE}
+              <span className="block font-medium text-warm-sand">
+                Phone / WhatsApp:
+              </span>
+              +91 75584 93155
             </p>
             <p>
-              <span className="block font-medium text-ivory">Email:</span>
-              {CONTACT_EMAIL}
+              <span className="block font-medium text-warm-sand">Email:</span>
+              contact@thebraintea.com
             </p>
             <p>
-              <span className="block font-medium text-ivory">Hours:</span>
-              {CONTACT_HOURS.weekday}
+              <span className="block font-medium text-warm-sand">Hours:</span>
+              Mon – Fri: 9:00 AM – 7:00 PM
               <br />
-              {CONTACT_HOURS.weekend}
+              Saturday: 10:00 AM – 4:00 PM
             </p>
           </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 md:px-12 border-t border-ivory/15 pt-8 flex flex-col md:flex-row items-center justify-between text-xs text-ivory/50 font-dmsans">
-        <p>© {currentYear} {SITE_NAME}. All rights reserved.</p>
-        <p className="mt-2 md:mt-0">Confidentiality guaranteed. Professional mental health services.</p>
+      {/* Bottom Bar */}
+      <div className="max-w-7xl mx-auto px-6 md:px-12 border-t border-muted-sage/20 pt-8 flex flex-col md:flex-row items-center justify-between text-xs text-warm-sand/50 font-dmsans">
+        <p>
+          © {currentYear} The Brain Tea Mental Health Clinic. All rights
+          reserved.
+        </p>
+        <p className="mt-2 md:mt-0">
+          Confidentiality guaranteed. Professional Mental Health Services.
+        </p>
       </div>
     </footer>
   );

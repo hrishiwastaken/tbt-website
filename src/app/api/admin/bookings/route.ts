@@ -1,7 +1,12 @@
 import { NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
-import { handleApi, paginated, parsePagination, requireStaff } from "@/server/http";
+import {
+  handleApi,
+  paginated,
+  parsePagination,
+  requireStaff,
+} from "@/server/http";
 import { BOOKING_STATUSES } from "@/server/domain/bookingStatus";
 
 // Admin booking list: pagination + status/payment/consultant filters,

@@ -1,12 +1,23 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
-import { badRequest, handleApi, parseBody, requireTherapist } from "@/server/http";
+import {
+  badRequest,
+  handleApi,
+  parseBody,
+  requireTherapist,
+} from "@/server/http";
 import { recordAudit } from "@/server/audit";
 
 const createSchema = z.object({
-  startAt: z.string().datetime().or(z.string().datetime({ local: true })),
-  endAt: z.string().datetime().or(z.string().datetime({ local: true })),
+  startAt: z
+    .string()
+    .datetime()
+    .or(z.string().datetime({ local: true })),
+  endAt: z
+    .string()
+    .datetime()
+    .or(z.string().datetime({ local: true })),
   reason: z.string().max(200).optional(),
 });
 

@@ -24,17 +24,23 @@ export const GET = handleApi(async (request: Request) => {
     throw badRequest("Invalid date range");
   }
 
-  const [kpis, revenue, bookings, clients, statuses, consultants] = await Promise.all([
-    overviewKpis(range),
-    revenueSeries(range),
-    bookingSeries(range),
-    clientGrowthSeries(range),
-    statusDistribution(range),
-    consultantPerformance(range),
-  ]);
+  const [kpis, revenue, bookings, clients, statuses, consultants] =
+    await Promise.all([
+      overviewKpis(range),
+      revenueSeries(range),
+      bookingSeries(range),
+      clientGrowthSeries(range),
+      statusDistribution(range),
+      consultantPerformance(range),
+    ]);
 
   return NextResponse.json({
-    range: { key: range.key, from: range.from, to: range.to, granularity: range.granularity },
+    range: {
+      key: range.key,
+      from: range.from,
+      to: range.to,
+      granularity: range.granularity,
+    },
     kpis,
     series: { revenue, bookings, clients },
     statusDistribution: statuses,

@@ -16,12 +16,13 @@ export default function InternshipApplicationForm() {
   if (submitted) {
     return (
       <Surface variant="raised" radius="surface" className="p-8 text-center">
-        <h3 className="font-cormorant text-2xl font-semibold text-ocean-deep mb-2">
+        <h3 className="font-cormorant text-2xl font-semibold text-forest-slate mb-2">
           Thanks for your interest!
         </h3>
-        <p className="text-sm text-ink-muted leading-relaxed">
-          This is a prototype of the application flow -- our real intake process isn&apos;t
-          connected yet. Please reach out via the Contact page in the meantime.
+        <p className="text-sm text-charcoal/80 leading-relaxed">
+          This is a prototype of the application flow -- our real intake process
+          isn&apos;t connected yet. Please reach out via the Contact page in the
+          meantime.
         </p>
       </Surface>
     );
@@ -44,7 +45,10 @@ export default function InternshipApplicationForm() {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <label htmlFor="internshipType" className="text-xs font-bold tracking-wider uppercase text-ink-muted block mb-2">
+            <label
+              htmlFor="internshipType"
+              className="text-xs font-bold tracking-wider uppercase text-charcoal/80 block mb-2"
+            >
               Internship Type *
             </label>
             <select
@@ -57,14 +61,24 @@ export default function InternshipApplicationForm() {
                 Select one
               </option>
               <option value="graduate">Graduate -- Administrative Focus</option>
-              <option value="postgraduate">Postgraduate -- Clinical Focus</option>
+              <option value="postgraduate">
+                Postgraduate -- Clinical Focus
+              </option>
             </select>
           </div>
-          <Input label="Preferred Start Date" id="startDate" type="date" required />
+          <Input
+            label="Preferred Start Date"
+            id="startDate"
+            type="date"
+            required
+          />
         </div>
         <Textarea label="Statement of Purpose" id="sop" required rows={5} />
         <div>
-          <label htmlFor="resume" className="text-xs font-bold tracking-wider uppercase text-ink-muted block mb-2">
+          <label
+            htmlFor="resume"
+            className="text-xs font-bold tracking-wider uppercase text-charcoal/80 block mb-2"
+          >
             Resume Upload *
           </label>
           <input
@@ -72,7 +86,7 @@ export default function InternshipApplicationForm() {
             type="file"
             accept=".pdf,.doc,.docx"
             required
-            className="w-full text-sm text-ink-muted file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:bg-ocean file:text-white file:text-xs file:font-semibold file:cursor-pointer cursor-pointer"
+            className="w-full text-sm text-charcoal/80 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:bg-teal-sage file:text-white file:text-xs file:font-semibold file:cursor-pointer cursor-pointer"
           />
         </div>
         <div className="pt-2">

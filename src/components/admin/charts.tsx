@@ -42,10 +42,17 @@ function useTooltip() {
   const [tooltip, setTooltip] = useState<TooltipState | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const show = (event: { clientX: number; clientY: number }, content: ReactNode) => {
+  const show = (
+    event: { clientX: number; clientY: number },
+    content: ReactNode,
+  ) => {
     const rect = containerRef.current?.getBoundingClientRect();
     if (!rect) return;
-    setTooltip({ x: event.clientX - rect.left, y: event.clientY - rect.top, content });
+    setTooltip({
+      x: event.clientX - rect.left,
+      y: event.clientY - rect.top,
+      content,
+    });
   };
   const hide = () => setTooltip(null);
   return { tooltip, show, hide, containerRef };
@@ -72,8 +79,14 @@ function Legend({ series }: { series: SeriesDef[] }) {
   return (
     <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1">
       {series.map((s) => (
-        <span key={s.key} className="inline-flex items-center gap-1.5 font-dmsans text-[11px] font-medium text-ink-muted">
-          <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: s.color }} />
+        <span
+          key={s.key}
+          className="inline-flex items-center gap-1.5 font-dmsans text-[11px] font-medium text-ink-muted"
+        >
+          <span
+            className="h-2.5 w-2.5 rounded-full"
+            style={{ backgroundColor: s.color }}
+          />
           {s.label}
         </span>
       ))}
@@ -85,7 +98,8 @@ function niceMax(value: number): number {
   if (value <= 0) return 1;
   const magnitude = 10 ** Math.floor(Math.log10(value));
   const normalized = value / magnitude;
-  const nice = normalized <= 1 ? 1 : normalized <= 2 ? 2 : normalized <= 5 ? 5 : 10;
+  const nice =
+    normalized <= 1 ? 1 : normalized <= 2 ? 2 : normalized <= 5 ? 5 : 10;
   return nice * magnitude;
 }
 
@@ -118,13 +132,21 @@ export function LineAreaChart({
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
 
   const max = useMemo(
-    () => niceMax(Math.max(1, ...data.flatMap((d) => series.map((s) => Number(d[s.key]) || 0)))),
-    [data, series]
+    () =>
+      niceMax(
+        Math.max(
+          1,
+          ...data.flatMap((d) => series.map((s) => Number(d[s.key]) || 0)),
+        ),
+      ),
+    [data, series],
   );
 
   if (data.length === 0) return <ChartEmpty />;
 
-  const xFor = (i: number) => PAD.left + (data.length === 1 ? plotW / 2 : (i / (data.length - 1)) * plotW);
+  const xFor = (i: number) =>
+    PAD.left +
+    (data.length === 1 ? plotW / 2 : (i / (data.length - 1)) * plotW);
   const yFor = (v: number) => PAD.top + plotH - (v / max) * plotH;
   const ticks = [0, 0.25, 0.5, 0.75, 1].map((f) => f * max);
 
@@ -135,17 +157,24 @@ export function LineAreaChart({
     const clamped = Math.max(0, Math.min(data.length - 1, idx));
     setActiveIndex(clamped);
     const d = data[clamped];
-    show(event, (
+    show(
+      event,
       <div className="space-y-0.5">
         <div className="font-semibold text-ocean-deep">{d.label}</div>
         {series.map((s) => (
           <div key={s.key} className="flex items-center gap-1.5 text-ink-muted">
-            <span className="h-2 w-2 rounded-full" style={{ backgroundColor: s.color }} />
-            {s.label}: <span className="font-semibold text-ink tabular-nums">{valueFormat(Number(d[s.key]) || 0)}</span>
+            <span
+              className="h-2 w-2 rounded-full"
+              style={{ backgroundColor: s.color }}
+            />
+            {s.label}:{" "}
+            <span className="font-semibold text-ink tabular-nums">
+              {valueFormat(Number(d[s.key]) || 0)}
+            </span>
           </div>
         ))}
-      </div>
-    ));
+      </div>,
+    );
   };
 
   return (
@@ -162,20 +191,44 @@ export function LineAreaChart({
       >
         {ticks.map((t) => (
           <g key={t}>
-            <line x1={PAD.left} x2={W - PAD.right} y1={yFor(t)} y2={yFor(t)} stroke={GRID} strokeWidth={1} />
-            <text x={PAD.left - 6} y={yFor(t) + 3} textAnchor="end" fontSize={9} fill={AXIS_TEXT} fontFamily="var(--font-dm-sans)">
+            <line
+              x1={PAD.left}
+              x2={W - PAD.right}
+              y1={yFor(t)}
+              y2={yFor(t)}
+              stroke={GRID}
+              strokeWidth={1}
+            />
+            <text
+              x={PAD.left - 6}
+              y={yFor(t) + 3}
+              textAnchor="end"
+              fontSize={9}
+              fill={AXIS_TEXT}
+              fontFamily="var(--font-dm-sans)"
+            >
               {valueFormat(t)}
             </text>
           </g>
         ))}
         {xTickIndexes(data.length).map((i) => (
-          <text key={i} x={xFor(i)} y={H - 8} textAnchor="middle" fontSize={9} fill={AXIS_TEXT} fontFamily="var(--font-dm-sans)">
+          <text
+            key={i}
+            x={xFor(i)}
+            y={H - 8}
+            textAnchor="middle"
+            fontSize={9}
+            fill={AXIS_TEXT}
+            fontFamily="var(--font-dm-sans)"
+          >
             {data[i].label}
           </text>
         ))}
 
         {series.map((s) => {
-          const points = data.map((d, i) => `${xFor(i)},${yFor(Number(d[s.key]) || 0)}`);
+          const points = data.map(
+            (d, i) => `${xFor(i)},${yFor(Number(d[s.key]) || 0)}`,
+          );
           return (
             <g key={s.key}>
               {s.area && data.length > 1 && (
@@ -185,14 +238,29 @@ export function LineAreaChart({
                   opacity={0.12}
                 />
               )}
-              <polyline points={points.join(" ")} fill="none" stroke={s.color} strokeWidth={2} strokeLinejoin="round" strokeLinecap="round" />
+              <polyline
+                points={points.join(" ")}
+                fill="none"
+                stroke={s.color}
+                strokeWidth={2}
+                strokeLinejoin="round"
+                strokeLinecap="round"
+              />
             </g>
           );
         })}
 
         {activeIndex !== null && (
           <g>
-            <line x1={xFor(activeIndex)} x2={xFor(activeIndex)} y1={PAD.top} y2={PAD.top + plotH} stroke="rgba(93,118,139,0.35)" strokeWidth={1} strokeDasharray="3 3" />
+            <line
+              x1={xFor(activeIndex)}
+              x2={xFor(activeIndex)}
+              y1={PAD.top}
+              y2={PAD.top + plotH}
+              stroke="rgba(93,118,139,0.35)"
+              strokeWidth={1}
+              strokeDasharray="3 3"
+            />
             {series.map((s) => (
               <circle
                 key={s.key}
@@ -227,8 +295,14 @@ export function BarChart({
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
 
   const max = useMemo(
-    () => niceMax(Math.max(1, ...data.flatMap((d) => series.map((s) => Number(d[s.key]) || 0)))),
-    [data, series]
+    () =>
+      niceMax(
+        Math.max(
+          1,
+          ...data.flatMap((d) => series.map((s) => Number(d[s.key]) || 0)),
+        ),
+      ),
+    [data, series],
   );
   if (data.length === 0) return <ChartEmpty />;
 
@@ -239,17 +313,47 @@ export function BarChart({
 
   return (
     <div ref={containerRef} className="relative">
-      <svg viewBox={`0 0 ${W} ${H}`} className="w-full" role="img" onMouseLeave={() => { hide(); setActiveIndex(null); }}>
+      <svg
+        viewBox={`0 0 ${W} ${H}`}
+        className="w-full"
+        role="img"
+        onMouseLeave={() => {
+          hide();
+          setActiveIndex(null);
+        }}
+      >
         {ticks.map((t) => (
           <g key={t}>
-            <line x1={PAD.left} x2={W - PAD.right} y1={yFor(t)} y2={yFor(t)} stroke={GRID} strokeWidth={1} />
-            <text x={PAD.left - 6} y={yFor(t) + 3} textAnchor="end" fontSize={9} fill={AXIS_TEXT} fontFamily="var(--font-dm-sans)">
+            <line
+              x1={PAD.left}
+              x2={W - PAD.right}
+              y1={yFor(t)}
+              y2={yFor(t)}
+              stroke={GRID}
+              strokeWidth={1}
+            />
+            <text
+              x={PAD.left - 6}
+              y={yFor(t) + 3}
+              textAnchor="end"
+              fontSize={9}
+              fill={AXIS_TEXT}
+              fontFamily="var(--font-dm-sans)"
+            >
               {valueFormat(t)}
             </text>
           </g>
         ))}
         {xTickIndexes(data.length).map((i) => (
-          <text key={i} x={PAD.left + i * groupW + groupW / 2} y={H - 8} textAnchor="middle" fontSize={9} fill={AXIS_TEXT} fontFamily="var(--font-dm-sans)">
+          <text
+            key={i}
+            x={PAD.left + i * groupW + groupW / 2}
+            y={H - 8}
+            textAnchor="middle"
+            fontSize={9}
+            fill={AXIS_TEXT}
+            fontFamily="var(--font-dm-sans)"
+          >
             {data[i].label}
           </text>
         ))}
@@ -263,23 +367,48 @@ export function BarChart({
               key={d.key}
               onMouseMove={(e) => {
                 setActiveIndex(i);
-                show(e, (
+                show(
+                  e,
                   <div className="space-y-0.5">
-                    <div className="font-semibold text-ocean-deep">{d.label}</div>
+                    <div className="font-semibold text-ocean-deep">
+                      {d.label}
+                    </div>
                     {series.map((s) => (
-                      <div key={s.key} className="flex items-center gap-1.5 text-ink-muted">
-                        <span className="h-2 w-2 rounded-full" style={{ backgroundColor: s.color }} />
-                        {s.label}: <span className="font-semibold text-ink tabular-nums">{valueFormat(Number(d[s.key]) || 0)}</span>
+                      <div
+                        key={s.key}
+                        className="flex items-center gap-1.5 text-ink-muted"
+                      >
+                        <span
+                          className="h-2 w-2 rounded-full"
+                          style={{ backgroundColor: s.color }}
+                        />
+                        {s.label}:{" "}
+                        <span className="font-semibold text-ink tabular-nums">
+                          {valueFormat(Number(d[s.key]) || 0)}
+                        </span>
                       </div>
                     ))}
-                  </div>
-                ));
+                  </div>,
+                );
               }}
             >
               {/* generous invisible hit target */}
-              <rect x={groupX} y={PAD.top} width={groupW} height={plotH} fill="transparent" />
+              <rect
+                x={groupX}
+                y={PAD.top}
+                width={groupW}
+                height={plotH}
+                fill="transparent"
+              />
               {activeIndex === i && (
-                <rect x={groupX} y={PAD.top} width={groupW} height={plotH} fill="rgba(93,118,139,0.06)" rx={4} />
+                <rect
+                  x={groupX}
+                  y={PAD.top}
+                  width={groupW}
+                  height={plotH}
+                  fill="rgba(93,118,139,0.06)"
+                  rx={4}
+                />
               )}
               {series.map((s, si) => {
                 const v = Number(d[s.key]) || 0;
@@ -299,7 +428,14 @@ export function BarChart({
             </g>
           );
         })}
-        <line x1={PAD.left} x2={W - PAD.right} y1={yFor(0)} y2={yFor(0)} stroke="rgba(93,118,139,0.3)" strokeWidth={1} />
+        <line
+          x1={PAD.left}
+          x2={W - PAD.right}
+          y1={yFor(0)}
+          y2={yFor(0)}
+          stroke="rgba(93,118,139,0.3)"
+          strokeWidth={1}
+        />
       </svg>
       <Tooltip state={tooltip} />
       <Legend series={series} />
@@ -327,13 +463,21 @@ export function HBarList({
             <span className="font-semibold text-ocean-deep">{item.label}</span>
             <span className="shrink-0 tabular-nums font-semibold text-ink">
               {valueFormat(item.value)}
-              {item.secondary && <span className="ml-2 font-normal text-ink-muted">{item.secondary}</span>}
+              {item.secondary && (
+                <span className="ml-2 font-normal text-ink-muted">
+                  {item.secondary}
+                </span>
+              )}
             </span>
           </div>
           <div className="h-2.5 w-full overflow-hidden rounded-full surface-inset">
             <div
               className="h-full rounded-full transition-all duration-500 ease-out-soft"
-              style={{ width: `${(item.value / max) * 100}%`, backgroundColor: color, minWidth: item.value > 0 ? 4 : 0 }}
+              style={{
+                width: `${(item.value / max) * 100}%`,
+                backgroundColor: color,
+                minWidth: item.value > 0 ? 4 : 0,
+              }}
             />
           </div>
         </div>
@@ -360,16 +504,31 @@ export function DonutChart({
   const R = 70;
   const STROKE = 26;
   const C = 2 * Math.PI * R;
-  let offset = 0;
+  // Cumulative arc offset (start position) for each slice, precomputed so the
+  // render stays pure — no variable reassignment during JSX evaluation.
+  const offsets = slices.map((_, i) =>
+    slices.slice(0, i).reduce((sum, s) => sum + (s.value / total) * C, 0),
+  );
 
   return (
-    <div ref={containerRef} className="relative flex flex-col items-center gap-5 sm:flex-row">
-      <svg viewBox="0 0 180 180" className="w-44 shrink-0" role="img" onMouseLeave={() => { hide(); setActive(null); }}>
+    <div
+      ref={containerRef}
+      className="relative flex flex-col items-center gap-5 sm:flex-row"
+    >
+      <svg
+        viewBox="0 0 180 180"
+        className="w-44 shrink-0"
+        role="img"
+        onMouseLeave={() => {
+          hide();
+          setActive(null);
+        }}
+      >
         <g transform="rotate(-90 90 90)">
           {slices.map((s, i) => {
             const frac = s.value / total;
             const dash = Math.max(0, frac * C - 2); // 2px surface gap between segments
-            const el = (
+            return (
               <circle
                 key={s.label}
                 cx={90}
@@ -379,31 +538,50 @@ export function DonutChart({
                 stroke={s.color}
                 strokeWidth={active === i ? STROKE + 4 : STROKE}
                 strokeDasharray={`${dash} ${C - dash}`}
-                strokeDashoffset={-offset}
+                strokeDashoffset={-offsets[i]}
                 className="transition-all duration-150"
                 onMouseMove={(e) => {
                   setActive(i);
-                  show(e, (
+                  show(
+                    e,
                     <div>
-                      <div className="font-semibold text-ocean-deep">{s.label}</div>
+                      <div className="font-semibold text-ocean-deep">
+                        {s.label}
+                      </div>
                       <div className="text-ink-muted">
-                        <span className="font-semibold text-ink tabular-nums">{valueFormat(s.value)}</span>
+                        <span className="font-semibold text-ink tabular-nums">
+                          {valueFormat(s.value)}
+                        </span>
                         {" · "}
                         {Math.round(frac * 100)}%
                       </div>
-                    </div>
-                  ));
+                    </div>,
+                  );
                 }}
               />
             );
-            offset += frac * C;
-            return el;
           })}
         </g>
-        <text x={90} y={86} textAnchor="middle" fontSize={22} fontWeight={700} fill="#26333D" fontFamily="var(--font-dm-sans)">
+        <text
+          x={90}
+          y={86}
+          textAnchor="middle"
+          fontSize={22}
+          fontWeight={700}
+          fill="#26333D"
+          fontFamily="var(--font-dm-sans)"
+        >
           {valueFormat(total)}
         </text>
-        <text x={90} y={104} textAnchor="middle" fontSize={9} fill={AXIS_TEXT} fontFamily="var(--font-dm-sans)" style={{ textTransform: "uppercase", letterSpacing: "0.1em" }}>
+        <text
+          x={90}
+          y={104}
+          textAnchor="middle"
+          fontSize={9}
+          fill={AXIS_TEXT}
+          fontFamily="var(--font-dm-sans)"
+          style={{ textTransform: "uppercase", letterSpacing: "0.1em" }}
+        >
           {centerLabel}
         </text>
       </svg>
@@ -413,9 +591,14 @@ export function DonutChart({
             key={s.label}
             className={`flex items-center gap-2 rounded-full px-2 py-0.5 font-dmsans text-xs transition-colors ${active === i ? "bg-surface-sunken" : ""}`}
           >
-            <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ backgroundColor: s.color }} />
+            <span
+              className="h-2.5 w-2.5 shrink-0 rounded-full"
+              style={{ backgroundColor: s.color }}
+            />
             <span className="font-medium text-ink-muted">{s.label}</span>
-            <span className="ml-auto pl-3 font-semibold tabular-nums text-ink">{valueFormat(s.value)}</span>
+            <span className="ml-auto pl-3 font-semibold tabular-nums text-ink">
+              {valueFormat(s.value)}
+            </span>
           </div>
         ))}
       </div>

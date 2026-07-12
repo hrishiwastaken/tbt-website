@@ -11,9 +11,18 @@ export const GET = handleApi(async (request: Request) => {
 
   const [balance, payouts, entries] = await Promise.all([
     consultantBalance(therapistId),
-    prisma.payout.findMany({ where: { therapistId }, orderBy: { createdAt: "desc" }, take: 25 }),
+    prisma.payout.findMany({
+      where: { therapistId },
+      orderBy: { createdAt: "desc" },
+      take: 25,
+    }),
     prisma.ledgerEntry.findMany({
-      where: { therapistId, entryType: { in: ["COMMISSION_ACCRUED", "COMMISSION_REVERSED", "PAYOUT_PAID"] } },
+      where: {
+        therapistId,
+        entryType: {
+          in: ["COMMISSION_ACCRUED", "COMMISSION_REVERSED", "PAYOUT_PAID"],
+        },
+      },
       orderBy: { createdAt: "desc" },
       take: 50,
     }),

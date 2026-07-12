@@ -12,7 +12,9 @@ export const GET = handleApi(async (request: Request) => {
     throw badRequest("Missing therapist slug or date parameter");
   }
 
-  const therapist = await prisma.therapist.findUnique({ where: { slug: therapistSlug } });
+  const therapist = await prisma.therapist.findUnique({
+    where: { slug: therapistSlug },
+  });
   if (!therapist || !therapist.isActive || therapist.status !== "APPROVED") {
     throw notFound("Therapist not found");
   }
@@ -32,26 +34,35 @@ export const GET = handleApi(async (request: Request) => {
     }),
     // BookingSlot rows are the single source of truth for live holds.
     prisma.bookingSlot.findMany({
-      where: { therapistId: therapist.id, startAt: { gte: startOfDay, lte: endOfDay } },
+      where: {
+        therapistId: therapist.id,
+        startAt: { gte: startOfDay, lte: endOfDay },
+      },
       select: { startAt: true },
     }),
     prisma.slotBlock.findMany({
-      where: { therapistId: therapist.id, startAt: { lt: endOfDay }, endAt: { gt: startOfDay } },
+      where: {
+        therapistId: therapist.id,
+        startAt: { lt: endOfDay },
+        endAt: { gt: startOfDay },
+      },
     }),
   ]);
 
   const heldTimes = new Set(
     heldSlots.map(
       (s) =>
-        `${String(s.startAt.getHours()).padStart(2, "0")}:${String(s.startAt.getMinutes()).padStart(2, "0")}`
-    )
+        `${String(s.startAt.getHours()).padStart(2, "0")}:${String(s.startAt.getMinutes()).padStart(2, "0")}`,
+    ),
   );
 
   const availableSlots = weeklySlots
     .map((slot) => {
       const slotStart = new Date(`${dateStr}T${slot.startTime}:00`);
       const slotEnd = new Date(`${dateStr}T${slot.endTime}:00`);
-      const isBlocked = blocks.some((b) => b.startAt < slotEnd && b.endAt > slotStart);
+      const isBlocked = blocks.some(
+        (b) => b.startAt < slotEnd && b.endAt > slotStart,
+      );
       const isPast = slotStart.getTime() <= Date.now();
       return {
         id: slot.id,

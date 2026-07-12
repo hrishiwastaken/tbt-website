@@ -49,13 +49,16 @@ export const GET = handleApi(async (request: Request) => {
     b.createdAt.toISOString().replace("T", " ").slice(0, 19),
   ]);
 
-  const csvContent = [headers, ...rows].map((row) => row.map((v) => `"${v}"`).join(",")).join("\n");
+  const csvContent = [headers, ...rows]
+    .map((row) => row.map((v) => `"${v}"`).join(","))
+    .join("\n");
 
   return new Response(csvContent, {
     status: 200,
     headers: {
       "Content-Type": "text/csv; charset=utf-8",
-      "Content-Disposition": "attachment; filename=brain_tea_bookings_report.csv",
+      "Content-Disposition":
+        "attachment; filename=brain_tea_bookings_report.csv",
       Pragma: "no-cache",
       "Cache-Control": "no-store",
     },

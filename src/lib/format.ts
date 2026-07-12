@@ -14,7 +14,10 @@ function compactRupees(rupees: number): string {
   return `${sign}${abs}`;
 }
 
-export function formatINR(minor: number | null | undefined, opts: { compact?: boolean } = {}): string {
+export function formatINR(
+  minor: number | null | undefined,
+  opts: { compact?: boolean } = {},
+): string {
   const rupees = (minor ?? 0) / 100;
   if (opts.compact && Math.abs(rupees) >= 1000) {
     return `₹${compactRupees(rupees)}`;
@@ -23,11 +26,18 @@ export function formatINR(minor: number | null | undefined, opts: { compact?: bo
 }
 
 export function formatDate(value: string | Date): string {
-  return new Date(value).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
+  return new Date(value).toLocaleDateString("en-IN", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
 }
 
 export function formatTime(value: string | Date): string {
-  return new Date(value).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" });
+  return new Date(value).toLocaleTimeString("en-IN", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 }
 
 export function formatDateTime(value: string | Date): string {

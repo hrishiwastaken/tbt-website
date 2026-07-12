@@ -2,7 +2,13 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { transitionBooking } from "@/server/services/bookingService";
-import { badRequest, forbidden, handleApi, notFound, parseBody } from "@/server/http";
+import {
+  badRequest,
+  forbidden,
+  handleApi,
+  notFound,
+  parseBody,
+} from "@/server/http";
 
 const CUTOFF_HOURS = 12;
 
@@ -23,7 +29,7 @@ export const POST = handleApi(async (request: Request) => {
   const hoursUntilSession = (booking.dateTime.getTime() - Date.now()) / 3600000;
   if (hoursUntilSession < CUTOFF_HOURS) {
     throw forbidden(
-      `Cancellations are only permitted at least ${CUTOFF_HOURS} hours before the scheduled appointment. Your session starts in ${Math.max(0, hoursUntilSession).toFixed(1)} hours.`
+      `Cancellations are only permitted at least ${CUTOFF_HOURS} hours before the scheduled appointment. Your session starts in ${Math.max(0, hoursUntilSession).toFixed(1)} hours.`,
     );
   }
 

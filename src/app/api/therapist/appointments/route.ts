@@ -1,7 +1,12 @@
 import { NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
-import { handleApi, paginated, parsePagination, requireTherapist } from "@/server/http";
+import {
+  handleApi,
+  paginated,
+  parsePagination,
+  requireTherapist,
+} from "@/server/http";
 import { BOOKING_STATUSES } from "@/server/domain/bookingStatus";
 
 // Own-scoped appointment register — identical filter/search/sort surface to

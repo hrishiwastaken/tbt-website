@@ -1,11 +1,31 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import { ArrowRight, IndianRupee, CalendarCheck, Wallet, Hourglass } from "lucide-react";
+import {
+  ArrowRight,
+  IndianRupee,
+  CalendarCheck,
+  Wallet,
+  Hourglass,
+} from "lucide-react";
 import { formatINR, formatDateTime, titleCase } from "@/lib/format";
-import { BarChart, CHART_COLORS, DonutChart, LineAreaChart, type ChartDatum } from "@/components/admin/charts";
-import { ErrorNote, KpiCard, LoadingRow, Panel, RangeFilter, StatusPill, type RangeKey } from "@/components/admin/ui";
+import {
+  BarChart,
+  CHART_COLORS,
+  DonutChart,
+  LineAreaChart,
+  type ChartDatum,
+} from "@/components/admin/charts";
+import {
+  ErrorNote,
+  KpiCard,
+  LoadingRow,
+  Panel,
+  RangeFilter,
+  StatusPill,
+  type RangeKey,
+} from "@/components/admin/ui";
 
 interface TherapistKpis {
   sessionValueMinor: number;
@@ -59,30 +79,32 @@ export default function TherapistDashboardPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  const fetchDashboard = useCallback(async () => {
-    if (range === "custom" && (!custom.from || !custom.to)) return;
-    setLoading(true);
-    setError("");
-    try {
-      const params = new URLSearchParams({ range });
-      if (range === "custom") {
-        params.set("from", custom.from);
-        params.set("to", custom.to);
-      }
-      const res = await fetch(`/api/therapist/dashboard?${params}`);
-      const payload = await res.json();
-      if (!res.ok) throw new Error(payload.error || "Failed to load dashboard");
-      setData(payload);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load dashboard");
-    } finally {
-      setLoading(false);
-    }
-  }, [range, custom]);
-
   useEffect(() => {
-    fetchDashboard();
-  }, [fetchDashboard]);
+    if (range === "custom" && (!custom.from || !custom.to)) return;
+    const load = async () => {
+      setLoading(true);
+      setError("");
+      try {
+        const params = new URLSearchParams({ range });
+        if (range === "custom") {
+          params.set("from", custom.from);
+          params.set("to", custom.to);
+        }
+        const res = await fetch(`/api/therapist/dashboard?${params}`);
+        const payload = await res.json();
+        if (!res.ok)
+          throw new Error(payload.error || "Failed to load dashboard");
+        setData(payload);
+      } catch (err) {
+        setError(
+          err instanceof Error ? err.message : "Failed to load dashboard",
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
+  }, [range, custom]);
 
   const kpis = data?.kpis;
 
@@ -90,10 +112,19 @@ export default function TherapistDashboardPage() {
     <div className="space-y-8 animate-[fadeIn_0.5s_ease-out]">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="mb-2 font-cormorant text-4xl font-semibold text-ocean-deep">Your Practice</h1>
-          <p className="font-dmsans text-sm text-ink-muted">Sessions and earnings, scoped to your own caseload.</p>
+          <h1 className="mb-2 font-cormorant text-4xl font-semibold text-ocean-deep">
+            Your Practice
+          </h1>
+          <p className="font-dmsans text-sm text-ink-muted">
+            Sessions and earnings, scoped to your own caseload.
+          </p>
         </div>
-        <RangeFilter value={range} onChange={setRange} custom={custom} onCustomChange={setCustom} />
+        <RangeFilter
+          value={range}
+          onChange={setRange}
+          custom={custom}
+          onCustomChange={setCustom}
+        />
       </div>
 
       <ErrorNote message={error} />
@@ -102,8 +133,16 @@ export default function TherapistDashboardPage() {
       {kpis && (
         <>
           <div className="grid grid-cols-2 gap-5 sm:grid-cols-3 lg:grid-cols-4">
-            <KpiCard label="Today's Sessions" value={kpis.todaysSessions} icon={<CalendarCheck size={16} />} />
-            <KpiCard label="Upcoming" value={kpis.upcomingBookings} hint="Confirmed, not yet held" />
+            <KpiCard
+              label="Today's Sessions"
+              value={kpis.todaysSessions}
+              icon={<CalendarCheck size={16} />}
+            />
+            <KpiCard
+              label="Upcoming"
+              value={kpis.upcomingBookings}
+              hint="Confirmed, not yet held"
+            />
             <KpiCard
               label="Session Value"
               value={formatINR(kpis.sessionValueMinor)}
@@ -119,40 +158,87 @@ export default function TherapistDashboardPage() {
           </div>
 
           <div className="grid grid-cols-2 gap-5 sm:grid-cols-3 lg:grid-cols-5">
-            <KpiCard label="Payable Balance" value={formatINR(kpis.payableMinor)} hint="Unsettled" />
-            <KpiCard label="Reserved" value={formatINR(kpis.reservedMinor)} hint="In pending payouts" icon={<Hourglass size={13} />} />
-            <KpiCard label="Lifetime Paid" value={formatINR(kpis.commissionPaidMinor)} hint="Settled to date" />
-            <KpiCard label="Completed" value={kpis.completedBookings} hint={`of ${kpis.totalBookings} bookings`} />
-            <KpiCard label="Clients Served" value={kpis.totalClients} hint="All time" />
+            <KpiCard
+              label="Payable Balance"
+              value={formatINR(kpis.payableMinor)}
+              hint="Unsettled"
+            />
+            <KpiCard
+              label="Reserved"
+              value={formatINR(kpis.reservedMinor)}
+              hint="In pending payouts"
+              icon={<Hourglass size={13} />}
+            />
+            <KpiCard
+              label="Lifetime Paid"
+              value={formatINR(kpis.commissionPaidMinor)}
+              hint="Settled to date"
+            />
+            <KpiCard
+              label="Completed"
+              value={kpis.completedBookings}
+              hint={`of ${kpis.totalBookings} bookings`}
+            />
+            <KpiCard
+              label="Clients Served"
+              value={kpis.totalClients}
+              hint="All time"
+            />
           </div>
         </>
       )}
 
       {data && (
         <div className="grid grid-cols-1 items-start gap-6 xl:grid-cols-2">
-          <Panel title="Earnings Trend" subtitle="Session value collected vs your accrued commission.">
+          <Panel
+            title="Earnings Trend"
+            subtitle="Session value collected vs your accrued commission."
+          >
             <LineAreaChart
               data={data.series.revenue}
               series={[
-                { key: "gross", label: "Session Value", color: CHART_COLORS.blue, area: true },
-                { key: "consultant", label: "Your Commission", color: CHART_COLORS.violet },
+                {
+                  key: "gross",
+                  label: "Session Value",
+                  color: CHART_COLORS.blue,
+                  area: true,
+                },
+                {
+                  key: "consultant",
+                  label: "Your Commission",
+                  color: CHART_COLORS.violet,
+                },
               ]}
               valueFormat={compactINR}
             />
           </Panel>
 
-          <Panel title="Bookings" subtitle="Sessions booked with you per period.">
+          <Panel
+            title="Bookings"
+            subtitle="Sessions booked with you per period."
+          >
             <BarChart
               data={data.series.bookings}
               series={[
                 { key: "total", label: "Booked", color: CHART_COLORS.blue },
-                { key: "completed", label: "Completed", color: CHART_COLORS.ochre },
-                { key: "cancelled", label: "Cancelled", color: CHART_COLORS.rosewood },
+                {
+                  key: "completed",
+                  label: "Completed",
+                  color: CHART_COLORS.ochre,
+                },
+                {
+                  key: "cancelled",
+                  label: "Cancelled",
+                  color: CHART_COLORS.rosewood,
+                },
               ]}
             />
           </Panel>
 
-          <Panel title="Appointment Status" subtitle="Lifecycle outcome of your bookings in the period.">
+          <Panel
+            title="Appointment Status"
+            subtitle="Lifecycle outcome of your bookings in the period."
+          >
             <DonutChart
               centerLabel="Bookings"
               slices={data.statusDistribution.map((s) => ({
@@ -167,7 +253,10 @@ export default function TherapistDashboardPage() {
             title="Upcoming Appointments"
             subtitle="Your next confirmed and pending sessions."
             actions={
-              <Link href="/therapist/appointments" className="inline-flex items-center gap-1.5 text-xs font-semibold text-ocean hover:text-ocean-deep transition-colors">
+              <Link
+                href="/therapist/appointments"
+                className="inline-flex items-center gap-1.5 text-xs font-semibold text-ocean hover:text-ocean-deep transition-colors"
+              >
                 View all <ArrowRight size={13} />
               </Link>
             }
@@ -177,11 +266,17 @@ export default function TherapistDashboardPage() {
             ) : (
               <div className="divide-y divide-ocean/10 font-dmsans">
                 {data.upcomingAppointments.map((a) => (
-                  <div key={a.id} className="flex flex-wrap items-center justify-between gap-3 py-3">
+                  <div
+                    key={a.id}
+                    className="flex flex-wrap items-center justify-between gap-3 py-3"
+                  >
                     <div>
-                      <p className="font-medium text-ocean-deep">{a.client.name}</p>
+                      <p className="font-medium text-ocean-deep">
+                        {a.client.name}
+                      </p>
                       <p className="text-xs text-ink-muted">
-                        {a.service.name} — {formatDateTime(a.dateTime)} ({a.durationMinutes} min)
+                        {a.service.name} — {formatDateTime(a.dateTime)} (
+                        {a.durationMinutes} min)
                       </p>
                     </div>
                     <StatusPill status={a.status} />

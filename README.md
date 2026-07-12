@@ -38,42 +38,55 @@ Booking → PaymentRecord → Charge success → LedgerEntry postings
 Follow these steps to run the clinic platform locally:
 
 ### 1. Install Dependencies
+
 Run the package installation using the `--legacy-peer-deps` flag:
+
 ```bash
 npm install --legacy-peer-deps
 ```
 
 ### 2. Configure Environment Variables
+
 Create `.env` with your PostgreSQL connection and secrets:
+
 ```bash
 DATABASE_URL="postgresql://postgres:postgres@localhost:5432/braintea"
 DIRECT_URL="postgresql://postgres:postgres@localhost:5432/braintea"
 NEXTAUTH_SECRET="change-me"
 ENCRYPTION_KEY="<32-byte hex key>"
 ```
+
 Generate a secure 32-byte hex encryption key for protecting notes at rest:
+
 ```bash
 node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 ```
 
 ### 3. Initialize and Seed the Database
+
 Synchronize the Prisma models and populate a realistic 90-day operating history (consultants, bookings, ledger entries, payouts):
+
 ```bash
 npx prisma db push
 node prisma/seed.js
 ```
 
 ### 4. Start Local Server
+
 Launch the Next.js development server:
+
 ```bash
 npm run dev
 ```
+
 Open [http://localhost:3000](http://localhost:3000) in your web browser.
 
 ### 5. Run Tests
+
 ```bash
 npm test
 ```
+
 Domain unit tests always run; the integration suite uses the database from `DATABASE_URL`.
 
 ---
@@ -83,13 +96,15 @@ Domain unit tests always run; the integration suite uses the database from `DATA
 To test the secure dashboards, log in using the following accounts:
 
 ### Admin Portal
+
 - **URL**: `/admin/login`
-- **Email**: `admin@madhumaticlinic.com`
+- **Email**: `admin@thebraintea.com`
 - **Password**: `AdminPass123!`
 
 ### Therapist Portal
+
 - **URL**: `/therapist/login`
-- **Email**: `madhumati@madhumaticlinic.com` (Dr. Madhumati Halande) OR `rohan@madhumaticlinic.com` (Dr. Rohan Gupta)
+- **Email**: `madhumati@thebraintea.com` (Dr. Madhumati Halande) OR `rohan@thebraintea.com` (Dr. Rohan Gupta)
 - **Password**: `DrMadhumati123!` OR `DrRohan123!`
 
 ---
@@ -118,6 +133,7 @@ Booking, revenue, commission and payout logic require **no changes**.
 ## 🚀 Deployment Guide
 
 ### Vercel Deployment (Preferred)
+
 1. Commit your changes and push them to a Git repository (GitHub/GitLab).
 2. Go to [Vercel](https://vercel.com) and click **Add New Project**.
 3. Import your clinic repository.

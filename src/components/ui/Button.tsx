@@ -6,12 +6,13 @@ type Size = "sm" | "md" | "lg";
 
 const variantClasses: Record<Variant, string> = {
   primary:
-    "bg-ocean text-white shadow-surface-raised-sm hover:shadow-surface-raised hover:-translate-y-0.5 active:translate-y-0 active:shadow-surface-inset",
+    "bg-teal-sage text-warm-sand shadow-sm hover:bg-forest-slate hover:shadow-warm-soft hover:-translate-y-0.5 active:translate-y-0 btn-shimmer",
   secondary:
-    "bg-surface text-ocean-deep shadow-surface-raised-sm hover:shadow-surface-raised hover:-translate-y-0.5 active:translate-y-0 active:shadow-surface-inset",
+    "bg-warm-white text-forest-slate border border-muted-sage/30 shadow-sm hover:shadow-warm-soft hover:-translate-y-0.5 active:translate-y-0",
   outline:
-    "bg-transparent text-ocean-deep border border-ocean/30 hover:bg-surface hover:border-ocean/50",
-  ghost: "bg-transparent text-ocean hover:text-ocean-deep underline-offset-4 hover:underline",
+    "bg-transparent text-forest-slate border border-teal-sage/40 hover:bg-warm-white hover:border-teal-sage/60",
+  ghost:
+    "bg-transparent text-teal-sage hover:text-forest-slate underline-offset-4 hover:underline",
 };
 
 const sizeClasses: Record<Size, string> = {

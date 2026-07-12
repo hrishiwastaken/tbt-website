@@ -12,12 +12,15 @@ export async function POST() {
       "Set-Cookie",
       `auth_token=; Path=/; HttpOnly; ${
         isProd ? "Secure;" : ""
-      } SameSite=Strict; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT`
+      } SameSite=Strict; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT`,
     );
 
     return response;
   } catch (error) {
     console.error("Logout Error:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 },
+    );
   }
 }

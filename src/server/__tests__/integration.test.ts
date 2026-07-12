@@ -1,6 +1,10 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { prisma } from "@/lib/db";
-import { createBooking, rescheduleBooking, transitionBooking } from "../services/bookingService";
+import {
+  createBooking,
+  rescheduleBooking,
+  transitionBooking,
+} from "../services/bookingService";
 import { executeRefund, recordChargeSuccess } from "../services/paymentService";
 import { createPayout, transitionPayout } from "../services/payoutService";
 import { consultantBalance } from "../services/ledgerService";
@@ -43,7 +47,11 @@ const clientInput = (n: number) => ({
 suite("booking & finance integration", () => {
   beforeAll(async () => {
     const user = await prisma.user.create({
-      data: { email: `test.admin.${STAMP}@example.com`, passwordHash: "x", role: "ADMIN" },
+      data: {
+        email: `test.admin.${STAMP}@example.com`,
+        passwordHash: "x",
+        role: "ADMIN",
+      },
     });
     adminSession = { userId: user.id, email: user.email, role: "ADMIN" };
 
@@ -65,7 +73,7 @@ suite("booking & finance integration", () => {
           dayOfWeek: day,
           startTime: `${String(h).padStart(2, "0")}:00`,
           endTime: `${String(h + 1).padStart(2, "0")}:00`,
-        }))
+        })),
       ),
     });
     const service = await prisma.service.create({
@@ -86,8 +94,12 @@ suite("booking & finance integration", () => {
     await prisma.booking.deleteMany({ where: { therapistId } });
     await prisma.therapist.delete({ where: { id: therapistId } });
     await prisma.service.delete({ where: { id: serviceId } });
-    await prisma.client.deleteMany({ where: { email: { contains: `${STAMP}` } } });
-    await prisma.user.deleteMany({ where: { email: { contains: `${STAMP}` } } });
+    await prisma.client.deleteMany({
+      where: { email: { contains: `${STAMP}` } },
+    });
+    await prisma.user.deleteMany({
+      where: { email: { contains: `${STAMP}` } },
+    });
     await prisma.$disconnect();
   });
 
@@ -115,7 +127,9 @@ suite("booking & finance integration", () => {
     expect(fulfilled).toHaveLength(1);
     expect(rejected).toHaveLength(1);
 
-    const holds = await prisma.bookingSlot.count({ where: { therapistId, startAt: slot } });
+    const holds = await prisma.bookingSlot.count({
+      where: { therapistId, startAt: slot },
+    });
     expect(holds).toBe(1);
   });
 
@@ -129,7 +143,7 @@ suite("booking & finance integration", () => {
         dateTime: slot,
         client: clientInput(3),
         paymentOption: "PAY_LATER",
-      })
+      }),
     ).rejects.toThrow(/working hours/);
   });
 
@@ -150,8 +164,14 @@ suite("booking & finance integration", () => {
     });
 
     // Replay the success handler (as a duplicate webhook would)
-    await recordChargeSuccess({ paymentRecordId: charge.id, providerPaymentId: "123456789012" });
-    await recordChargeSuccess({ paymentRecordId: charge.id, providerPaymentId: "123456789012" });
+    await recordChargeSuccess({
+      paymentRecordId: charge.id,
+      providerPaymentId: "123456789012",
+    });
+    await recordChargeSuccess({
+      paymentRecordId: charge.id,
+      providerPaymentId: "123456789012",
+    });
 
     const grossEntries = await prisma.ledgerEntry.count({
       where: { bookingId: booking.id, entryType: "GROSS_REVENUE" },
@@ -177,27 +197,45 @@ suite("booking & finance integration", () => {
 
     // Refunds require the REFUND_PENDING gate
     await expect(
-      executeRefund({ bookingId: booking.id, session: adminSession })
+      executeRefund({ bookingId: booking.id, session: adminSession }),
     ).rejects.toThrow(/REFUND_PENDING/);
 
-    await transitionBooking({ bookingId: booking.id, toStatus: "REFUND_PENDING", session: adminSession });
-    await executeRefund({ bookingId: booking.id, reason: "test refund", session: adminSession });
+    await transitionBooking({
+      bookingId: booking.id,
+      toStatus: "REFUND_PENDING",
+      session: adminSession,
+    });
+    await executeRefund({
+      bookingId: booking.id,
+      reason: "test refund",
+      session: adminSession,
+    });
 
-    const after = await prisma.booking.findUniqueOrThrow({ where: { id: booking.id } });
+    const after = await prisma.booking.findUniqueOrThrow({
+      where: { id: booking.id },
+    });
     expect(after.status).toBe("REFUNDED");
     expect(after.paymentStatus).toBe("REFUNDED");
 
     // Slot is released after refund
-    const holds = await prisma.bookingSlot.count({ where: { bookingId: booking.id } });
+    const holds = await prisma.bookingSlot.count({
+      where: { bookingId: booking.id },
+    });
     expect(holds).toBe(0);
 
     // Net financial effect of the booking is zero
-    const entries = await prisma.ledgerEntry.findMany({ where: { bookingId: booking.id } });
+    const entries = await prisma.ledgerEntry.findMany({
+      where: { bookingId: booking.id },
+    });
     const commissionNet = entries
-      .filter((e) => ["COMMISSION_ACCRUED", "COMMISSION_REVERSED"].includes(e.entryType))
+      .filter((e) =>
+        ["COMMISSION_ACCRUED", "COMMISSION_REVERSED"].includes(e.entryType),
+      )
       .reduce((sum, e) => sum + e.amountMinor, 0);
     const platformNet = entries
-      .filter((e) => ["PLATFORM_REVENUE", "PLATFORM_REVENUE_REVERSED"].includes(e.entryType))
+      .filter((e) =>
+        ["PLATFORM_REVENUE", "PLATFORM_REVENUE_REVERSED"].includes(e.entryType),
+      )
       .reduce((sum, e) => sum + e.amountMinor, 0);
     expect(commissionNet).toBe(0);
     expect(platformNet).toBe(0);
@@ -247,11 +285,19 @@ suite("booking & finance integration", () => {
     });
     // Moving A onto B's slot must fail
     await expect(
-      rescheduleBooking({ bookingId: a.id, newDateTime: slotB, session: adminSession })
+      rescheduleBooking({
+        bookingId: a.id,
+        newDateTime: slotB,
+        session: adminSession,
+      }),
     ).rejects.toThrow(/no longer available/);
     // Moving B to a free slot succeeds
     const slotC = futureSlot(12, 11);
-    const moved = await rescheduleBooking({ bookingId: b.id, newDateTime: slotC, session: adminSession });
+    const moved = await rescheduleBooking({
+      bookingId: b.id,
+      newDateTime: slotC,
+      session: adminSession,
+    });
     expect(moved.dateTime.getTime()).toBe(slotC.getTime());
   });
 
@@ -261,20 +307,38 @@ suite("booking & finance integration", () => {
 
     // Over-drawing is rejected
     await expect(
-      createPayout({ therapistId, amountMinor: before.payableMinor + 1, session: adminSession })
+      createPayout({
+        therapistId,
+        amountMinor: before.payableMinor + 1,
+        session: adminSession,
+      }),
     ).rejects.toThrow(/exceeds payable/);
 
     const payout = await createPayout({ therapistId, session: adminSession });
     expect(payout.amountMinor).toBe(before.payableMinor);
 
     // Pending payout reserves the balance — a second full payout is blocked
-    await expect(createPayout({ therapistId, session: adminSession })).rejects.toThrow();
+    await expect(
+      createPayout({ therapistId, session: adminSession }),
+    ).rejects.toThrow();
 
-    await transitionPayout({ payoutId: payout.id, toStatus: "PAID", reference: "TEST1", session: adminSession });
+    await transitionPayout({
+      payoutId: payout.id,
+      toStatus: "PAID",
+      reference: "TEST1",
+      session: adminSession,
+    });
     // Marking PAID twice is a no-op, not a double ledger post
-    await transitionPayout({ payoutId: payout.id, toStatus: "PAID", reference: "TEST1", session: adminSession });
+    await transitionPayout({
+      payoutId: payout.id,
+      toStatus: "PAID",
+      reference: "TEST1",
+      session: adminSession,
+    });
 
-    const settledEntries = await prisma.ledgerEntry.count({ where: { payoutId: payout.id } });
+    const settledEntries = await prisma.ledgerEntry.count({
+      where: { payoutId: payout.id },
+    });
     expect(settledEntries).toBe(1);
 
     const after = await consultantBalance(therapistId);

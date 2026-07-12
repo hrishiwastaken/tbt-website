@@ -1,107 +1,113 @@
 import React, { Suspense } from "react";
 import { Phone, Mail, MapPin, Clock, Instagram, Linkedin } from "lucide-react";
 import ContactForm from "@/components/ContactForm";
-import Container from "@/components/ui/Container";
-import Surface from "@/components/ui/Surface";
-import Badge from "@/components/ui/Badge";
-import {
-  CONTACT_ADDRESS,
-  CONTACT_EMAIL,
-  CONTACT_PHONE,
-  CONTACT_HOURS,
-  SITE_NAME,
-} from "@/lib/site";
-
-export const metadata = {
-  title: "Contact & Book | The Brain Tea",
-  description: "Reach out in confidence and book your first session.",
-};
 
 export default function Contact() {
   return (
     <div className="bg-ivory min-h-screen font-dmsans">
-      <section className="pt-36 pb-20">
-        <Container className="text-center">
-          <Badge tone="gold" className="mb-4">
-            Begin Your Journey
-          </Badge>
-          <h1 className="font-cormorant text-5xl md:text-6xl font-semibold text-ocean-deep leading-tight mb-6 text-balance">
+      {/* PAGE HERO */}
+      <section className="bg-sand pt-32 pb-20 border-b border-mist/20">
+        <div className="max-w-4xl mx-auto px-6 text-center">
+          <span className="text-xs font-semibold tracking-[0.15em] text-terracotta uppercase mb-4 block">
+            Begin Your Healing Path
+          </span>
+          <h1 className="font-cormorant text-5xl md:text-6xl font-semibold text-charcoal leading-tight mb-6">
             Contact & Book
           </h1>
-          <p className="text-ink-muted text-lg md:text-xl max-w-2xl mx-auto leading-relaxed text-pretty">
-            Reach out in confidence. We are here to match you with the right support and address
-            your needs.
+          <p className="text-sage text-lg md:text-xl max-w-2xl mx-auto leading-relaxed">
+            Reach out in confidence. We are here to match you with the right
+            support system and address your needs.
           </p>
-        </Container>
+        </div>
       </section>
 
-      <section className="pb-24">
-        <Container className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-start">
+      {/* TWO-COLUMN LAYOUT */}
+      <section className="py-24 max-w-7xl mx-auto px-6 md:px-12">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-start">
+          {/* Left Column: Contact details & Map */}
           <div className="lg:col-span-5 space-y-10">
             <div>
-              <h2 className="font-cormorant text-3xl md:text-4xl font-semibold text-ocean-deep mb-4">
+              <h2 className="font-cormorant text-3xl md:text-4xl font-semibold text-charcoal mb-6">
                 Get In Touch
               </h2>
-              <p className="text-ink-muted text-sm md:text-base leading-relaxed">
-                Whether you want to schedule a session, ask about pricing, or have general
-                questions, we&apos;re ready to help.
+              <p className="text-sage text-sm md:text-base leading-relaxed mb-8">
+                Whether you want to schedule a session, check pricing tiers, or
+                ask simple questions, we are ready to guide you. Use any of the
+                options below.
               </p>
             </div>
 
+            {/* Details */}
             <div className="space-y-6">
-              {[
-                {
-                  icon: <MapPin className="w-5 h-5" />,
-                  label: "Clinic Address",
-                  value: (
-                    <>
-                      {CONTACT_ADDRESS.line1}
-                      <br />
-                      {CONTACT_ADDRESS.line2}
-                    </>
-                  ),
-                },
-                {
-                  icon: <Phone className="w-5 h-5" />,
-                  label: "Phone & WhatsApp",
-                  value: CONTACT_PHONE,
-                },
-                {
-                  icon: <Mail className="w-5 h-5" />,
-                  label: "Email",
-                  value: CONTACT_EMAIL,
-                },
-                {
-                  icon: <Clock className="w-5 h-5" />,
-                  label: "Operating Hours",
-                  value: (
-                    <>
-                      {CONTACT_HOURS.weekday}
-                      <br />
-                      {CONTACT_HOURS.weekend}
-                    </>
-                  ),
-                },
-              ].map((item) => (
-                <div key={item.label} className="flex items-start gap-4">
-                  <div className="w-11 h-11 rounded-soft surface-inset flex items-center justify-center text-ocean shrink-0">
-                    {item.icon}
-                  </div>
-                  <div>
-                    <h4 className="font-cormorant text-lg font-semibold text-ocean-deep">{item.label}</h4>
-                    <p className="text-sm text-ink-muted leading-relaxed mt-1">{item.value}</p>
-                  </div>
+              <div className="flex items-start gap-4">
+                <div className="p-3 bg-mist/30 rounded-xl text-forest shrink-0">
+                  <MapPin className="w-5 h-5" />
                 </div>
-              ))}
+                <div>
+                  <h4 className="font-cormorant text-lg font-semibold text-charcoal">
+                    Clinic Address
+                  </h4>
+                  <p className="font-dmsans text-sm text-sage leading-relaxed mt-1">
+                    12, Green Meadow Lane, Sector 4,
+                    <br />
+                    New Delhi, DL 110001
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-4">
+                <div className="p-3 bg-mist/30 rounded-xl text-forest shrink-0">
+                  <Phone className="w-5 h-5" />
+                </div>
+                <div>
+                  <h4 className="font-cormorant text-lg font-semibold text-charcoal">
+                    Phone & WhatsApp
+                  </h4>
+                  <p className="font-dmsans text-sm text-sage leading-relaxed mt-1">
+                    +91 75584 93155
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-4">
+                <div className="p-3 bg-mist/30 rounded-xl text-forest shrink-0">
+                  <Mail className="w-5 h-5" />
+                </div>
+                <div>
+                  <h4 className="font-cormorant text-lg font-semibold text-charcoal">
+                    Email Communication
+                  </h4>
+                  <p className="font-dmsans text-sm text-sage leading-relaxed mt-1">
+                    contact@thebraintea.com
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-4">
+                <div className="p-3 bg-mist/30 rounded-xl text-forest shrink-0">
+                  <Clock className="w-5 h-5" />
+                </div>
+                <div>
+                  <h4 className="font-cormorant text-lg font-semibold text-charcoal">
+                    Operating Hours
+                  </h4>
+                  <p className="font-dmsans text-sm text-sage leading-relaxed mt-1">
+                    Monday – Friday: 9:00 AM – 7:00 PM
+                    <br />
+                    Saturday: 10:00 AM – 4:00 PM
+                  </p>
+                </div>
+              </div>
             </div>
 
+            {/* Social Icons */}
             <div className="flex items-center gap-4 pt-2">
               <a
                 href="https://instagram.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-11 h-11 rounded-full surface-raised flex items-center justify-center text-ocean hover:text-ocean-deep transition-colors"
-                aria-label="Instagram"
+                className="p-3 bg-sand hover:bg-mist/30 hover:text-forest rounded-full text-sage transition-all"
+                aria-label="Instagram Link"
               >
                 <Instagram className="w-5 h-5" />
               </a>
@@ -109,39 +115,45 @@ export default function Contact() {
                 href="https://linkedin.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-11 h-11 rounded-full surface-raised flex items-center justify-center text-ocean hover:text-ocean-deep transition-colors"
-                aria-label="LinkedIn"
+                className="p-3 bg-sand hover:bg-mist/30 hover:text-forest rounded-full text-sage transition-all"
+                aria-label="LinkedIn Link"
               >
                 <Linkedin className="w-5 h-5" />
               </a>
             </div>
 
-            <Surface variant="raised" radius="surface" className="overflow-hidden relative aspect-video">
+            {/* Google Map Mockup / Iframe */}
+            <div className="rounded-2xl overflow-hidden shadow-warm-soft border border-mist/20 relative aspect-video bg-sand">
+              {/* Using a clean filter on standard iframe embed to keep aesthetics matching the ivory/sand look */}
               <iframe
-                title={`${SITE_NAME} Location Map`}
+                title="The Brain Tea Location Map"
                 src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3502.5620138981146!2d77.218224!3d28.613939!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x390cfd5d34190c1f%3A0x63351ec30c5e7b57!2sConnaught%20Place%2C%20New%20Delhi%2C%20Delhi%20110001!5e0!3m2!1sen!2sin!4v1700000000000!5m2!1sen!2sin"
                 width="100%"
                 height="100%"
-                style={{ border: 0 }}
+                style={{
+                  border: 0,
+                  filter: "grayscale(1) contrast(0.9) brightness(0.95)",
+                }}
                 allowFullScreen={false}
                 loading="lazy"
                 referrerPolicy="no-referrer-when-downgrade"
               />
-            </Surface>
+            </div>
           </div>
 
+          {/* Right Column: Appointment Request Form */}
           <div className="lg:col-span-7">
             <Suspense
               fallback={
-                <Surface variant="raised" radius="surface" className="text-center py-20 text-ink-muted">
+                <div className="bg-warm-white p-8 rounded-2xl shadow-warm-soft border border-mist/20 text-center py-20 font-dmsans text-sage">
                   Loading Request Form...
-                </Surface>
+                </div>
               }
             >
               <ContactForm />
             </Suspense>
           </div>
-        </Container>
+        </div>
       </section>
     </div>
   );

@@ -1,9 +1,15 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Search } from "lucide-react";
 import { formatDate } from "@/lib/format";
-import { ErrorNote, inputClass, LoadingRow, Pager, Panel } from "@/components/admin/ui";
+import {
+  ErrorNote,
+  inputClass,
+  LoadingRow,
+  Pager,
+  Panel,
+} from "@/components/admin/ui";
 
 interface ClientRow {
   id: string;
@@ -33,41 +39,47 @@ export default function TherapistClientsPage() {
     return () => clearTimeout(t);
   }, [q]);
 
-  const fetchRows = useCallback(async () => {
-    setLoading(true);
-    setError("");
-    try {
-      const params = new URLSearchParams({ page: String(page) });
-      if (search) params.set("q", search);
-      const res = await fetch(`/api/therapist/clients?${params}`);
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to load clients");
-      setRows(data.items);
-      setPageCount(data.pageCount);
-      setTotal(data.total);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load clients");
-    } finally {
-      setLoading(false);
-    }
-  }, [page, search]);
-
   useEffect(() => {
-    fetchRows();
-  }, [fetchRows]);
+    const load = async () => {
+      setLoading(true);
+      setError("");
+      try {
+        const params = new URLSearchParams({ page: String(page) });
+        if (search) params.set("q", search);
+        const res = await fetch(`/api/therapist/clients?${params}`);
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Failed to load clients");
+        setRows(data.items);
+        setPageCount(data.pageCount);
+        setTotal(data.total);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Failed to load clients");
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
+  }, [page, search]);
 
   return (
     <div className="space-y-6 animate-[fadeIn_0.5s_ease-out]">
       <div>
-        <h1 className="mb-2 font-cormorant text-4xl font-semibold text-ocean-deep">Your Clients</h1>
-        <p className="font-dmsans text-sm text-ink-muted">Everyone you've held a session with.</p>
+        <h1 className="mb-2 font-cormorant text-4xl font-semibold text-ocean-deep">
+          Your Clients
+        </h1>
+        <p className="font-dmsans text-sm text-ink-muted">
+          Everyone you&apos;ve held a session with.
+        </p>
       </div>
 
       <ErrorNote message={error} />
 
       <Panel title="Client Roster" subtitle={`${total} clients.`}>
         <div className="relative mb-5 max-w-md">
-          <Search size={13} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-muted" />
+          <Search
+            size={13}
+            className="absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-muted"
+          />
           <input
             value={q}
             onChange={(e) => setQ(e.target.value)}
@@ -95,14 +107,20 @@ export default function TherapistClientsPage() {
               <tbody>
                 {rows.map((row) => (
                   <tr key={row.id} className="border-b border-ocean/5">
-                    <td className="px-3 py-3.5 font-semibold text-ocean-deep">{row.name}</td>
+                    <td className="px-3 py-3.5 font-semibold text-ocean-deep">
+                      {row.name}
+                    </td>
                     <td className="px-3 py-3.5 text-xs text-ink-muted">
                       {row.email}
                       <br />
                       {row.phone}
                     </td>
-                    <td className="px-3 py-3.5 text-right tabular-nums text-ink">{row.sessionCount}</td>
-                    <td className="px-3 py-3.5 text-right tabular-nums text-ink">{row.completedCount}</td>
+                    <td className="px-3 py-3.5 text-right tabular-nums text-ink">
+                      {row.sessionCount}
+                    </td>
+                    <td className="px-3 py-3.5 text-right tabular-nums text-ink">
+                      {row.completedCount}
+                    </td>
                     <td className="px-3 py-3.5 text-xs text-ink-muted">
                       {row.lastSessionAt ? formatDate(row.lastSessionAt) : "—"}
                     </td>
@@ -112,7 +130,12 @@ export default function TherapistClientsPage() {
             </table>
           </div>
         )}
-        <Pager page={page} pageCount={pageCount} total={total} onPage={setPage} />
+        <Pager
+          page={page}
+          pageCount={pageCount}
+          total={total}
+          onPage={setPage}
+        />
       </Panel>
     </div>
   );

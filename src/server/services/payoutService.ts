@@ -16,17 +16,21 @@ export async function createPayout(input: {
   note?: string;
   session: Session;
 }) {
-  const therapist = await prisma.therapist.findUnique({ where: { id: input.therapistId } });
+  const therapist = await prisma.therapist.findUnique({
+    where: { id: input.therapistId },
+  });
   if (!therapist) throw notFound("Consultant not found");
 
   const balance = await consultantBalance(input.therapistId);
   const amountMinor = input.amountMinor ?? balance.payableMinor;
   if (!Number.isSafeInteger(amountMinor) || amountMinor <= 0) {
-    throw badRequest("Payout amount must be a positive integer amount in paise");
+    throw badRequest(
+      "Payout amount must be a positive integer amount in paise",
+    );
   }
   if (amountMinor > balance.payableMinor) {
     throw conflict(
-      `Payout exceeds payable balance (${balance.payableMinor} paise available)`
+      `Payout exceeds payable balance (${balance.payableMinor} paise available)`,
     );
   }
 
@@ -65,11 +69,15 @@ export async function transitionPayout(input: {
   session: Session;
 }) {
   return prisma.$transaction(async (tx) => {
-    const payout = await tx.payout.findUnique({ where: { id: input.payoutId } });
+    const payout = await tx.payout.findUnique({
+      where: { id: input.payoutId },
+    });
     if (!payout) throw notFound("Payout not found");
     if (payout.status === input.toStatus) return payout; // idempotent
     if (!PAYOUT_TRANSITIONS[payout.status]?.includes(input.toStatus)) {
-      throw conflict(`Illegal payout transition ${payout.status} → ${input.toStatus}`);
+      throw conflict(
+        `Illegal payout transition ${payout.status} → ${input.toStatus}`,
+      );
     }
 
     const updated = await tx.payout.update({
@@ -100,9 +108,13 @@ export async function transitionPayout(input: {
         action: `payout.${input.toStatus.toLowerCase()}`,
         entityType: "Payout",
         entityId: payout.id,
-        detail: { from: payout.status, to: input.toStatus, reference: input.reference },
+        detail: {
+          from: payout.status,
+          to: input.toStatus,
+          reference: input.reference,
+        },
       },
-      tx
+      tx,
     );
     return updated;
   });

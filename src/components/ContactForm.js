@@ -18,8 +18,13 @@ export default function ContactForm() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    if (!formData.name || !formData.email || !formData.subject || !formData.message) {
+
+    if (
+      !formData.name ||
+      !formData.email ||
+      !formData.subject ||
+      !formData.message
+    ) {
       setStatus("ERROR");
       setMessageText("Please fill out all fields.");
       return;
@@ -43,7 +48,9 @@ export default function ContactForm() {
         setFormData({ name: "", email: "", subject: "", message: "" });
       } else {
         setStatus("ERROR");
-        setMessageText(data.error || "Failed to send message. Please try again.");
+        setMessageText(
+          data.error || "Failed to send message. Please try again.",
+        );
       }
     } catch (err) {
       console.error(err);
@@ -53,9 +60,14 @@ export default function ContactForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6 glass-card p-8 md:p-12 rounded-2xl border border-mist/30 shadow-warm-soft">
-      <h3 className="font-cormorant text-3xl font-semibold text-charcoal mb-4 border-b border-mist/20 pb-2">Send a Message</h3>
-      
+    <form
+      onSubmit={handleSubmit}
+      className="space-y-6 glass-card p-8 md:p-12 rounded-2xl border border-mist/30 shadow-warm-soft"
+    >
+      <h3 className="font-cormorant text-3xl font-semibold text-charcoal mb-4 border-b border-mist/20 pb-2">
+        Send a Message
+      </h3>
+
       {status === "SUCCESS" && (
         <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm font-medium">
           {messageText}
@@ -69,7 +81,10 @@ export default function ContactForm() {
       )}
 
       <div>
-        <label htmlFor="name" className="text-xs font-bold tracking-wider uppercase text-sage block mb-1">
+        <label
+          htmlFor="name"
+          className="text-xs font-bold tracking-wider uppercase text-sage block mb-1"
+        >
           Full Name
         </label>
         <input
@@ -87,7 +102,10 @@ export default function ContactForm() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <div>
-          <label htmlFor="email" className="text-xs font-bold tracking-wider uppercase text-sage block mb-1">
+          <label
+            htmlFor="email"
+            className="text-xs font-bold tracking-wider uppercase text-sage block mb-1"
+          >
             Email Address
           </label>
           <input
@@ -103,7 +121,10 @@ export default function ContactForm() {
           />
         </div>
         <div>
-          <label htmlFor="subject" className="text-xs font-bold tracking-wider uppercase text-sage block mb-1">
+          <label
+            htmlFor="subject"
+            className="text-xs font-bold tracking-wider uppercase text-sage block mb-1"
+          >
             Subject
           </label>
           <input
@@ -121,7 +142,10 @@ export default function ContactForm() {
       </div>
 
       <div>
-        <label htmlFor="message" className="text-xs font-bold tracking-wider uppercase text-sage block mb-1">
+        <label
+          htmlFor="message"
+          className="text-xs font-bold tracking-wider uppercase text-sage block mb-1"
+        >
           Message
         </label>
         <textarea
