@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db";
 import {
   createBooking,
   rescheduleBooking,
+  scheduleAdminBooking,
   transitionBooking,
 } from "../services/bookingService";
 import { executeRefund, recordChargeSuccess } from "../services/paymentService";
@@ -94,6 +95,13 @@ suite("booking & finance integration", () => {
     await prisma.booking.deleteMany({ where: { therapistId } });
     await prisma.therapist.delete({ where: { id: therapistId } });
     await prisma.service.delete({ where: { id: serviceId } });
+    // Canonical services upserted by scheduleAdminBooking (unique to tests —
+    // seed data uses different slugs).
+    await prisma.service.deleteMany({
+      where: {
+        slug: { in: ["individual-counselling", "couple-family-counselling"] },
+      },
+    });
     await prisma.client.deleteMany({
       where: { email: { contains: `${STAMP}` } },
     });
@@ -299,6 +307,54 @@ suite("booking & finance integration", () => {
       session: adminSession,
     });
     expect(moved.dateTime.getTime()).toBe(slotC.getTime());
+  });
+
+  it("schedules an admin appointment: confirmed, typed, slot-held, and prepaid revenue posted", async () => {
+    const slot = futureSlot(20, 16);
+    const booking = await scheduleAdminBooking({
+      therapistId,
+      counselingType: "COUPLE_FAMILY",
+      dateTime: slot,
+      feeMinor: 200000,
+      paymentReceived: true,
+      paymentRef: "112233445566",
+      client: { new: clientInput(20) },
+      session: adminSession,
+    });
+
+    expect(booking.status).toBe("CONFIRMED");
+    expect(booking.paymentStatus).toBe("PAID");
+    expect(booking.counselingType).toBe("COUPLE_FAMILY");
+    expect(booking.amountMinor).toBe(200000);
+    expect(booking.invoiceNumber).toBeTruthy();
+
+    const holds = await prisma.bookingSlot.count({
+      where: { therapistId, startAt: slot },
+    });
+    expect(holds).toBe(1);
+
+    // Prepaid fee posts gross revenue once and commission at 35% of ₹2000.
+    const gross = await prisma.ledgerEntry.count({
+      where: { bookingId: booking.id, entryType: "GROSS_REVENUE" },
+    });
+    expect(gross).toBe(1);
+    const commission = await prisma.ledgerEntry.findFirstOrThrow({
+      where: { bookingId: booking.id, entryType: "COMMISSION_ACCRUED" },
+    });
+    expect(commission.amountMinor).toBe(70000);
+
+    // Double-booking the same consultant/time is rejected by the slot guard.
+    await expect(
+      scheduleAdminBooking({
+        therapistId,
+        counselingType: "INDIVIDUAL",
+        dateTime: slot,
+        feeMinor: 150000,
+        paymentReceived: false,
+        client: { new: clientInput(21) },
+        session: adminSession,
+      }),
+    ).rejects.toThrow(/already has an appointment|no longer available/i);
   });
 
   it("payouts respect the payable balance and settle exactly once", async () => {
