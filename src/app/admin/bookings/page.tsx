@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Download, Search } from "lucide-react";
+import { CalendarPlus, Download, Search } from "lucide-react";
 import {
   formatINR,
   formatDate,
@@ -19,6 +19,11 @@ import {
   Panel,
   StatusPill,
 } from "@/components/admin/ui";
+import {
+  COUNSELING_TYPES,
+  COUNSELING_TYPE_LABELS,
+  counselingTypeLabel,
+} from "@/server/domain/counselingType";
 
 // Client-side mirror of the booking state machine for action menus; the
 // server re-validates every transition.
@@ -77,6 +82,7 @@ interface BookingRow {
   paymentStatus: string;
   invoiceNumber: string | null;
   commissionBps: number;
+  counselingType: string | null;
   client: { id: string; name: string; email: string; phone: string };
   therapist: { id: string; name: string };
   service: { id: string; name: string };
@@ -116,6 +122,9 @@ interface BookingDetail extends BookingRow {
 interface Consultant {
   id: string;
   name: string;
+  status?: string;
+  isActive?: boolean;
+  feeMinor?: number;
 }
 
 export default function AdminBookingsPage() {
@@ -136,6 +145,7 @@ export default function AdminBookingsPage() {
   const [consultants, setConsultants] = useState<Consultant[]>([]);
 
   const [detailId, setDetailId] = useState<string | null>(null);
+  const [scheduleOpen, setScheduleOpen] = useState(false);
 
   useEffect(() => {
     fetch("/api/admin/consultants")
@@ -197,12 +207,21 @@ export default function AdminBookingsPage() {
             Search, inspect and manage the full booking lifecycle.
           </p>
         </div>
-        <a
-          href="/api/admin/reports"
-          className="inline-flex items-center gap-2 rounded-full border border-ocean/25 px-5 py-2.5 font-dmsans text-xs font-bold uppercase tracking-wider text-ocean-deep transition-colors hover:bg-surface-sunken"
-        >
-          <Download size={13} /> Export CSV
-        </a>
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setScheduleOpen(true)}
+            className="inline-flex items-center gap-2 rounded-full bg-ocean px-5 py-2.5 font-dmsans text-xs font-bold uppercase tracking-wider text-white shadow-surface-raised-sm transition-all hover:-translate-y-0.5"
+          >
+            <CalendarPlus size={13} /> Schedule appointment
+          </button>
+          <a
+            href="/api/admin/reports"
+            className="inline-flex items-center gap-2 rounded-full border border-ocean/25 px-5 py-2.5 font-dmsans text-xs font-bold uppercase tracking-wider text-ocean-deep transition-colors hover:bg-surface-sunken"
+          >
+            <Download size={13} /> Export CSV
+          </a>
+        </div>
       </div>
 
       <Panel
@@ -321,6 +340,11 @@ export default function AdminBookingsPage() {
                         {formatDate(row.dateTime)} · {formatTime(row.dateTime)}{" "}
                         · {row.durationMinutes} min
                       </div>
+                      {row.counselingType && (
+                        <div className="mt-0.5 text-[10px] font-semibold uppercase tracking-wide text-ocean/70">
+                          {counselingTypeLabel(row.counselingType)}
+                        </div>
+                      )}
                     </td>
                     <td className="px-3 py-3.5">
                       <div className="font-medium text-ink">
@@ -363,7 +387,400 @@ export default function AdminBookingsPage() {
           onChanged={fetchRows}
         />
       )}
+
+      {scheduleOpen && (
+        <ScheduleModal
+          consultants={consultants}
+          onClose={() => setScheduleOpen(false)}
+          onScheduled={() => {
+            setScheduleOpen(false);
+            setPage(1);
+            fetchRows();
+          }}
+        />
+      )}
     </div>
+  );
+}
+
+interface ClientOption {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+}
+
+function ScheduleModal({
+  consultants,
+  onClose,
+  onScheduled,
+}: {
+  consultants: Consultant[];
+  onClose: () => void;
+  onScheduled: () => void;
+}) {
+  // Only APPROVED, active consultants can take new appointments. When the
+  // list carries status/isActive (the consultants endpoint provides them) we
+  // filter on it; otherwise we fall back to the full roster.
+  const bookable = useMemo(
+    () =>
+      consultants.filter(
+        (c) =>
+          (c.status === undefined || c.status === "APPROVED") &&
+          (c.isActive === undefined || c.isActive),
+      ),
+    [consultants],
+  );
+
+  const [therapistId, setTherapistId] = useState("");
+  const [counselingType, setCounselingType] = useState<string>(
+    COUNSELING_TYPES[0],
+  );
+  const [date, setDate] = useState("");
+  const [time, setTime] = useState("");
+  const [feeRupees, setFeeRupees] = useState("");
+  const [paymentReceived, setPaymentReceived] = useState(false);
+  const [paymentRef, setPaymentRef] = useState("");
+
+  const [clientMode, setClientMode] = useState<"existing" | "new">("existing");
+  const [clientQuery, setClientQuery] = useState("");
+  const [clientResults, setClientResults] = useState<ClientOption[]>([]);
+  const [selectedClient, setSelectedClient] = useState<ClientOption | null>(
+    null,
+  );
+  const [newClient, setNewClient] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    dob: "",
+    emergencyContact: "",
+  });
+
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+
+  // Prefill the fee from the chosen consultant's default rate.
+  const onConsultantChange = (id: string) => {
+    setTherapistId(id);
+    const c = bookable.find((x) => x.id === id);
+    if (c?.feeMinor != null) setFeeRupees(String(c.feeMinor / 100));
+  };
+
+  // Debounced client search against the admin clients endpoint. All state
+  // updates happen inside the debounced callback so the effect body never
+  // sets state synchronously.
+  useEffect(() => {
+    if (clientMode !== "existing") return;
+    const q = clientQuery.trim();
+    const t = setTimeout(async () => {
+      if (!q) {
+        setClientResults([]);
+        return;
+      }
+      try {
+        const res = await fetch(
+          `/api/admin/clients?q=${encodeURIComponent(q)}&pageSize=8`,
+        );
+        if (!res.ok) return;
+        const data = await res.json();
+        setClientResults(data.items ?? []);
+      } catch {
+        /* ignore transient search errors */
+      }
+    }, 300);
+    return () => clearTimeout(t);
+  }, [clientQuery, clientMode]);
+
+  const submit = async () => {
+    setError("");
+    if (!therapistId) return setError("Select a consultant");
+    if (!date || !time) return setError("Select a date and time");
+    const fee = Number(feeRupees);
+    if (!fee || fee <= 0) return setError("Enter a valid fee amount");
+    if (clientMode === "existing" && !selectedClient)
+      return setError("Search for and select a client");
+    if (
+      clientMode === "new" &&
+      (!newClient.name ||
+        !newClient.email ||
+        !newClient.phone ||
+        !newClient.dob ||
+        !newClient.emergencyContact)
+    )
+      return setError("Complete all new client fields");
+
+    setBusy(true);
+    try {
+      const body: Record<string, unknown> = {
+        therapistId,
+        counselingType,
+        date,
+        time,
+        feeRupees: fee,
+        paymentReceived,
+      };
+      if (paymentReceived && paymentRef.trim())
+        body.paymentRef = paymentRef.trim();
+      if (clientMode === "existing") body.clientId = selectedClient!.id;
+      else body.newClient = newClient;
+
+      const res = await fetch("/api/admin/bookings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to schedule");
+      onScheduled();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to schedule");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const today = new Date().toISOString().slice(0, 10);
+
+  return (
+    <Modal title="Schedule Appointment" onClose={onClose} wide>
+      <div className="space-y-5 font-dmsans">
+        <ErrorNote message={error} />
+
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <Field label="Consultant">
+            <select
+              value={therapistId}
+              onChange={(e) => onConsultantChange(e.target.value)}
+              className={inputClass}
+            >
+              <option value="">Select consultant…</option>
+              {bookable.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
+          </Field>
+          <Field label="Counselling type">
+            <select
+              value={counselingType}
+              onChange={(e) => setCounselingType(e.target.value)}
+              className={inputClass}
+            >
+              {COUNSELING_TYPES.map((t) => (
+                <option key={t} value={t}>
+                  {COUNSELING_TYPE_LABELS[t]}
+                </option>
+              ))}
+            </select>
+          </Field>
+          <Field label="Date">
+            <input
+              type="date"
+              min={today}
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+              className={inputClass}
+            />
+          </Field>
+          <Field label="Time">
+            <input
+              type="time"
+              value={time}
+              onChange={(e) => setTime(e.target.value)}
+              className={inputClass}
+              step={900}
+            />
+          </Field>
+          <Field label="Session fee (₹)">
+            <input
+              type="number"
+              min={0}
+              step="0.01"
+              value={feeRupees}
+              onChange={(e) => setFeeRupees(e.target.value)}
+              className={inputClass}
+              placeholder="e.g. 1500"
+            />
+          </Field>
+          <div className="flex flex-col justify-end gap-2">
+            <label className="flex cursor-pointer items-center gap-2 text-sm text-ink">
+              <input
+                type="checkbox"
+                checked={paymentReceived}
+                onChange={(e) => setPaymentReceived(e.target.checked)}
+                className="h-4 w-4 accent-ocean"
+              />
+              Fee already paid
+            </label>
+            {paymentReceived && (
+              <input
+                value={paymentRef}
+                onChange={(e) => setPaymentRef(e.target.value)}
+                className={`${inputClass} !py-2 !text-xs`}
+                placeholder="Payment reference / UPI UTR (optional)"
+              />
+            )}
+          </div>
+        </div>
+
+        {/* Client selection */}
+        <div className="surface-inset rounded-soft p-4">
+          <div className="mb-3 flex items-center gap-2">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-ink-muted">
+              Client
+            </span>
+            <div className="surface-raised ml-auto flex items-center gap-1 rounded-full p-1">
+              {(["existing", "new"] as const).map((m) => (
+                <button
+                  key={m}
+                  type="button"
+                  onClick={() => setClientMode(m)}
+                  className={`rounded-full px-3 py-1 text-[11px] font-semibold transition-all ${
+                    clientMode === m
+                      ? "bg-ocean text-white"
+                      : "text-ink-muted hover:text-ocean-deep"
+                  }`}
+                >
+                  {m === "existing" ? "Existing" : "New client"}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {clientMode === "existing" ? (
+            <div className="space-y-2">
+              {selectedClient ? (
+                <div className="flex flex-wrap items-center justify-between gap-2 rounded-soft border border-ocean/20 bg-surface px-3.5 py-2.5 text-sm">
+                  <span>
+                    <span className="font-semibold text-ocean-deep">
+                      {selectedClient.name}
+                    </span>{" "}
+                    <span className="text-ink-muted">
+                      · {selectedClient.email}
+                    </span>
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedClient(null);
+                      setClientQuery("");
+                    }}
+                    className="text-xs font-semibold text-ocean underline"
+                  >
+                    Change
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <input
+                    value={clientQuery}
+                    onChange={(e) => setClientQuery(e.target.value)}
+                    className={inputClass}
+                    placeholder="Search client by name, email or phone…"
+                  />
+                  {clientResults.length > 0 && (
+                    <div className="max-h-44 overflow-y-auto rounded-soft border border-ocean/15">
+                      {clientResults.map((c) => (
+                        <button
+                          key={c.id}
+                          type="button"
+                          onClick={() => setSelectedClient(c)}
+                          className="block w-full border-b border-ocean/5 px-3.5 py-2 text-left text-sm transition-colors last:border-0 hover:bg-surface-sunken"
+                        >
+                          <span className="font-semibold text-ocean-deep">
+                            {c.name}
+                          </span>{" "}
+                          <span className="text-xs text-ink-muted">
+                            · {c.email} · {c.phone}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+              <Field label="Full name">
+                <input
+                  value={newClient.name}
+                  onChange={(e) =>
+                    setNewClient({ ...newClient, name: e.target.value })
+                  }
+                  className={inputClass}
+                />
+              </Field>
+              <Field label="Email">
+                <input
+                  type="email"
+                  value={newClient.email}
+                  onChange={(e) =>
+                    setNewClient({ ...newClient, email: e.target.value })
+                  }
+                  className={inputClass}
+                />
+              </Field>
+              <Field label="Phone">
+                <input
+                  value={newClient.phone}
+                  onChange={(e) =>
+                    setNewClient({ ...newClient, phone: e.target.value })
+                  }
+                  className={inputClass}
+                />
+              </Field>
+              <Field label="Date of birth">
+                <input
+                  type="date"
+                  max={today}
+                  value={newClient.dob}
+                  onChange={(e) =>
+                    setNewClient({ ...newClient, dob: e.target.value })
+                  }
+                  className={inputClass}
+                />
+              </Field>
+              <div className="md:col-span-2">
+                <Field label="Emergency contact">
+                  <input
+                    value={newClient.emergencyContact}
+                    onChange={(e) =>
+                      setNewClient({
+                        ...newClient,
+                        emergencyContact: e.target.value,
+                      })
+                    }
+                    className={inputClass}
+                    placeholder="Name & phone of an emergency contact"
+                  />
+                </Field>
+              </div>
+            </div>
+          )}
+        </div>
+
+        <div className="flex justify-end gap-2">
+          <button
+            type="button"
+            onClick={onClose}
+            disabled={busy}
+            className="rounded-full border border-ocean/25 px-5 py-2.5 text-xs font-bold uppercase tracking-wider text-ocean-deep transition-colors hover:bg-surface-sunken disabled:opacity-40"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            onClick={submit}
+            disabled={busy}
+            className="rounded-full bg-ocean px-6 py-2.5 text-xs font-bold uppercase tracking-wider text-white shadow-surface-raised-sm transition-all hover:-translate-y-0.5 disabled:opacity-40"
+          >
+            {busy ? "Scheduling…" : "Schedule appointment"}
+          </button>
+        </div>
+      </div>
+    </Modal>
   );
 }
 
@@ -459,6 +876,11 @@ function BookingDetailModal({
                   {detail.invoiceNumber || detail.id.slice(0, 8)}
                 </span>
               </div>
+              {detail.counselingType && (
+                <div className="mt-0.5 text-[11px] font-semibold uppercase tracking-wide text-ocean/70">
+                  {counselingTypeLabel(detail.counselingType)}
+                </div>
+              )}
             </div>
             <div className="flex gap-2">
               <StatusPill status={detail.status} />

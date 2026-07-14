@@ -694,6 +694,12 @@ async function main() {
 
       const paidUpfront = rand() < 0.65 || status === "REFUNDED";
 
+      // Classify each seeded booking as individual vs couple/family so the
+      // admin appointment register has representative counselling-type data.
+      const counselingType = service.slug.includes("couple")
+        ? "COUPLE_FAMILY"
+        : "INDIVIDUAL";
+
       const booking = await prisma.booking.create({
         data: {
           therapistId: therapist.id,
@@ -704,6 +710,7 @@ async function main() {
           amountMinor: service.priceMinor,
           discountMinor,
           commissionBps,
+          counselingType,
           status: status === "REFUNDED" ? "CONFIRMED" : status, // refunds transition below
           paymentStatus: "UNPAID",
           createdAt,

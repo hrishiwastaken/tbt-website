@@ -123,6 +123,11 @@ model Booking {
   dateTime        DateTime // session start
   durationMinutes Int
 
+  // High-level counselling category captured for admin-scheduled sessions:
+  // "INDIVIDUAL" | "COUPLE_FAMILY". Null for legacy/self-service bookings that
+  // predate the field. Constrained by src/server/domain/counselingType.ts.
+  counselingType  String?
+
   // Financial snapshot (paise). netMinor = gross - discount - tax is the
   // commission base; commissionBps is resolved and frozen at booking time.
   amountMinor     Int

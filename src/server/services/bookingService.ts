@@ -5,6 +5,10 @@ import {
   SLOT_RELEASING_STATUSES,
   type BookingStatus,
 } from "../domain/bookingStatus";
+import {
+  COUNSELING_SERVICE_DEFAULTS,
+  type CounselingType,
+} from "../domain/counselingType";
 import { resolveBookingCommissionBps } from "./commissionService";
 import {
   createCharge,
@@ -385,5 +389,231 @@ export async function rescheduleBooking(input: {
       tx,
     );
     return updated;
+  });
+}
+
+/**
+ * Resolve a counselling type to a concrete Service row, upserting the
+ * canonical offering by slug the first time a type is scheduled so the
+ * catalogue always carries a matching, priced, timed service.
+ */
+async function resolveCounselingService(
+  tx: Prisma.TransactionClient,
+  type: CounselingType,
+) {
+  const def = COUNSELING_SERVICE_DEFAULTS[type];
+  return tx.service.upsert({
+    where: { slug: def.slug },
+    update: {},
+    create: {
+      name: def.name,
+      description: def.description,
+      durationMinutes: def.durationMinutes,
+      priceMinor: def.priceMinor,
+      slug: def.slug,
+      isActive: true,
+    },
+  });
+}
+
+export type ScheduleClientInput =
+  | { existingId: string }
+  | {
+      new: {
+        name: string;
+        email: string;
+        phone: string;
+        dob: string;
+        emergencyContact: string;
+      };
+    };
+
+export interface ScheduleAdminBookingInput {
+  therapistId: string;
+  counselingType: CounselingType;
+  dateTime: Date;
+  feeMinor: number;
+  paymentReceived: boolean;
+  paymentRef?: string;
+  client: ScheduleClientInput;
+  session: Session;
+  ip?: string;
+}
+
+/**
+ * Admin-only appointment scheduling. Captures the consultant, counselling
+ * type, date/time and fee, attaching an existing or freshly-created client.
+ * The booking is created CONFIRMED (staff-scheduled, no reservation TTL); the
+ * DB slot-uniqueness guard prevents double-booking and leave blocks are
+ * honoured. When the fee has already been collected the payment is recorded
+ * through the manual provider so revenue/commission ledgers stay accurate.
+ *
+ * Deliberately not exposed to consultants — only /api/admin routes call this.
+ */
+export async function scheduleAdminBooking(input: ScheduleAdminBookingInput) {
+  if (!Number.isInteger(input.feeMinor) || input.feeMinor <= 0) {
+    throw badRequest("The session fee must be a positive amount");
+  }
+
+  const created = await prisma.$transaction(async (tx) => {
+    await releaseExpiredReservations(tx);
+
+    const therapist = await tx.therapist.findUnique({
+      where: { id: input.therapistId },
+    });
+    if (!therapist) throw notFound("Consultant not found");
+    if (!therapist.isActive || therapist.status !== "APPROVED") {
+      throw conflict(
+        "This consultant is not currently accepting appointments",
+      );
+    }
+
+    const service = await resolveCounselingService(tx, input.counselingType);
+
+    // Resolve the client: an existing record by id, or upsert a new one by
+    // email so repeat clients are never duplicated.
+    let clientId: string;
+    if ("existingId" in input.client) {
+      const existing = await tx.client.findUnique({
+        where: { id: input.client.existingId },
+      });
+      if (!existing) throw notFound("Selected client not found");
+      clientId = existing.id;
+    } else {
+      const c = input.client.new;
+      const client = await tx.client.upsert({
+        where: { email: c.email.toLowerCase() },
+        update: {
+          name: c.name,
+          phone: c.phone,
+          dob: c.dob,
+          emergencyContact: c.emergencyContact,
+        },
+        create: {
+          name: c.name,
+          email: c.email.toLowerCase(),
+          phone: c.phone,
+          dob: c.dob,
+          emergencyContact: c.emergencyContact,
+          gdprConsent: true,
+        },
+      });
+      clientId = client.id;
+    }
+
+    if (input.dateTime.getTime() <= Date.now()) {
+      throw badRequest("Appointments must be scheduled for a future time");
+    }
+    // Admin scheduling isn't bound to the weekly availability template, but it
+    // must never land inside a consultant's leave block.
+    const end = new Date(
+      input.dateTime.getTime() + service.durationMinutes * 60000,
+    );
+    const block = await tx.slotBlock.findFirst({
+      where: {
+        therapistId: therapist.id,
+        startAt: { lt: end },
+        endAt: { gt: input.dateTime },
+      },
+    });
+    if (block) {
+      throw conflict(
+        "The consultant is on leave or otherwise unavailable at the selected time",
+      );
+    }
+
+    const commissionBps = await resolveBookingCommissionBps(therapist, tx);
+
+    const booking = await tx.booking.create({
+      data: {
+        therapistId: therapist.id,
+        serviceId: service.id,
+        clientId,
+        dateTime: input.dateTime,
+        durationMinutes: service.durationMinutes,
+        amountMinor: input.feeMinor,
+        commissionBps,
+        counselingType: input.counselingType,
+        status: "CONFIRMED",
+        paymentStatus: "UNPAID",
+        expiresAt: null,
+      },
+    });
+    await tx.booking.update({
+      where: { id: booking.id },
+      data: { invoiceNumber: invoiceNumberFor(booking.id) },
+    });
+
+    await tx.bookingStatusHistory.create({
+      data: {
+        bookingId: booking.id,
+        fromStatus: null,
+        toStatus: "CONFIRMED",
+        actorType: "ADMIN",
+        actorId: input.session.userId,
+        reason: "Appointment scheduled by admin",
+      },
+    });
+
+    // DB-level double-booking guard: unique(therapistId, startAt).
+    try {
+      await tx.bookingSlot.create({
+        data: {
+          therapistId: therapist.id,
+          startAt: input.dateTime,
+          bookingId: booking.id,
+        },
+      });
+    } catch (err) {
+      if (isUniqueViolation(err)) {
+        throw conflict(
+          "The consultant already has an appointment at this time. Please pick another slot.",
+          "SLOT_TAKEN",
+        );
+      }
+      throw err;
+    }
+
+    await recordAudit(
+      {
+        session: input.session,
+        action: "booking.schedule",
+        entityType: "Booking",
+        entityId: booking.id,
+        detail: {
+          therapistId: therapist.id,
+          counselingType: input.counselingType,
+          dateTime: input.dateTime.toISOString(),
+          feeMinor: input.feeMinor,
+          paymentReceived: input.paymentReceived,
+        },
+        ip: input.ip,
+      },
+      tx,
+    );
+
+    return booking;
+  });
+
+  // Fee already collected out-of-band (cash / UPI at the clinic): record it
+  // through the manual provider so the GROSS_REVENUE / commission / platform
+  // ledger postings and payout maths all stay correct and idempotent.
+  if (input.paymentReceived) {
+    const charge = await createCharge({
+      bookingId: created.id,
+      idempotencyKey: `charge:${created.id}`,
+    });
+    const providerRef = input.paymentRef?.trim() || undefined;
+    await recordChargeSuccess({
+      paymentRecordId: charge.id,
+      providerPaymentId: providerRef ?? `manual-${created.id.slice(0, 12)}`,
+      providerRef,
+      actor: input.session,
+    });
+  }
+
+  return prisma.booking.findUniqueOrThrow({
+    where: { id: created.id },
+    include: { client: true, therapist: true, service: true },
   });
 }
