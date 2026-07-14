@@ -245,9 +245,9 @@ export default function Services() {
   ];
 
   return (
-    <div className="bg-warm-sand min-h-screen font-dmsans">
+    <div className="bg-ivory min-h-screen font-dmsans">
       {/* HERO SECTION */}
-      <section className="bg-warm-tan/30 pt-32 pb-20 border-b border-muted-sage/20 relative overflow-hidden">
+      <section className="bg-warm-tan/20 pt-32 pb-20 border-b border-muted-sage/15 relative overflow-hidden">
         {/* Scattered leaf overlays */}
         <Leaf
           double
@@ -303,7 +303,7 @@ export default function Services() {
           return (
             <div
               key={service.title}
-              className={`py-16 md:py-24 border-b border-muted-sage/20 relative overflow-hidden ${isEven ? "bg-warm-sand" : "bg-warm-sand/45"}`}
+              className={`py-16 md:py-24 border-b border-muted-sage/15 relative overflow-hidden ${isEven ? "bg-ivory" : "bg-warm-sand/20"}`}
             >
               {/* Messy scattered leaf accents — layout varies per row */}
               {ROW_SCATTERS[index % ROW_SCATTERS.length].map((leaf, i) => (
@@ -370,7 +370,7 @@ export default function Services() {
       </section>
 
       {/* PRICING SECTION */}
-      <section className="py-24 bg-muted-sage/20 relative overflow-hidden">
+      <section className="py-24 bg-warm-sand/15 relative overflow-hidden">
         {/* Scattered leaf accents */}
         <Leaf
           double
@@ -428,7 +428,7 @@ export default function Services() {
                   key={plan.type}
                   className={`rounded-2xl p-8 md:p-12 shadow-warm-soft flex flex-col justify-between relative transition-all duration-300 ${
                     isRecommended
-                      ? "bg-warm-sand border-2 border-teal-sage hover:border-forest-slate"
+                      ? "bg-warm-white border-2 border-teal-sage hover:border-forest-slate"
                       : "glass-card hover:border-teal-sage/35"
                   }`}
                 >
