@@ -104,21 +104,33 @@ export default function Home() {
   const testimonials = [
     {
       quote:
-        "For the first time in my life, I felt truly heard and understood. The environment was safe, and the guidance helped me find my footing again.",
-      author: "Sarah",
-      city: "New Delhi",
+        "I came in feeling lost, overwhelmed, and struggling to steady myself. Under the guidance of Madhumati Ma'am, I slowly found my balance again. She listened with patience and reminded me that my own light is enough to move forward.",
+      author: "S. N.",
+      city: "Verified Client",
     },
     {
       quote:
-        "Managing my severe anxiety felt impossible. Working together, I gained practical tools that completely changed how I handle daily stress.",
-      author: "Rahul",
-      city: "Gurugram",
+        "She provided structured, thoughtful, and empathetic support that helped me effectively manage my anxiety and significantly improve my self-confidence and self-esteem — always in a calm, professional, and nonjudgmental environment.",
+      author: "R. B.",
+      city: "Verified Client",
     },
     {
       quote:
-        "As a couple, we had hit a wall in our communication. The relationship sessions gave us a structured space to reconnect and understand each other's needs.",
-      author: "Priya & Amit",
-      city: "Noida",
+        "From the very first session, I felt heard, understood, and completely at ease. Their approach is thoughtful, compassionate, and practical, which has helped me gain clarity and make real progress.",
+      author: "S. K.",
+      city: "Verified Client",
+    },
+    {
+      quote:
+        "Madhumati Ma'am helped me organize my thoughts and see clearly, and I was able to reflect on myself better. Thank you so much.",
+      author: "S. R.",
+      city: "Verified Client",
+    },
+    {
+      quote:
+        "Madhumati's sessions were really helpful. I got clarity on what I need to pursue, and it helped me reduce my anxiety.",
+      author: "Y. C.",
+      city: "Verified Client",
     },
   ];
 
@@ -127,9 +139,9 @@ export default function Home() {
       <div className="bg-muted-sage">
         {/* SECTION 1: HERO (STILLPOINT LAYOUT REPLICATION) */}
         <section className="relative min-h-[90vh] pt-28 md:pt-[120px] pb-20 md:pb-24 bg-warm-white rounded-b-[120px] md:rounded-b-[360px] overflow-hidden shadow-sm z-20">
-          {/* Faint Concentric Outline Circles (StillPoint style) */}
-          <div className="absolute top-[10%] left-[32%] w-[420px] h-[420px] rounded-full border border-forest-slate/10 -z-10 pointer-events-none hidden lg:block" />
-          <div className="absolute top-[18%] left-[28%] w-[420px] h-[420px] rounded-full border border-forest-slate/5 -z-10 pointer-events-none hidden lg:block" />
+          {/* Concentric Outline Circles (StillPoint style) */}
+          <div className="absolute top-[10%] left-[32%] w-[420px] h-[420px] rounded-full border border-forest-slate/30 -z-10 pointer-events-none hidden lg:block" />
+          <div className="absolute top-[18%] left-[28%] w-[420px] h-[420px] rounded-full border border-forest-slate/20 -z-10 pointer-events-none hidden lg:block" />
 
           <div className="max-w-7xl mx-auto px-6 md:px-12 grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-12 lg:gap-8 items-center relative z-10">
             {/* Left Column (5 Cols): Arched shape containing the therapist portrait */}
@@ -304,7 +316,7 @@ export default function Home() {
             preserveAspectRatio="none"
           >
             <path
-              d="M0,120 Q600,0 1200,120 L1200,120 L0,120 Z"
+              d="M0,60 Q600,0 1200,60 L1200,120 L0,120 Z"
               fill="var(--color-warm-white)"
             />
           </svg>
@@ -432,7 +444,7 @@ export default function Home() {
               </div>
 
               <Link
-                href="/about"
+                href="/team"
                 className="font-dmsans text-sm font-bold text-teal-sage hover:text-forest-slate hover:underline underline-offset-4 inline-flex items-center gap-1.5 transition-colors"
               >
                 Meet the Full Team <ArrowRight className="w-4 h-4" />

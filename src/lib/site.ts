@@ -1,5 +1,5 @@
 export const SITE_NAME = "The Brain Tea";
-export const SITE_TAGLINE = "Psychology & Mental Wellness";
+export const SITE_TAGLINE = "A space to unwind and heal";
 
 export const WHATSAPP_NUMBER = "917558493155";
 export const WHATSAPP_MESSAGE =

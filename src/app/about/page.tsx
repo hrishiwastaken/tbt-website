@@ -71,14 +71,16 @@ export default function About() {
             transition={{ duration: 0.6 }}
           >
             <span className="text-[11px] font-bold tracking-[0.25em] text-teal-sage uppercase mb-4 block">
-              About the Practice
+              Welcome to The Brain Tea
             </span>
             <h1 className="font-cormorant text-5xl md:text-6xl font-semibold text-forest-slate leading-tight mb-6">
-              About The Brain Tea
+              Your Approach to Whole-Person Wellness
             </h1>
             <p className="text-forest-slate/85 text-lg md:text-xl max-w-2xl mx-auto leading-relaxed font-dmsans">
-              We believe every person deserves a space where they feel seen,
-              heard, and supported on their journey toward mental well-being.
+              True well-being is not a one-size-fits-all checklist. You are a
+              complex, vibrant individual, and your path to growth should be
+              just as unique as you are — a space where you can finally breathe,
+              explore, and evolve.
             </p>
           </motion.div>
         </div>
@@ -90,34 +92,37 @@ export default function About() {
           {/* Story Text */}
           <div className="lg:col-span-7 space-y-6">
             <h2 className="font-cormorant text-4xl md:text-[48px] font-semibold text-forest-slate mb-4">
-              Building a Safe Haven for Healing
+              Our Story: Why &ldquo;The Brain Tea&rdquo;?
             </h2>
             <div className="text-forest-slate/90 text-base md:text-lg space-y-6 leading-relaxed font-dmsans">
               <p>
-                The Brain Tea was founded with a singular, vital goal: to create
-                a therapeutic environment that combines clinical excellence with
-                genuine, authentic warmth. We recognized that traditional
-                clinical spaces often felt cold, intimidating, or sterile. We
-                set out to change that, designing our practice to feel like
-                entering a comfortable, peaceful room where you can catch your
-                breath.
+                Life often feels like a turbulent, cluttered brew of stress,
+                expectations, and noise. For too long, the approach to mental
+                health has been fragmented — treating the mind in one room, the
+                body in another, and the career in a third.
               </p>
               <p>
-                Our team is composed of highly qualified, licensed clinical
-                practitioners who share a common philosophy: therapy is not
-                about &ldquo;fixing&rdquo; someone, but about exploring the
-                complex layers of human experience together. We meet you exactly
-                where you are—whether you are dealing with debilitating anxiety,
-                navigating structural relationship conflicts, or seeking to
-                understand yourself on a deeper level.
+                We named ourselves The Brain Tea because we view wellness as the
+                process of letting that turbulence settle. Just as clear water
+                emerges when the ingredients are given the right environment to
+                rest, your mind finds clarity when the noise stops and you can
+                finally process your experiences.
               </p>
               <p>
-                Over the years, we have helped hundreds of clients build
-                resilience, develop healthy coping mechanisms, and reclaim their
-                peace of mind. We are deeply committed to providing
-                evidence-based treatment paths tailored uniquely to your life
-                context, ensuring you never feel like a number on a medical
-                chart.
+                Real transformation rarely happens by just sitting still and
+                talking in a sterile, clinical room. It happens through an
+                &ldquo;aha!&rdquo; moment — a physical resonance that occurs
+                when you connect your thoughts to your body and your community.
+              </p>
+              <p>
+                This is why we bridge the gap between talk therapy and active
+                restoration. While our expert clinicians provide the
+                foundational work of counseling and psychiatric support, we
+                integrate movement, sensory grounding, and social interaction
+                into the process. Whether it is the insight of traditional
+                therapy, the release of a yoga session, the quiet focus of
+                Reiki, or a fun workshop, we ensure your healing is holistic,
+                grounded, and complete.
               </p>
             </div>
           </div>
@@ -186,13 +191,19 @@ export default function About() {
             </p>
           </div>
 
-          {/* Team Grid */}
+          {/* Team Grid — centered when the roster is smaller than a full row */}
           <motion.div
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true, margin: "-100px" }}
             variants={staggerContainer}
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+            className={`grid gap-8 justify-center ${
+              team.length === 1
+                ? "grid-cols-1 max-w-sm mx-auto"
+                : team.length === 2
+                  ? "grid-cols-1 md:grid-cols-2 max-w-3xl mx-auto"
+                  : "grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
+            }`}
           >
             {team.map((t) => (
               <motion.div
