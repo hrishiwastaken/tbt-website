@@ -11,11 +11,11 @@ import {
 } from "../domain/counselingType";
 import { resolveBookingCommissionBps } from "./commissionService";
 import {
+  chargeIdempotencyKey,
   createCharge,
   recordChargeSuccess,
   invoiceNumberFor,
 } from "./paymentService";
-import { getPaymentProvider } from "../payments/registry";
 import { badRequest, conflict, notFound, type Session } from "../http";
 import { recordAudit } from "../audit";
 
@@ -40,7 +40,6 @@ export interface CreateBookingInput {
     gdprConsent: boolean;
   };
   paymentOption: "PAY_NOW" | "PAY_LATER";
-  paymentProof?: { utr?: string };
 }
 
 /**
@@ -54,14 +53,26 @@ export async function releaseExpiredReservations(
     where: { status: "AWAITING_PAYMENT", expiresAt: { lt: new Date() } },
     select: { id: true, status: true },
   });
+  let released = 0;
   for (const booking of expired) {
-    await tx.booking.update({
-      where: { id: booking.id },
+    // CAS: only cancel if the hold is STILL an expired AWAITING_PAYMENT.
+    // A payment confirmation racing this sweep may have just flipped the
+    // booking to CONFIRMED — an unconditional update here would clobber a
+    // paid booking with CANCELLED. When the guard misses, skip: no history
+    // row, no slot release.
+    const cancelled = await tx.booking.updateMany({
+      where: {
+        id: booking.id,
+        status: "AWAITING_PAYMENT",
+        expiresAt: { lt: new Date() },
+      },
       data: {
         status: "CANCELLED",
         cancellationReason: "Payment window expired",
+        expiresAt: null,
       },
     });
+    if (cancelled.count === 0) continue;
     await tx.bookingStatusHistory.create({
       data: {
         bookingId: booking.id,
@@ -72,8 +83,9 @@ export async function releaseExpiredReservations(
       },
     });
     await tx.bookingSlot.deleteMany({ where: { bookingId: booking.id } });
+    released++;
   }
-  return expired.length;
+  return released;
 }
 
 function isUniqueViolation(err: unknown): boolean {
@@ -210,36 +222,45 @@ export async function createBooking(input: CreateBookingInput) {
     return { booking, client, therapist, service };
   });
 
-  // PAY_NOW: create the charge and verify the supplied proof through the
-  // provider abstraction. Verification failure leaves an AWAITING_PAYMENT
-  // reservation that expires and frees the slot automatically.
+  // PAY_NOW: open a gateway checkout for the reservation. The booking stays
+  // AWAITING_PAYMENT until the gateway confirms (webhook or status poll) —
+  // the client redirect is never trusted. If checkout creation fails, the
+  // reservation survives; the payment-status page's retry recovers it and
+  // the TTL cleans up abandoned holds.
+  let payment: { checkoutUrl: string } | null = null;
   if (input.paymentOption === "PAY_NOW") {
-    const idempotencyKey = `charge:${result.booking.id}`;
-    const charge = await createCharge({
+    const { clientAction } = await createCharge({
       bookingId: result.booking.id,
-      idempotencyKey,
+      idempotencyKey: chargeIdempotencyKey(result.booking.id, 1),
     });
-    const provider = getPaymentProvider(charge.provider);
-    const verification = await provider.verifyPayment({
-      providerOrderId: charge.providerOrderId ?? "",
-      proof: input.paymentProof?.utr
-        ? { utr: input.paymentProof.utr }
-        : undefined,
-    });
-    if (verification.ok === false) {
-      throw badRequest(verification.reason, "PAYMENT_VERIFICATION_FAILED");
+    if (
+      clientAction.type === "checkout" &&
+      typeof clientAction.payload.checkoutUrl === "string"
+    ) {
+      payment = { checkoutUrl: clientAction.payload.checkoutUrl };
+    } else {
+      // The configured provider cannot take online payments (e.g. the
+      // manual/offline provider) — never leave a client on an unpayable
+      // reservation. The transaction already committed, so cancel the hold
+      // explicitly before reporting the misconfiguration.
+      await transitionBooking({
+        bookingId: result.booking.id,
+        toStatus: "CANCELLED",
+        actorType: "SYSTEM",
+        reason: "Online payment unavailable (no checkout-capable provider)",
+      });
+      throw conflict(
+        "Online payment is temporarily unavailable. Please choose pay at clinic, or try again later.",
+        "ONLINE_PAYMENT_UNAVAILABLE",
+      );
     }
-    await recordChargeSuccess({
-      paymentRecordId: charge.id,
-      providerPaymentId: verification.providerPaymentId,
-      providerRef: input.paymentProof?.utr,
-    });
   }
 
-  return prisma.booking.findUniqueOrThrow({
+  const booking = await prisma.booking.findUniqueOrThrow({
     where: { id: result.booking.id },
     include: { client: true, therapist: true, service: true },
   });
+  return { booking, payment };
 }
 
 /**
@@ -263,15 +284,46 @@ export async function transitionBooking(input: {
 
     assertTransition(booking.status, input.toStatus);
 
-    const data: Prisma.BookingUpdateInput = { status: input.toStatus };
+    // Rejecting a refund reinstates the booking — but not while the gateway
+    // is still processing the refund; the money may already be on its way
+    // back to the payer.
+    if (booking.status === "REFUND_PENDING" && input.toStatus === "CONFIRMED") {
+      const inflight = await tx.paymentRecord.findFirst({
+        where: {
+          bookingId: booking.id,
+          kind: "REFUND",
+          status: { in: ["CREATED", "PROCESSING"] },
+        },
+      });
+      if (inflight) {
+        throw conflict(
+          "A refund is currently being processed for this booking and cannot be rejected. Wait for it to settle.",
+        );
+      }
+    }
+
+    const data: Prisma.BookingUpdateManyMutationInput = {
+      status: input.toStatus,
+    };
     if (input.toStatus === "CANCELLED") {
       data.cancellationReason = input.reason ?? "Cancelled by staff";
       data.expiresAt = null;
     }
 
-    const updated = await tx.booking.update({
-      where: { id: booking.id },
+    // CAS on the status we validated against: if a concurrent actor (e.g. a
+    // payment webhook confirming this booking) moved it first, this stale
+    // transition must not clobber theirs.
+    const moved = await tx.booking.updateMany({
+      where: { id: booking.id, status: booking.status },
       data,
+    });
+    if (moved.count === 0) {
+      throw conflict(
+        "The booking was updated concurrently — reload and try again",
+      );
+    }
+    const updated = await tx.booking.findUniqueOrThrow({
+      where: { id: booking.id },
     });
     await tx.bookingStatusHistory.create({
       data: {
@@ -596,12 +648,15 @@ export async function scheduleAdminBooking(input: ScheduleAdminBookingInput) {
   });
 
   // Fee already collected out-of-band (cash / UPI at the clinic): record it
-  // through the manual provider so the GROSS_REVENUE / commission / platform
+  // through the manual provider — pinned explicitly, because the DEFAULT
+  // provider may be a real gateway and an in-person payment must never
+  // create a gateway order — so the GROSS_REVENUE / commission / platform
   // ledger postings and payout maths all stay correct and idempotent.
   if (input.paymentReceived) {
-    const charge = await createCharge({
+    const { record: charge } = await createCharge({
       bookingId: created.id,
-      idempotencyKey: `charge:${created.id}`,
+      idempotencyKey: chargeIdempotencyKey(created.id, 1),
+      providerName: "manual",
     });
     const providerRef = input.paymentRef?.trim() || undefined;
     await recordChargeSuccess({

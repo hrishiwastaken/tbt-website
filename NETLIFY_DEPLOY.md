@@ -12,6 +12,16 @@ DIRECT_URL="postgresql://USER:PASSWORD@HOST:5432/DATABASE?sslmode=require"
 NEXTAUTH_SECRET="<long random secret>"
 ENCRYPTION_KEY="<64-character hex key>"
 PAYMENT_PROVIDER="manual"
+
+# UPI payments via PhonePe PG (see section 5 before flipping PAYMENT_PROVIDER)
+APP_BASE_URL="https://<your-site>.netlify.app"
+CRON_SECRET="<long random secret>"
+PHONEPE_ENV="sandbox"                      # "production" when live
+PHONEPE_CLIENT_ID="<from PhonePe business dashboard>"
+PHONEPE_CLIENT_SECRET="<from PhonePe business dashboard>"
+PHONEPE_CLIENT_VERSION="1"
+PHONEPE_WEBHOOK_USERNAME="<choose one; also set in PhonePe dashboard>"
+PHONEPE_WEBHOOK_PASSWORD="<choose one; also set in PhonePe dashboard>"
 ```
 
 Generate `ENCRYPTION_KEY` locally:
@@ -65,3 +75,35 @@ Commit changes.
 Push to GitHub or GitLab.
 Netlify redeploys automatically.
 Open `/admin/login` after deploy.
+
+## 5. Enabling UPI Payments (PhonePe PG)
+
+Ship with `PAYMENT_PROVIDER="manual"` first — online payment stays hidden
+from clients until the gateway round-trip is verified.
+
+1. Get merchant API credentials (client id/secret) from the PhonePe Business
+   dashboard and set the `PHONEPE_*` variables above (start with
+   `PHONEPE_ENV="sandbox"`).
+2. In the PhonePe dashboard, configure the webhook:
+   - URL: `https://<your-site>/api/webhooks/phonepe`
+   - Username/password: the same values as `PHONEPE_WEBHOOK_USERNAME` /
+     `PHONEPE_WEBHOOK_PASSWORD`.
+3. Sandbox test: set `PAYMENT_PROVIDER="phonepe"` on a preview/staging site,
+   make a test booking with "Pay Online via UPI", complete + fail one payment
+   each, and confirm the booking flips to CONFIRMED/PAID only on success.
+4. Flip `PHONEPE_ENV="production"` + production credentials, redeploy, and
+   run one small live payment followed by an admin refund to verify the full
+   loop.
+
+The scheduled function `netlify/functions/reconcile-payments.mts` runs every
+10 minutes and needs `APP_BASE_URL` + `CRON_SECRET` set; it resolves any
+payment/refund whose webhook was missed and releases expired holds. (Without
+Netlify scheduled functions, point any external cron at
+`POST /api/cron/reconcile-payments` with `Authorization: Bearer $CRON_SECRET`.)
+
+Notes:
+- Refunds executed from the admin console go back through PhonePe to the
+  payer's UPI account; they show as "processing" until PhonePe confirms.
+- Admin-scheduled appointments with "fee already paid" always record through
+  the manual provider (money collected in person) regardless of
+  `PAYMENT_PROVIDER`.

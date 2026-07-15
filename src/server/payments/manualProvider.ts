@@ -1,6 +1,7 @@
 import crypto from "crypto";
 import type {
   CreateIntentInput,
+  FetchPaymentStatusResult,
   PaymentIntentResult,
   PaymentProvider,
   RefundInput,
@@ -65,7 +66,7 @@ export const manualProvider: PaymentProvider = {
     };
   },
 
-  async fetchPaymentStatus(): Promise<"UNKNOWN"> {
-    return "UNKNOWN"; // no remote source of truth for manual payments
+  async fetchPaymentStatus(): Promise<FetchPaymentStatusResult> {
+    return { status: "UNKNOWN" }; // no remote source of truth for manual payments
   },
 };
