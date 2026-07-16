@@ -72,7 +72,7 @@ export default function Header() {
             className="z-50 flex items-center"
             aria-label="The Brain Tea — Home"
           >
-            <Logo className="w-12 h-12 md:w-14 md:h-14 text-forest-slate shrink-0" />
+            <Logo className="w-12 h-12 md:w-14 md:h-14 shrink-0 ring-1 ring-forest-slate/10 shadow-sm" />
           </Link>
 
           {/* Desktop Navigation */}
