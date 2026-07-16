@@ -103,6 +103,23 @@ function niceMax(value: number): number {
   return nice * magnitude;
 }
 
+// Y domain covering every plotted value. Extends below zero when a series
+// dips negative (e.g. refund reversals outweighing collections in a bucket)
+// so nothing ever draws outside the plot area.
+function niceDomain(values: number[]): { min: number; max: number } {
+  const max = niceMax(Math.max(1, ...values));
+  const rawMin = Math.min(0, ...values);
+  return { min: rawMin < 0 ? -niceMax(-rawMin) : 0, max };
+}
+
+function yTicks(min: number, max: number): number[] {
+  const ticks = [0, 0.25, 0.5, 0.75, 1].map((f) => f * max);
+  // Label the negative extent only when it sits far enough from ₹0 for the
+  // text not to collide; shallow dips keep just the emphasised zero line.
+  if (min <= -0.2 * max) ticks.unshift(min);
+  return ticks;
+}
+
 const W = 560;
 const H = 220;
 const PAD = { top: 12, right: 12, bottom: 26, left: 46 };
@@ -131,14 +148,9 @@ export function LineAreaChart({
   const { tooltip, show, hide, containerRef } = useTooltip();
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
 
-  const max = useMemo(
+  const { min, max } = useMemo(
     () =>
-      niceMax(
-        Math.max(
-          1,
-          ...data.flatMap((d) => series.map((s) => Number(d[s.key]) || 0)),
-        ),
-      ),
+      niceDomain(data.flatMap((d) => series.map((s) => Number(d[s.key]) || 0))),
     [data, series],
   );
 
@@ -147,8 +159,9 @@ export function LineAreaChart({
   const xFor = (i: number) =>
     PAD.left +
     (data.length === 1 ? plotW / 2 : (i / (data.length - 1)) * plotW);
-  const yFor = (v: number) => PAD.top + plotH - (v / max) * plotH;
-  const ticks = [0, 0.25, 0.5, 0.75, 1].map((f) => f * max);
+  const yFor = (v: number) =>
+    PAD.top + plotH - ((v - min) / (max - min)) * plotH;
+  const ticks = yTicks(min, max);
 
   const handleMove = (event: React.MouseEvent<SVGSVGElement>) => {
     const rect = event.currentTarget.getBoundingClientRect();
@@ -196,7 +209,7 @@ export function LineAreaChart({
               x2={W - PAD.right}
               y1={yFor(t)}
               y2={yFor(t)}
-              stroke={GRID}
+              stroke={t === 0 && min < 0 ? "rgba(93,118,139,0.35)" : GRID}
               strokeWidth={1}
             />
             <text
@@ -294,22 +307,21 @@ export function BarChart({
   const { tooltip, show, hide, containerRef } = useTooltip();
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
 
-  const max = useMemo(
+  const { min, max } = useMemo(
     () =>
-      niceMax(
-        Math.max(
-          1,
-          ...data.flatMap((d) => series.map((s) => Number(d[s.key]) || 0)),
-        ),
-      ),
+      niceDomain(data.flatMap((d) => series.map((s) => Number(d[s.key]) || 0))),
     [data, series],
   );
   if (data.length === 0) return <ChartEmpty />;
 
   const groupW = plotW / data.length;
   const barW = Math.min(18, Math.max(3, (groupW - 4) / series.length - 2));
-  const yFor = (v: number) => PAD.top + plotH - (v / max) * plotH;
-  const ticks = [0, 0.5, 1].map((f) => f * max);
+  const yFor = (v: number) =>
+    PAD.top + plotH - ((v - min) / (max - min)) * plotH;
+  const ticks =
+    min <= -0.2 * max
+      ? [min, 0, max / 2, max]
+      : [0, 0.5, 1].map((f) => f * max);
 
   return (
     <div ref={containerRef} className="relative">
@@ -412,12 +424,13 @@ export function BarChart({
               )}
               {series.map((s, si) => {
                 const v = Number(d[s.key]) || 0;
-                const h = Math.max(v > 0 ? 2 : 0, (v / max) * plotH);
+                const zeroY = yFor(0);
+                const h = Math.max(v !== 0 ? 2 : 0, Math.abs(zeroY - yFor(v)));
                 return (
                   <rect
                     key={s.key}
                     x={start + si * (barW + 2)}
-                    y={yFor(0) - h}
+                    y={v >= 0 ? zeroY - h : zeroY}
                     width={barW}
                     height={h}
                     fill={s.color}
@@ -504,11 +517,7 @@ export function DonutChart({
   const R = 70;
   const STROKE = 26;
   const C = 2 * Math.PI * R;
-  // Cumulative arc offset (start position) for each slice, precomputed so the
-  // render stays pure — no variable reassignment during JSX evaluation.
-  const offsets = slices.map((_, i) =>
-    slices.slice(0, i).reduce((sum, s) => sum + (s.value / total) * C, 0),
-  );
+  let offset = 0;
 
   return (
     <div
@@ -528,7 +537,7 @@ export function DonutChart({
           {slices.map((s, i) => {
             const frac = s.value / total;
             const dash = Math.max(0, frac * C - 2); // 2px surface gap between segments
-            return (
+            const el = (
               <circle
                 key={s.label}
                 cx={90}
@@ -538,7 +547,7 @@ export function DonutChart({
                 stroke={s.color}
                 strokeWidth={active === i ? STROKE + 4 : STROKE}
                 strokeDasharray={`${dash} ${C - dash}`}
-                strokeDashoffset={-offsets[i]}
+                strokeDashoffset={-offset}
                 className="transition-all duration-150"
                 onMouseMove={(e) => {
                   setActive(i);
@@ -560,6 +569,8 @@ export function DonutChart({
                 }}
               />
             );
+            offset += frac * C;
+            return el;
           })}
         </g>
         <text

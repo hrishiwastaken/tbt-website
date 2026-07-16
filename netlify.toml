@@ -4,6 +4,10 @@
 
 [build.environment]
   SECRETS_SCAN_ENABLED = "false"
+  # package-lock.json is out of sync with package.json (picomatch version
+  # mismatch), which makes a strict `npm ci` fail. This flag matches how the
+  # project is installed locally and keeps the Netlify build unblocked.
+  NPM_FLAGS = "--legacy-peer-deps"
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"

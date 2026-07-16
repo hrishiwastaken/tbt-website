@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X } from "lucide-react";
 import Logo from "./Logo";
+import { NavLink } from "./ui/NavLink";
 
 export default function Header() {
   const pathname = usePathname();
@@ -71,7 +72,7 @@ export default function Header() {
             className="z-50 flex items-center"
             aria-label="The Brain Tea — Home"
           >
-            <Logo className="w-12 h-12 md:w-14 md:h-14 shrink-0 ring-1 ring-forest-slate/10 shadow-sm" />
+            <Logo className="w-12 h-12 md:w-14 md:h-14 text-forest-slate shrink-0" />
           </Link>
 
           {/* Desktop Navigation */}
@@ -79,7 +80,7 @@ export default function Header() {
             {navLinks.map((link) => {
               const isActive = pathname === link.href;
               return (
-                <Link
+                <NavLink
                   key={link.name}
                   href={link.href}
                   className={`font-dmsans text-sm font-medium tracking-wide transition-colors relative py-1 ${
@@ -100,7 +101,7 @@ export default function Header() {
                       }}
                     />
                   )}
-                </Link>
+                </NavLink>
               );
             })}
 
@@ -146,13 +147,13 @@ export default function Header() {
                   transition={{ delay: 0.1 * index }}
                   key={link.name}
                 >
-                  <Link
+                  <NavLink
                     href={link.href}
                     onClick={() => setIsMobileMenuOpen(false)}
                     className="font-cormorant text-3xl font-semibold hover:text-mist transition-colors"
                   >
                     {link.name}
-                  </Link>
+                  </NavLink>
                 </motion.div>
               ))}
 

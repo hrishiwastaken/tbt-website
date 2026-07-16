@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   IndianRupee,
   Landmark,
@@ -91,32 +91,30 @@ export default function AdminDashboardPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  useEffect(() => {
+  const fetchAnalytics = useCallback(async () => {
     if (range === "custom" && (!custom.from || !custom.to)) return;
-    const load = async () => {
-      setLoading(true);
-      setError("");
-      try {
-        const params = new URLSearchParams({ range });
-        if (range === "custom") {
-          params.set("from", custom.from);
-          params.set("to", custom.to);
-        }
-        const res = await fetch(`/api/admin/analytics?${params}`);
-        const payload = await res.json();
-        if (!res.ok)
-          throw new Error(payload.error || "Failed to load analytics");
-        setData(payload);
-      } catch (err) {
-        setError(
-          err instanceof Error ? err.message : "Failed to load analytics",
-        );
-      } finally {
-        setLoading(false);
+    setLoading(true);
+    setError("");
+    try {
+      const params = new URLSearchParams({ range });
+      if (range === "custom") {
+        params.set("from", custom.from);
+        params.set("to", custom.to);
       }
-    };
-    load();
+      const res = await fetch(`/api/admin/analytics?${params}`);
+      const payload = await res.json();
+      if (!res.ok) throw new Error(payload.error || "Failed to load analytics");
+      setData(payload);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to load analytics");
+    } finally {
+      setLoading(false);
+    }
   }, [range, custom]);
+
+  useEffect(() => {
+    fetchAnalytics();
+  }, [fetchAnalytics]);
 
   const kpis = data?.kpis;
 
@@ -155,7 +153,7 @@ export default function AdminDashboardPage() {
             <KpiCard
               label="Net Revenue"
               value={formatINR(kpis.netRevenueMinor)}
-              hint={`After ${formatINR(kpis.refundsMinor)} refunds & discounts`}
+              hint={`After ${formatINR(kpis.grossRevenueMinor - kpis.netRevenueMinor)} refunds & discounts`}
               icon={<Landmark size={16} />}
             />
             <KpiCard
@@ -243,7 +241,7 @@ export default function AdminDashboardPage() {
           <div className="grid grid-cols-1 items-start gap-6 xl:grid-cols-2">
             <Panel
               title="Revenue Trend"
-              subtitle="Gross collections vs platform and consultant share, from ledger entries."
+              subtitle="Gross collections vs platform and consultant share, with refunds, from ledger entries."
             >
               <LineAreaChart
                 data={data.series.revenue}
@@ -263,6 +261,11 @@ export default function AdminDashboardPage() {
                     key: "consultant",
                     label: "Consultant",
                     color: CHART_COLORS.violet,
+                  },
+                  {
+                    key: "refunds",
+                    label: "Refunds",
+                    color: CHART_COLORS.rosewood,
                   },
                 ]}
                 valueFormat={compactINR}
