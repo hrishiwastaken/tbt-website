@@ -34,11 +34,13 @@ Use a managed PostgreSQL database. `DIRECT_URL` can match `DATABASE_URL` when yo
 
 ## 2. Push Schema And Seed
 
-Run once against live database:
+The Netlify build runs `prisma db push` automatically (see `netlify.toml`),
+so schema changes sync to the live database on every deploy — the admin panel
+can never fall behind the code. You only need to seed once:
 
 ```bash
 npm ci --legacy-peer-deps
-npx prisma db push
+npx prisma db push   # optional locally; the deploy already does this
 node prisma/seed.js
 ```
 
