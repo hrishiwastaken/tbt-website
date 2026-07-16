@@ -18,7 +18,6 @@ const bookingSchema = z.object({
     message: "Consent is mandatory to book a session",
   }),
   paymentOption: z.enum(["PAY_NOW", "PAY_LATER"]),
-  upiUtr: z.string().optional(),
 });
 
 export const POST = handleApi(async (request: Request) => {
@@ -37,7 +36,7 @@ export const POST = handleApi(async (request: Request) => {
   const dateTime = new Date(`${body.date}T${body.time}:00`);
   if (isNaN(dateTime.getTime())) throw badRequest("Invalid date or time");
 
-  const booking = await createBooking({
+  const { booking, payment } = await createBooking({
     therapistSlug: body.therapistSlug,
     serviceSlug: body.serviceSlug,
     dateTime,
@@ -50,11 +49,13 @@ export const POST = handleApi(async (request: Request) => {
       gdprConsent: body.gdprConsent,
     },
     paymentOption: body.paymentOption,
-    paymentProof: body.upiUtr ? { utr: body.upiUtr } : undefined,
   });
 
   return NextResponse.json({
     booking,
+    // PAY_NOW: the client must complete checkout at this URL; confirmation
+    // arrives server-side (webhook / status poll), never from the client.
+    payment,
     client: {
       name: booking.client.name,
       email: booking.client.email,

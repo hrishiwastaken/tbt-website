@@ -1,5 +1,10 @@
+# `prisma db push` syncs the deployed database to the schema before building,
+# so additive schema changes (new columns/indexes) can never leave the live
+# DB behind the code and 500 the admin panel. It is non-interactive and only
+# applies non-destructive changes; a destructive diff fails the build rather
+# than dropping data. Needs DATABASE_URL/DIRECT_URL in the site environment.
 [build]
-  command = "npm run build"
+  command = "npx prisma db push --skip-generate && npm run build"
   publish = ".next"
 
 [build.environment]

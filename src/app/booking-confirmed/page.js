@@ -1,6 +1,6 @@
 import React from "react";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
@@ -25,6 +25,15 @@ export default async function BookingConfirmedPage({ searchParams }) {
 
   if (!booking) {
     notFound();
+  }
+
+  // An unpaid hold is not a confirmation — a stale/shared link must land on
+  // the live payment-status page, never a "reserved" screen.
+  if (booking.status === "AWAITING_PAYMENT") {
+    redirect(`/booking/payment-status?bookingId=${booking.id}`);
+  }
+  if (["CANCELLED", "REFUND_PENDING", "REFUNDED"].includes(booking.status)) {
+    redirect(`/booking/payment-status?bookingId=${booking.id}`);
   }
 
   const formattedDate = new Date(booking.dateTime).toLocaleDateString("en-IN", {

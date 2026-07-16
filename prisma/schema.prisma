@@ -218,6 +218,8 @@ model PaymentRecord {
   @@index([bookingId])
   @@index([status])
   @@index([provider, providerPaymentId])
+  // Webhooks and reconciliation resolve records by merchant order id
+  @@index([provider, providerOrderId])
 }
 
 // Inbound webhook dedupe/journal: (provider, externalId) unique so an event

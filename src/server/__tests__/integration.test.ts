@@ -7,6 +7,8 @@ import {
   transitionBooking,
 } from "../services/bookingService";
 import { executeRefund, recordChargeSuccess } from "../services/paymentService";
+import { registerPaymentProvider } from "../payments/registry";
+import type { PaymentProvider } from "../payments/types";
 import { createPayout, transitionPayout } from "../services/payoutService";
 import { consultantBalance } from "../services/ledgerService";
 import type { Session } from "../http";
@@ -45,8 +47,48 @@ const clientInput = (n: number) => ({
   gdprConsent: true as const,
 });
 
+// Minimal checkout-capable gateway so PAY_NOW bookings mint a redirectable
+// charge; success is then recorded the way a webhook would. Sync refunds keep
+// the admin refund lifecycle observable end-to-end in this suite.
+const testGateway: PaymentProvider = {
+  name: "test-gw",
+  async createIntent(input) {
+    return {
+      providerOrderId: `tgw_${input.idempotencyKey.replace(/[^a-zA-Z0-9]/g, "")}`,
+      clientAction: {
+        type: "checkout",
+        payload: { checkoutUrl: `https://gw.test/pay/${input.bookingId}` },
+      },
+      metadata: { checkoutUrl: `https://gw.test/pay/${input.bookingId}` },
+    };
+  },
+  async verifyPayment() {
+    return { ok: false, reason: "unused" };
+  },
+  async parseWebhook() {
+    throw new Error("unused");
+  },
+  async refund(input) {
+    return {
+      ok: true,
+      providerRefundId: `tgw_rf_${input.idempotencyKey.length}`,
+      status: "SUCCEEDED",
+      merchantRefundId: input.merchantRefundId,
+    };
+  },
+  async fetchPaymentStatus() {
+    return { status: "UNKNOWN" };
+  },
+};
+
+let previousProviderEnv: string | undefined;
+
 suite("booking & finance integration", () => {
   beforeAll(async () => {
+    registerPaymentProvider(testGateway);
+    previousProviderEnv = process.env.PAYMENT_PROVIDER;
+    process.env.PAYMENT_PROVIDER = "test-gw";
+
     const user = await prisma.user.create({
       data: {
         email: `test.admin.${STAMP}@example.com`,
@@ -90,16 +132,20 @@ suite("booking & finance integration", () => {
   });
 
   afterAll(async () => {
+    if (previousProviderEnv === undefined) delete process.env.PAYMENT_PROVIDER;
+    else process.env.PAYMENT_PROVIDER = previousProviderEnv;
+
     await prisma.ledgerEntry.deleteMany({ where: { therapistId } });
     await prisma.payout.deleteMany({ where: { therapistId } });
     await prisma.booking.deleteMany({ where: { therapistId } });
     await prisma.therapist.delete({ where: { id: therapistId } });
     await prisma.service.delete({ where: { id: serviceId } });
-    // Canonical services upserted by scheduleAdminBooking (unique to tests —
-    // seed data uses different slugs).
+    // Canonical services upserted by scheduleAdminBooking — but only when no
+    // other bookings reference them (a shared dev database may have some).
     await prisma.service.deleteMany({
       where: {
         slug: { in: ["individual-counselling", "couple-family-counselling"] },
+        bookings: { none: {} },
       },
     });
     await prisma.client.deleteMany({
@@ -155,31 +201,42 @@ suite("booking & finance integration", () => {
     ).rejects.toThrow(/working hours/);
   });
 
-  it("records a charge exactly once even when replayed (idempotency)", async () => {
-    const booking = await createBooking({
+  it("holds PAY_NOW as AWAITING_PAYMENT, confirms on gateway success exactly once (replay-safe)", async () => {
+    const { booking, payment } = await createBooking({
       therapistSlug: SLUG,
       serviceSlug: SERVICE_SLUG,
       dateTime: futureSlot(9, 11),
       client: clientInput(4),
       paymentOption: "PAY_NOW",
-      paymentProof: { utr: "123456789012" },
     });
-    expect(booking.status).toBe("CONFIRMED");
-    expect(booking.paymentStatus).toBe("PAID");
+    // Booking must NOT confirm before the gateway does.
+    expect(booking.status).toBe("AWAITING_PAYMENT");
+    expect(booking.paymentStatus).toBe("UNPAID");
+    expect(booking.expiresAt).toBeTruthy();
+    expect(payment?.checkoutUrl).toContain(booking.id);
 
     const charge = await prisma.paymentRecord.findFirstOrThrow({
       where: { bookingId: booking.id, kind: "CHARGE" },
     });
+    expect(charge.status).toBe("CREATED");
 
-    // Replay the success handler (as a duplicate webhook would)
+    // Success lands (as the webhook would deliver it) — twice.
     await recordChargeSuccess({
       paymentRecordId: charge.id,
-      providerPaymentId: "123456789012",
+      providerPaymentId: "TXN123",
     });
     await recordChargeSuccess({
       paymentRecordId: charge.id,
-      providerPaymentId: "123456789012",
+      providerPaymentId: "TXN123",
     });
+
+    const after = await prisma.booking.findUniqueOrThrow({
+      where: { id: booking.id },
+    });
+    expect(after.status).toBe("CONFIRMED");
+    expect(after.paymentStatus).toBe("PAID");
+    expect(after.invoiceNumber).toBeTruthy();
+    expect(after.expiresAt).toBeNull();
 
     const grossEntries = await prisma.ledgerEntry.count({
       where: { bookingId: booking.id, entryType: "GROSS_REVENUE" },
@@ -194,13 +251,19 @@ suite("booking & finance integration", () => {
   });
 
   it("executes a refund with full ledger reversal, exactly once", async () => {
-    const booking = await createBooking({
+    const { booking } = await createBooking({
       therapistSlug: SLUG,
       serviceSlug: SERVICE_SLUG,
       dateTime: futureSlot(10, 13),
       client: clientInput(5),
       paymentOption: "PAY_NOW",
-      paymentProof: { utr: "999888777666" },
+    });
+    const paidCharge = await prisma.paymentRecord.findFirstOrThrow({
+      where: { bookingId: booking.id, kind: "CHARGE" },
+    });
+    await recordChargeSuccess({
+      paymentRecordId: paidCharge.id,
+      providerPaymentId: "TXN456",
     });
 
     // Refunds require the REFUND_PENDING gate
@@ -251,7 +314,7 @@ suite("booking & finance integration", () => {
 
   it("frees the slot on cancellation and allows rebooking", async () => {
     const slot = futureSlot(11, 14);
-    const booking = await createBooking({
+    const { booking } = await createBooking({
       therapistSlug: SLUG,
       serviceSlug: SERVICE_SLUG,
       dateTime: slot,
@@ -264,7 +327,7 @@ suite("booking & finance integration", () => {
       session: adminSession,
       reason: "test",
     });
-    const rebooked = await createBooking({
+    const { booking: rebooked } = await createBooking({
       therapistSlug: SLUG,
       serviceSlug: SERVICE_SLUG,
       dateTime: slot,
@@ -277,14 +340,14 @@ suite("booking & finance integration", () => {
   it("reschedules atomically and blocks the vacated-to-occupied race", async () => {
     const slotA = futureSlot(12, 9);
     const slotB = futureSlot(12, 10);
-    const a = await createBooking({
+    const { booking: a } = await createBooking({
       therapistSlug: SLUG,
       serviceSlug: SERVICE_SLUG,
       dateTime: slotA,
       client: clientInput(8),
       paymentOption: "PAY_LATER",
     });
-    const b = await createBooking({
+    const { booking: b } = await createBooking({
       therapistSlug: SLUG,
       serviceSlug: SERVICE_SLUG,
       dateTime: slotB,
