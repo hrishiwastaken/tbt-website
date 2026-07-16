@@ -39,7 +39,7 @@ function Leaf({
       className={`absolute pointer-events-none ${mobileHidden ? "hidden md:block" : ""} ${
         drift === "slow" ? "animate-float-slow" : "animate-float-reverse"
       } ${color === "teal" ? "text-teal-sage" : "text-forest-slate"}`}
-      style={{ ...pos, opacity }}
+      style={{ ...pos, opacity: Math.min(opacity * 2.2, 0.16) }}
     >
       {/* Rotation lives on the svg so the float animation (which owns the
           wrapper's transform) doesn't cancel it out */}
