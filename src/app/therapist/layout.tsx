@@ -15,6 +15,7 @@ import {
   HeartHandshake,
 } from "lucide-react";
 import { SITE_NAME } from "../../lib/site";
+import { NavLink } from "../../components/ui/NavLink";
 
 const NAV = [
   { name: "Dashboard", href: "/therapist", icon: LayoutDashboard },
@@ -111,7 +112,7 @@ export default function TherapistLayout({
               const Icon = item.icon;
               const isActive = pathname === item.href;
               return (
-                <Link
+                <NavLink
                   key={item.href}
                   href={item.href}
                   className={`flex items-center gap-3 px-3 py-3 rounded-soft text-xs font-semibold uppercase tracking-wider transition-all ${
@@ -122,7 +123,7 @@ export default function TherapistLayout({
                 >
                   <Icon size={14} />
                   {item.name}
-                </Link>
+                </NavLink>
               );
             })}
           </nav>

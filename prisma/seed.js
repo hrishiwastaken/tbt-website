@@ -10,9 +10,16 @@
  * src/server/domain/postings.ts (kept in plain JS because seeding runs under
  * node without a TS loader — the TS module stays the source of truth and is
  * covered by tests).
+ *
+ * Performance: rows are generated in memory (with client-side UUIDs so
+ * relations can be wired without round-tripping) and written with batched
+ * `createMany` calls. This collapses what used to be thousands of sequential
+ * inserts into a few dozen statements, so the seed completes in seconds even
+ * against a networked/pooled Postgres instead of appearing to hang.
  */
 const { PrismaClient } = require("@prisma/client");
 const bcrypt = require("bcryptjs");
+const { randomUUID } = require("crypto");
 
 const prisma = new PrismaClient();
 
@@ -42,6 +49,15 @@ const addDays = (d, days) => {
   return out;
 };
 
+// Insert a batch of rows in chunks small enough to stay under Postgres's
+// bind-parameter ceiling, regardless of how wide the row is.
+async function insertMany(delegate, rows) {
+  const CHUNK = 500;
+  for (let i = 0; i < rows.length; i += CHUNK) {
+    await delegate.createMany({ data: rows.slice(i, i + CHUNK) });
+  }
+}
+
 function splitPayment({
   grossMinor,
   discountMinor = 0,
@@ -57,8 +73,18 @@ function splitPayment({
   };
 }
 
-const invoiceNumberFor = (bookingId, year) =>
-  `INV-${year}-${bookingId.slice(0, 6).toUpperCase()}`;
+// Invoice numbers must be unique (the column is unique in the schema). The
+// short uuid slice keeps them readable; on the rare slice collision we suffix
+// a counter so a whole batch insert can never fail on a duplicate.
+const usedInvoices = new Set();
+function invoiceNumberFor(bookingId, year) {
+  const base = `INV-${year}-${bookingId.slice(0, 6).toUpperCase()}`;
+  let candidate = base;
+  let n = 1;
+  while (usedInvoices.has(candidate)) candidate = `${base}-${n++}`;
+  usedInvoices.add(candidate);
+  return candidate;
+}
 
 // ── Commission rate history: two eras, oldest first ─────────────────────
 // Bookings snapshot whichever rate was in effect at their creation time
@@ -80,6 +106,8 @@ const FUTURE_DAYS = 21; // how far ahead upcoming bookings extend
 
 async function main() {
   console.log("Seeding database...");
+  const now = new Date();
+  const nowMs = now.getTime();
 
   // Wipe in dependency order
   await prisma.ledgerEntry.deleteMany({});
@@ -98,17 +126,21 @@ async function main() {
   await prisma.user.deleteMany({});
   await prisma.service.deleteMany({});
   await prisma.testimonial.deleteMany({});
+  console.log("  cleared existing rows");
+
+  // Audit rows are collected here and written once at the end — every
+  // simulated admin action journals the same shape the live workflow
+  // endpoints write (mirroring src/server/audit.ts).
+  const auditRows = [];
 
   // ── Commission default history (append-only) ──────────────────────────
-  for (const era of COMMISSION_ERAS) {
-    await prisma.commissionSetting.create({
-      data: {
-        scope: "DEFAULT",
-        commissionBps: era.commissionBps,
-        effectiveFrom: era.effectiveFrom,
-      },
-    });
-  }
+  await prisma.commissionSetting.createMany({
+    data: COMMISSION_ERAS.map((era) => ({
+      scope: "DEFAULT",
+      commissionBps: era.commissionBps,
+      effectiveFrom: era.effectiveFrom,
+    })),
+  });
 
   // ── Services (prices in paise) ────────────────────────────────────────
   const serviceRows = [
@@ -148,20 +180,17 @@ async function main() {
       "career-academic-counselling",
     ],
   ];
-  const services = [];
-  for (const [
-    name,
-    description,
-    durationMinutes,
-    priceMinor,
-    slug,
-  ] of serviceRows) {
-    services.push(
-      await prisma.service.create({
-        data: { name, description, durationMinutes, priceMinor, slug },
-      }),
-    );
-  }
+  const services = serviceRows.map(
+    ([name, description, durationMinutes, priceMinor, slug]) => ({
+      id: randomUUID(),
+      name,
+      description,
+      durationMinutes,
+      priceMinor,
+      slug,
+    }),
+  );
+  await prisma.service.createMany({ data: services });
 
   // ── Users & consultants ───────────────────────────────────────────────
   const adminUser = await prisma.user.create({
@@ -171,6 +200,29 @@ async function main() {
       role: "ADMIN",
     },
   });
+
+  function adminAudit(action, entityType, entityId, detail, createdAt) {
+    auditRows.push({
+      actorUserId: adminUser.id,
+      actorEmail: adminUser.email,
+      actorRole: "ADMIN",
+      action,
+      entityType,
+      entityId: entityId ?? null,
+      detail: detail ? JSON.stringify(detail) : null,
+      createdAt,
+    });
+  }
+
+  for (const era of COMMISSION_ERAS) {
+    adminAudit(
+      "commission.set_default",
+      "CommissionSetting",
+      null,
+      { commissionBps: era.commissionBps },
+      era.effectiveFrom,
+    );
+  }
 
   const PHOTO = (seed) =>
     `https://images.unsplash.com/photo-${seed}?auto=format&fit=crop&w=800&q=80`;
@@ -274,82 +326,86 @@ async function main() {
   ];
 
   const therapists = [];
+  const userRows = [];
+  const therapistRows = [];
+  const therapistCommissionRows = [];
   for (const spec of consultantSpecs) {
     let userId = null;
     if (spec.email) {
-      const user = await prisma.user.create({
-        data: {
-          email: spec.email,
-          passwordHash: await bcrypt.hash(spec.password, 10),
-          role: "THERAPIST",
-        },
+      userId = randomUUID();
+      userRows.push({
+        id: userId,
+        email: spec.email,
+        passwordHash: await bcrypt.hash(spec.password, 10),
+        role: "THERAPIST",
       });
-      userId = user.id;
     }
-    const therapist = await prisma.therapist.create({
-      data: {
-        userId,
-        name: spec.name,
-        slug: spec.slug,
-        bio: spec.bio,
-        feeMinor: spec.feeMinor,
-        commissionBps: spec.commissionBps,
-        status: spec.status,
-        isActive: spec.status === "APPROVED",
-        photo: spec.photo,
-      },
+    const therapistId = randomUUID();
+    therapistRows.push({
+      id: therapistId,
+      userId,
+      name: spec.name,
+      slug: spec.slug,
+      bio: spec.bio,
+      feeMinor: spec.feeMinor,
+      commissionBps: spec.commissionBps,
+      status: spec.status,
+      isActive: spec.status === "APPROVED",
+      photo: spec.photo,
     });
     if (spec.commissionBps != null) {
-      await prisma.commissionSetting.create({
-        data: {
-          scope: "THERAPIST",
-          therapistId: therapist.id,
-          commissionBps: spec.commissionBps,
-          effectiveFrom: COMMISSION_ERAS[0].effectiveFrom,
-          createdById: adminUser.id,
-        },
+      therapistCommissionRows.push({
+        scope: "THERAPIST",
+        therapistId,
+        commissionBps: spec.commissionBps,
+        effectiveFrom: COMMISSION_ERAS[0].effectiveFrom,
+        createdById: adminUser.id,
       });
     }
-    therapists.push({ ...therapist, ...spec });
+    therapists.push({ id: therapistId, userId, ...spec });
   }
+  await insertMany(prisma.user, userRows);
+  await insertMany(prisma.therapist, therapistRows);
+  await insertMany(prisma.commissionSetting, therapistCommissionRows);
 
   // Bookable roster: those with a real schedule (excludes the pending applicant).
   const bookableTherapists = therapists.filter((t) => t.weight > 0);
+  const totalWeight = bookableTherapists.reduce((s, t) => s + t.weight, 0);
 
   // ── Weekly availability per consultant's own schedule ─────────────────
+  const availabilityRows = [];
   for (const therapist of therapists) {
     for (const day of therapist.schedule.days) {
       for (const hour of therapist.schedule.hours) {
-        await prisma.therapistAvailability.create({
-          data: {
-            therapistId: therapist.id,
-            dayOfWeek: day,
-            startTime: `${String(hour).padStart(2, "0")}:00`,
-            endTime: `${String(hour + 1).padStart(2, "0")}:00`,
-          },
+        availabilityRows.push({
+          therapistId: therapist.id,
+          dayOfWeek: day,
+          startTime: `${String(hour).padStart(2, "0")}:00`,
+          endTime: `${String(hour + 1).padStart(2, "0")}:00`,
         });
       }
     }
   }
+  await insertMany(prisma.therapistAvailability, availabilityRows);
 
   // ── Unavailability blocks (leave) for a couple of consultants ─────────
   const rohan = therapists.find((t) => t.slug === "dr-rohan-gupta");
   const kavita = therapists.find((t) => t.slug === "dr-kavita-rao");
-  await prisma.slotBlock.create({
-    data: {
-      therapistId: rohan.id,
-      startAt: addDays(new Date(), -25),
-      endAt: addDays(new Date(), -20),
-      reason: "Annual leave",
-    },
-  });
-  await prisma.slotBlock.create({
-    data: {
-      therapistId: kavita.id,
-      startAt: addDays(new Date(), 5),
-      endAt: addDays(new Date(), 7),
-      reason: "Conference travel",
-    },
+  await prisma.slotBlock.createMany({
+    data: [
+      {
+        therapistId: rohan.id,
+        startAt: addDays(now, -25),
+        endAt: addDays(now, -20),
+        reason: "Annual leave",
+      },
+      {
+        therapistId: kavita.id,
+        startAt: addDays(now, 5),
+        endAt: addDays(now, 7),
+        reason: "Conference travel",
+      },
+    ],
   });
 
   // ── Clients registered over the operating history ────────────────────
@@ -443,37 +499,39 @@ async function main() {
   const clients = [];
   const usedEmails = new Set();
   for (const name of clientNames) {
-    const createdAt = addDays(
-      new Date(),
-      -Math.floor(rand() * (HISTORY_DAYS + 10)),
-    );
+    const createdAt = addDays(now, -Math.floor(rand() * (HISTORY_DAYS + 10)));
     createdAt.setHours(
       9 + Math.floor(rand() * 10),
       Math.floor(rand() * 60),
       0,
       0,
     );
+    // A registration stamped "today" must not land later than the current
+    // clock — no row in the database may carry a future timestamp.
+    if (createdAt > now)
+      createdAt.setTime(nowMs - Math.floor(rand() * 4 * 3600000));
     let email = name.toLowerCase().replace(/[^a-z]+/g, ".") + "@example.com";
     if (usedEmails.has(email))
       email = email.replace("@", `.${clients.length}@`);
     usedEmails.add(email);
-    clients.push(
-      await prisma.client.create({
-        data: {
-          name,
-          email,
-          phone: `+9198${String(10000000 + Math.floor(rand() * 89999999))}`,
-          dob: `19${70 + Math.floor(rand() * 30)}-${String(1 + Math.floor(rand() * 12)).padStart(2, "0")}-${String(1 + Math.floor(rand() * 27)).padStart(2, "0")}`,
-          emergencyContact: `Family contact (+9199${String(10000000 + Math.floor(rand() * 89999999))})`,
-          gdprConsent: true,
-          createdAt,
-        },
-      }),
-    );
+    clients.push({
+      id: randomUUID(),
+      name,
+      email,
+      phone: `+9198${String(10000000 + Math.floor(rand() * 89999999))}`,
+      dob: `19${70 + Math.floor(rand() * 30)}-${String(1 + Math.floor(rand() * 12)).padStart(2, "0")}-${String(1 + Math.floor(rand() * 27)).padStart(2, "0")}`,
+      emergencyContact: `Family contact (+9199${String(10000000 + Math.floor(rand() * 89999999))})`,
+      gdprConsent: true,
+      createdAt,
+    });
   }
+  await insertMany(prisma.client, clients);
+  console.log(`  consultants + ${clients.length} clients ready`);
 
   // ── Bookings across the full operating history ────────────────────────
-  const year = new Date().getFullYear();
+  // Everything is built in memory first, then bulk-inserted. Ledger postings
+  // mirror src/server/domain/postings.ts exactly.
+  const year = now.getFullYear();
   const usedSlots = new Set(); // therapistId|iso
   const counters = {
     total: 0,
@@ -484,24 +542,30 @@ async function main() {
     upcoming: 0,
   };
 
-  async function recordChargeSuccess(booking, therapistId, when) {
+  const bookingRows = [];
+  const statusHistoryRows = [];
+  const slotRows = [];
+  const paymentRows = [];
+  const ledgerRows = [];
+
+  function recordChargeSuccess(booking, therapistId, when) {
     const invoiceNumber = invoiceNumberFor(booking.id, year);
-    const payment = await prisma.paymentRecord.create({
-      data: {
-        bookingId: booking.id,
-        provider: "manual",
-        kind: "CHARGE",
-        amountMinor: booking.amountMinor - booking.discountMinor,
-        status: "SUCCEEDED",
-        providerOrderId: `manual_seed_${booking.id.slice(0, 12)}`,
-        providerPaymentId: String(
-          100000000000 + Math.floor(rand() * 899999999999),
-        ),
-        providerRef: String(100000000000 + Math.floor(rand() * 899999999999)),
-        idempotencyKey: `charge:${booking.id}`,
-        createdAt: when,
-        updatedAt: when,
-      },
+    const paymentId = randomUUID();
+    paymentRows.push({
+      id: paymentId,
+      bookingId: booking.id,
+      provider: "manual",
+      kind: "CHARGE",
+      amountMinor: booking.amountMinor - booking.discountMinor,
+      status: "SUCCEEDED",
+      providerOrderId: `manual_seed_${booking.id.slice(0, 12)}`,
+      providerPaymentId: String(
+        100000000000 + Math.floor(rand() * 899999999999),
+      ),
+      providerRef: String(100000000000 + Math.floor(rand() * 899999999999)),
+      idempotencyKey: `charge:${booking.id}`,
+      createdAt: when,
+      updatedAt: when,
     });
     const split = splitPayment({
       grossMinor: booking.amountMinor,
@@ -510,100 +574,91 @@ async function main() {
     });
     const base = {
       bookingId: booking.id,
-      paymentRecordId: payment.id,
+      paymentRecordId: paymentId,
       createdAt: when,
     };
-    await prisma.ledgerEntry.createMany({
-      data: [
-        {
-          ...base,
-          entryType: "GROSS_REVENUE",
-          amountMinor: booking.amountMinor,
-          description: `Gross booking amount collected (${invoiceNumber})`,
-        },
-        ...(booking.discountMinor > 0
-          ? [
-              {
-                ...base,
-                entryType: "DISCOUNT",
-                amountMinor: -booking.discountMinor,
-                description: `Discount applied (${invoiceNumber})`,
-              },
-            ]
-          : []),
-        {
-          ...base,
-          entryType: "COMMISSION_ACCRUED",
-          amountMinor: split.commissionMinor,
-          therapistId,
-          description: `Consultant commission accrued at ${booking.commissionBps / 100}% (${invoiceNumber})`,
-        },
-        {
-          ...base,
-          entryType: "PLATFORM_REVENUE",
-          amountMinor: split.platformMinor,
-          description: `Platform share recognised (${invoiceNumber})`,
-        },
-      ],
-    });
-    await prisma.booking.update({
-      where: { id: booking.id },
-      data: { paymentStatus: "PAID", invoiceNumber },
-    });
-    return { payment, split, invoiceNumber };
+    ledgerRows.push(
+      {
+        ...base,
+        entryType: "GROSS_REVENUE",
+        amountMinor: booking.amountMinor,
+        description: `Gross booking amount collected (${invoiceNumber})`,
+      },
+      ...(booking.discountMinor > 0
+        ? [
+            {
+              ...base,
+              entryType: "DISCOUNT",
+              amountMinor: -booking.discountMinor,
+              description: `Discount applied (${invoiceNumber})`,
+            },
+          ]
+        : []),
+      {
+        ...base,
+        entryType: "COMMISSION_ACCRUED",
+        amountMinor: split.commissionMinor,
+        therapistId,
+        description: `Consultant commission accrued at ${booking.commissionBps / 100}% (${invoiceNumber})`,
+      },
+      {
+        ...base,
+        entryType: "PLATFORM_REVENUE",
+        amountMinor: split.platformMinor,
+        description: `Platform share recognised (${invoiceNumber})`,
+      },
+    );
+    return { split, invoiceNumber };
   }
 
-  async function recordRefund(booking, therapistId, split, when, reason) {
+  function recordRefund(bookingId, therapistId, split, when, reason) {
     const refundMinor = split.netMinor;
-    const refund = await prisma.paymentRecord.create({
-      data: {
-        bookingId: booking.id,
-        provider: "manual",
-        kind: "REFUND",
-        amountMinor: refundMinor,
-        status: "SUCCEEDED",
-        providerPaymentId: `manual_rf_${booking.id.slice(0, 12)}`,
-        idempotencyKey: `refund:${booking.id}:${refundMinor}`,
-        createdAt: when,
-        updatedAt: when,
-      },
-    });
-    const base = {
-      bookingId: booking.id,
-      paymentRecordId: refund.id,
+    const refundId = randomUUID();
+    paymentRows.push({
+      id: refundId,
+      bookingId,
+      provider: "manual",
+      kind: "REFUND",
+      amountMinor: refundMinor,
+      status: "SUCCEEDED",
+      providerPaymentId: `manual_rf_${bookingId.slice(0, 12)}`,
+      idempotencyKey: `refund:${bookingId}:${refundMinor}`,
       createdAt: when,
-    };
-    await prisma.ledgerEntry.createMany({
-      data: [
-        {
-          ...base,
-          entryType: "REFUND",
-          amountMinor: -refundMinor,
-          description: `Refund issued — ${reason}`,
-        },
-        {
-          ...base,
-          entryType: "COMMISSION_REVERSED",
-          amountMinor: -split.commissionMinor,
-          therapistId,
-          description: `Consultant commission reversed on refund`,
-        },
-        {
-          ...base,
-          entryType: "PLATFORM_REVENUE_REVERSED",
-          amountMinor: -split.platformMinor,
-          description: `Platform share reversed on refund`,
-        },
-      ],
+      updatedAt: when,
     });
-    await prisma.booking.update({
-      where: { id: booking.id },
-      data: { paymentStatus: "REFUNDED", status: "REFUNDED" },
-    });
+    const base = { bookingId, paymentRecordId: refundId, createdAt: when };
+    ledgerRows.push(
+      {
+        ...base,
+        entryType: "REFUND",
+        amountMinor: -refundMinor,
+        description: `Refund issued — ${reason}`,
+      },
+      {
+        ...base,
+        entryType: "COMMISSION_REVERSED",
+        amountMinor: -split.commissionMinor,
+        therapistId,
+        description: `Consultant commission reversed on refund`,
+      },
+      {
+        ...base,
+        entryType: "PLATFORM_REVENUE_REVERSED",
+        amountMinor: -split.platformMinor,
+        description: `Platform share reversed on refund`,
+      },
+    );
+    adminAudit(
+      "payment.refund_executed",
+      "Booking",
+      bookingId,
+      { refundMinor, reason },
+      when,
+    );
   }
 
   for (let dayOffset = -HISTORY_DAYS; dayOffset <= FUTURE_DAYS; dayOffset++) {
-    const day = addDays(new Date(), dayOffset);
+    const day = addDays(now, dayOffset);
     day.setHours(0, 0, 0, 0);
     const dayOfWeek = day.getDay();
 
@@ -624,8 +679,7 @@ async function main() {
     // reads as a busy practice rather than a sparse scatter.
     const growth = (dayOffset + HISTORY_DAYS) / (HISTORY_DAYS + FUTURE_DAYS);
     const capacityFactor =
-      eligible.reduce((s, t) => s + t.weight, 0) /
-      bookableTherapists.reduce((s, t) => s + t.weight, 0);
+      eligible.reduce((s, t) => s + t.weight, 0) / totalWeight;
     const futureTaper =
       dayOffset > 0 ? Math.max(0.35, 1 - dayOffset / (FUTURE_DAYS * 1.5)) : 1;
     const baseline =
@@ -649,11 +703,11 @@ async function main() {
       // Skip if this slot falls inside one of the seeded unavailability blocks.
       const blocked =
         (therapist.slug === "dr-rohan-gupta" &&
-          startAt >= addDays(new Date(), -25) &&
-          startAt < addDays(new Date(), -20)) ||
+          startAt >= addDays(now, -25) &&
+          startAt < addDays(now, -20)) ||
         (therapist.slug === "dr-kavita-rao" &&
-          startAt >= addDays(new Date(), 5) &&
-          startAt < addDays(new Date(), 7));
+          startAt >= addDays(now, 5) &&
+          startAt < addDays(now, 7));
       if (blocked) continue;
 
       const service = pick(services);
@@ -671,11 +725,18 @@ async function main() {
         0,
         0,
       );
+      // Upcoming sessions are booked in the recent past — a booking (and the
+      // payment stamped at booking time) must never be dated in the future.
+      // Spread over the trailing ten days so the created-per-day chart stays
+      // smooth instead of spiking at the seed date.
+      if (createdAt > now) {
+        createdAt.setTime(nowMs - (1 + Math.floor(rand() * 240)) * 3600000);
+      }
       if (createdAt < client.createdAt)
         createdAt.setTime(client.createdAt.getTime() + 3600000);
-      if (createdAt >= startAt) continue; // guard against pathological clamping
+      if (createdAt >= startAt || createdAt > now) continue; // guard against pathological clamping
 
-      const isPast = startAt.getTime() < Date.now();
+      const isPast = startAt.getTime() < nowMs;
       const roll = rand();
       let status;
       if (!isPast) {
@@ -693,139 +754,172 @@ async function main() {
       }
 
       const paidUpfront = rand() < 0.65 || status === "REFUNDED";
+      const charged = paidUpfront || (status === "COMPLETED" && rand() < 0.9);
 
-      const booking = await prisma.booking.create({
-        data: {
-          therapistId: therapist.id,
-          serviceId: service.id,
-          clientId: client.id,
-          dateTime: startAt,
-          durationMinutes: service.durationMinutes,
-          amountMinor: service.priceMinor,
-          discountMinor,
-          commissionBps,
-          status: status === "REFUNDED" ? "CONFIRMED" : status, // refunds transition below
-          paymentStatus: "UNPAID",
-          createdAt,
-          updatedAt: createdAt,
-        },
-      });
-      await prisma.bookingStatusHistory.create({
-        data: {
-          bookingId: booking.id,
-          fromStatus: null,
-          toStatus: paidUpfront
-            ? "CONFIRMED"
-            : status === "REFUNDED"
-              ? "CONFIRMED"
-              : status,
-          actorType: "CLIENT",
-          reason: paidUpfront
-            ? "Booked and paid online"
-            : "Booked with pay-at-clinic",
-          createdAt,
-        },
-      });
-
-      // Slot hold rows for statuses that keep the calendar occupied
-      if (["PENDING", "CONFIRMED", "COMPLETED", "NO_SHOW"].includes(status)) {
-        await prisma.bookingSlot.create({
-          data: { therapistId: therapist.id, startAt, bookingId: booking.id },
-        });
-      }
+      const bookingId = randomUUID();
+      let finalStatus = status;
+      let paymentStatus = "UNPAID";
+      let invoiceNumber = null;
 
       let split = null;
-      if (paidUpfront || (status === "COMPLETED" && rand() < 0.9)) {
+      if (charged) {
         const paidAt = paidUpfront
           ? createdAt
           : new Date(startAt.getTime() + 3600000);
-        const result = await recordChargeSuccess(
-          { ...booking, discountMinor, commissionBps },
+        const result = recordChargeSuccess(
+          {
+            id: bookingId,
+            amountMinor: service.priceMinor,
+            discountMinor,
+            commissionBps,
+          },
           therapist.id,
           paidAt,
         );
         split = result.split;
+        paymentStatus = "PAID";
+        invoiceNumber = result.invoiceNumber;
+      }
+
+      // Initial status-history row (fromStatus null → booked).
+      statusHistoryRows.push({
+        bookingId,
+        fromStatus: null,
+        toStatus: paidUpfront
+          ? "CONFIRMED"
+          : status === "REFUNDED"
+            ? "CONFIRMED"
+            : status,
+        actorType: "CLIENT",
+        reason: paidUpfront
+          ? "Booked and paid online"
+          : "Booked with pay-at-clinic",
+        createdAt,
+      });
+
+      // Slot hold rows for statuses that keep the calendar occupied.
+      if (["PENDING", "CONFIRMED", "COMPLETED", "NO_SHOW"].includes(status)) {
+        slotRows.push({ therapistId: therapist.id, startAt, bookingId });
       }
 
       if (status === "REFUNDED" && split) {
-        const refundAt = new Date(startAt.getTime() - 24 * 3600000);
-        await prisma.bookingStatusHistory.createMany({
-          data: [
-            {
-              bookingId: booking.id,
-              fromStatus: "CONFIRMED",
-              toStatus: "REFUND_PENDING",
-              actorType: "CLIENT",
-              reason: "Client cancelled paid session",
-              createdAt: refundAt,
-            },
-            {
-              bookingId: booking.id,
-              fromStatus: "REFUND_PENDING",
-              toStatus: "REFUNDED",
-              actorType: "ADMIN",
-              actorId: adminUser.id,
-              reason: "Refund executed",
-              createdAt: refundAt,
-            },
-          ],
-        });
-        await recordRefund(
-          booking,
+        // Never earlier than the charge it reverses.
+        const refundAt = new Date(
+          Math.max(
+            startAt.getTime() - 24 * 3600000,
+            createdAt.getTime() + 2 * 3600000,
+          ),
+        );
+        statusHistoryRows.push(
+          {
+            bookingId,
+            fromStatus: "CONFIRMED",
+            toStatus: "REFUND_PENDING",
+            actorType: "CLIENT",
+            reason: "Client cancelled paid session",
+            createdAt: refundAt,
+          },
+          {
+            bookingId,
+            fromStatus: "REFUND_PENDING",
+            toStatus: "REFUNDED",
+            actorType: "ADMIN",
+            actorId: adminUser.id,
+            reason: "Refund executed",
+            createdAt: refundAt,
+          },
+        );
+        recordRefund(
+          bookingId,
           therapist.id,
           split,
           refundAt,
           "client cancellation",
         );
+        finalStatus = "REFUNDED";
+        paymentStatus = "REFUNDED";
         counters.refunded++;
       } else if (["COMPLETED", "CANCELLED", "NO_SHOW"].includes(status)) {
         const transitionedAt = new Date(
           startAt.getTime() +
             (status === "CANCELLED" ? -20 * 3600000 : 2 * 3600000),
         );
-        await prisma.booking.update({
-          where: { id: booking.id },
-          data: { status },
-        });
-        await prisma.bookingStatusHistory.create({
-          data: {
-            bookingId: booking.id,
-            fromStatus: "CONFIRMED",
-            toStatus: status,
-            actorType: status === "CANCELLED" ? "CLIENT" : "THERAPIST",
-            reason:
-              status === "CANCELLED"
-                ? "Cancelled ahead of the 12h window"
-                : null,
-            createdAt: transitionedAt,
-          },
+        statusHistoryRows.push({
+          bookingId,
+          fromStatus: "CONFIRMED",
+          toStatus: status,
+          actorType: status === "CANCELLED" ? "CLIENT" : "THERAPIST",
+          reason:
+            status === "CANCELLED" ? "Cancelled ahead of the 12h window" : null,
+          createdAt: transitionedAt,
         });
         if (status === "CANCELLED") counters.cancelled++;
         if (status === "NO_SHOW") counters.noShow++;
         if (status === "COMPLETED") counters.completed++;
       }
+
+      bookingRows.push({
+        id: bookingId,
+        therapistId: therapist.id,
+        serviceId: service.id,
+        clientId: client.id,
+        dateTime: startAt,
+        durationMinutes: service.durationMinutes,
+        amountMinor: service.priceMinor,
+        discountMinor,
+        commissionBps,
+        status: finalStatus,
+        paymentStatus,
+        invoiceNumber,
+        createdAt,
+        updatedAt: createdAt,
+      });
+
       if (!isPast) counters.upcoming++;
       counters.total++;
     }
   }
+
+  // Bulk insert in FK-safe order: bookings, then their payments, then the
+  // child rows that reference both.
+  await insertMany(prisma.booking, bookingRows);
+  await insertMany(prisma.paymentRecord, paymentRows);
+  await insertMany(prisma.bookingSlot, slotRows);
+  await insertMany(prisma.bookingStatusHistory, statusHistoryRows);
+  await insertMany(prisma.ledgerEntry, ledgerRows);
+  console.log(
+    `  ${bookingRows.length} bookings + ${ledgerRows.length} ledger entries written`,
+  );
 
   // ── Payouts: multi-cycle settlement per consultant ────────────────────
   // Walks ~30-day cutoffs from each consultant's first earning up to
   // (today - 30 days), settling whatever had accrued by each cutoff, then
   // leaves half of the remaining unsettled balance as a queued PENDING
   // payout — so the payout register shows a real multi-month history
-  // instead of a single lump sum.
+  // instead of a single lump sum. Derived from the in-memory ledger rows.
+  const commissionByTherapist = new Map();
+  for (const e of ledgerRows) {
+    if (
+      (e.entryType === "COMMISSION_ACCRUED" ||
+        e.entryType === "COMMISSION_REVERSED") &&
+      e.therapistId
+    ) {
+      if (!commissionByTherapist.has(e.therapistId))
+        commissionByTherapist.set(e.therapistId, []);
+      commissionByTherapist
+        .get(e.therapistId)
+        .push({ createdAt: e.createdAt, amountMinor: e.amountMinor });
+    }
+  }
+
+  const payoutRows = [];
+  const payoutLedgerRows = [];
   for (const therapist of therapists) {
-    const entries = await prisma.ledgerEntry.findMany({
-      where: {
-        therapistId: therapist.id,
-        entryType: { in: ["COMMISSION_ACCRUED", "COMMISSION_REVERSED"] },
-      },
-      orderBy: { createdAt: "asc" },
-    });
+    const entries = (commissionByTherapist.get(therapist.id) || [])
+      .slice()
+      .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
     if (entries.length === 0) continue;
 
-    const now = new Date();
     const cutoffs = [];
     let cursor = addDays(entries[0].createdAt, 30);
     const lastCutoff = addDays(now, -30);
@@ -842,29 +936,42 @@ async function main() {
       const toPay = earnedByCutoff - paidSoFar;
       if (toPay <= 0) continue;
 
-      const payout = await prisma.payout.create({
-        data: {
-          therapistId: therapist.id,
-          amountMinor: toPay,
-          status: "PAID",
-          method: "BANK_TRANSFER",
-          reference: `NEFT${String(100000 + Math.floor(rand() * 899999))}`,
-          initiatedById: adminUser.id,
-          paidAt: cutoff,
-          createdAt: addDays(cutoff, -2),
-          updatedAt: cutoff,
-        },
+      const payoutId = randomUUID();
+      const reference = `NEFT${String(100000 + Math.floor(rand() * 899999))}`;
+      payoutRows.push({
+        id: payoutId,
+        therapistId: therapist.id,
+        amountMinor: toPay,
+        status: "PAID",
+        method: "BANK_TRANSFER",
+        reference,
+        initiatedById: adminUser.id,
+        paidAt: cutoff,
+        createdAt: addDays(cutoff, -2),
+        updatedAt: cutoff,
       });
-      await prisma.ledgerEntry.create({
-        data: {
-          entryType: "PAYOUT_PAID",
-          amountMinor: -toPay,
-          therapistId: therapist.id,
-          payoutId: payout.id,
-          description: `Payout settled (ref ${payout.reference})`,
-          createdAt: cutoff,
-        },
+      payoutLedgerRows.push({
+        entryType: "PAYOUT_PAID",
+        amountMinor: -toPay,
+        therapistId: therapist.id,
+        payoutId,
+        description: `Payout settled (ref ${reference})`,
+        createdAt: cutoff,
       });
+      adminAudit(
+        "payout.create",
+        "Payout",
+        payoutId,
+        { therapistId: therapist.id, amountMinor: toPay },
+        addDays(cutoff, -2),
+      );
+      adminAudit(
+        "payout.paid",
+        "Payout",
+        payoutId,
+        { from: "PENDING", to: "PAID", reference },
+        cutoff,
+      );
       paidSoFar += toPay;
     }
 
@@ -873,19 +980,47 @@ async function main() {
     if (payable > 0) {
       const pendingAmount = Math.round(payable * 0.5);
       if (pendingAmount > 0) {
-        await prisma.payout.create({
-          data: {
-            therapistId: therapist.id,
-            amountMinor: pendingAmount,
-            status: "PENDING",
-            method: "BANK_TRANSFER",
-            note: "Fortnightly settlement run",
-            initiatedById: adminUser.id,
-          },
+        const pendingId = randomUUID();
+        payoutRows.push({
+          id: pendingId,
+          therapistId: therapist.id,
+          amountMinor: pendingAmount,
+          status: "PENDING",
+          method: "BANK_TRANSFER",
+          note: "Fortnightly settlement run",
+          initiatedById: adminUser.id,
+          createdAt: now,
+          updatedAt: now,
         });
+        adminAudit(
+          "payout.create",
+          "Payout",
+          pendingId,
+          { therapistId: therapist.id, amountMinor: pendingAmount },
+          now,
+        );
       }
     }
   }
+  await insertMany(prisma.payout, payoutRows);
+  await insertMany(prisma.ledgerEntry, payoutLedgerRows);
+
+  // Journal the roster action behind Dr. Meera's suspension 50 days ago.
+  const meera = therapists.find((t) => t.slug === "dr-meera-iyengar");
+  if (meera) {
+    adminAudit(
+      "consultant.update",
+      "Therapist",
+      meera.id,
+      { changed: ["status", "isActive"] },
+      addDays(now, -50),
+    );
+  }
+
+  await insertMany(prisma.auditLog, auditRows);
+  console.log(
+    `  ${payoutRows.length} payouts + ${auditRows.length} audit entries written`,
+  );
 
   // ── Testimonials ──────────────────────────────────────────────────────
   await prisma.testimonial.createMany({

@@ -22,7 +22,12 @@ export function formatINR(
   if (opts.compact && Math.abs(rupees) >= 1000) {
     return `₹${compactRupees(rupees)}`;
   }
-  return `₹${rupees.toLocaleString("en-IN", { maximumFractionDigits: rupees % 1 === 0 ? 0 : 2 })}`;
+  return `₹${rupees.toLocaleString(
+    "en-IN",
+    rupees % 1 === 0
+      ? { maximumFractionDigits: 0 }
+      : { minimumFractionDigits: 2, maximumFractionDigits: 2 },
+  )}`;
 }
 
 export function formatDate(value: string | Date): string {
