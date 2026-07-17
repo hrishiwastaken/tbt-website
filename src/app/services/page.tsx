@@ -355,7 +355,7 @@ export default function Services() {
 
                     <div className="pt-2">
                       <Link
-                        href={`/contact?service=${encodeURIComponent(service.title)}`}
+                        href="/team"
                         className="inline-flex items-center gap-2 bg-teal-sage hover:bg-forest-slate text-warm-sand text-sm font-semibold px-8 py-3.5 rounded-full hover:shadow-lg transition-all btn-shimmer"
                       >
                         Book This Session
