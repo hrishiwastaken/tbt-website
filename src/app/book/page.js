@@ -8,20 +8,14 @@ export default async function BookPage({ searchParams }) {
   const sParams = await searchParams;
   const initialService = sParams.service || "";
 
-  // Fetch active therapists (which will be Dr. Madhumati Dhumak) and services
-  const therapists = await prisma.therapist.findMany({
-    where: { isActive: true, status: "APPROVED" },
-    select: {
-      id: true,
-      name: true,
-      slug: true,
-      feeMinor: true,
-      bio: true,
-    },
-  });
-
+  // Only services that at least one approved, active consultant offers are
+  // bookable — otherwise the consultant step would dead-end.
   const services = await prisma.service.findMany({
-    where: { isActive: true },
+    where: {
+      isActive: true,
+      therapists: { some: { status: "APPROVED", isActive: true } },
+    },
+    orderBy: { createdAt: "asc" },
     select: {
       id: true,
       name: true,
@@ -34,11 +28,7 @@ export default async function BookPage({ searchParams }) {
 
   return (
     <main className="flex-grow w-full max-w-7xl mx-auto px-6 md:px-12 py-28">
-      <BookingWizard
-        therapists={therapists}
-        services={services}
-        initialService={initialService}
-      />
+      <BookingWizard services={services} initialService={initialService} />
     </main>
   );
 }

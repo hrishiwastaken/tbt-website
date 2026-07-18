@@ -51,6 +51,9 @@ model Therapist {
   bookings      Booking[]
   payouts       Payout[]
   ledgerEntries LedgerEntry[]
+  // Services this consultant offers. The public booking flow is service-first:
+  // a client picks a service, then chooses among the consultants that offer it.
+  services      Service[]               @relation("TherapistServices")
   createdAt     DateTime                @default(now())
   updatedAt     DateTime                @updatedAt
 
@@ -89,10 +92,21 @@ model Service {
   name            String
   description     String
   durationMinutes Int
-  priceMinor      Int // paise
+  // Indicative price (paise). The public flow charges the chosen consultant's
+  // own rate; this is kept for reference and admin display.
+  priceMinor      Int
   slug            String    @unique
   isActive        Boolean   @default(true)
+  // Presentation content for the public services pages (DB is the single
+  // source of truth for the catalogue).
+  tagline         String?
+  image           String?
+  process         String?
+  suitableFor     String[]  @default([])
+  availability    String[]  @default([]) // e.g. ["Online", "Offline"]
   bookings        Booking[]
+  // Consultants who offer this service (inverse of Therapist.services).
+  therapists      Therapist[] @relation("TherapistServices")
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
 }

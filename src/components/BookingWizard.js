@@ -3,32 +3,43 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
-export default function BookingWizard({
-  therapists = [],
-  services = [],
-  initialService = "",
-}) {
+// Service-first booking flow:
+//   1. Service   → what kind of session
+//   2. Consultant→ who (only those offering the chosen service)
+//   3. Schedule  → the chosen consultant's real availability
+//   4. Details   → client information
+//   5. Confirm   → summary + payment (redirects to the UPI gateway checkout)
+//
+// The client is charged the chosen consultant's own rate.
+
+const STEPS = [
+  { stepNum: 1, label: "Service" },
+  { stepNum: 2, label: "Consultant" },
+  { stepNum: 3, label: "Schedule" },
+  { stepNum: 4, label: "Details" },
+  { stepNum: 5, label: "Confirm" },
+];
+
+const rupees = (minor) => `₹${(minor / 100).toLocaleString("en-IN")}`;
+
+export default function BookingWizard({ services = [], initialService = "" }) {
   const router = useRouter();
 
-  // Wizard Steps: 1 (Service Selection), 2 (Schedule), 3 (Details), 4 (Confirm)
-  const [step, setStep] = useState(1);
+  const preselected =
+    services.find((s) => s.slug === initialService) || null;
 
-  // Pre-select the sole therapist: Dr. Madhumati Dhumak
-  const [selectedTherapist] = useState(
-    therapists[0] || {
-      name: "Dr. Madhumati Dhumak",
-      slug: "dr-madhumati-dhumak",
-      feeMinor: 150000,
-    },
-  );
+  const [step, setStep] = useState(preselected ? 2 : 1);
+  const [selectedService, setSelectedService] = useState(preselected);
 
-  const [selectedService, setSelectedService] = useState(
-    services.find((s) => s.slug === initialService) || null,
-  );
+  const [consultants, setConsultants] = useState([]);
+  const [loadingConsultants, setLoadingConsultants] = useState(false);
+  const [selectedConsultant, setSelectedConsultant] = useState(null);
+
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedSlot, setSelectedSlot] = useState(null);
+  const [slots, setSlots] = useState([]);
+  const [loadingSlots, setLoadingSlots] = useState(false);
 
-  // Client details
   const [clientDetails, setClientDetails] = useState({
     name: "",
     email: "",
@@ -38,113 +49,142 @@ export default function BookingWizard({
     gdprConsent: false,
   });
 
-  const [paymentOption, setPaymentOption] = useState("PAY_NOW"); // PAY_NOW, PAY_LATER
-
-  // API loading & slot states
-  const [slots, setSlots] = useState([]);
-  const [loadingSlots, setLoadingSlots] = useState(false);
+  const [paymentOption, setPaymentOption] = useState("PAY_NOW");
   const [errorMsg, setErrorMsg] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Set default tomorrow's date for ease of scheduling on mount
+  // Default the date to tomorrow, client-side only (deferred so the effect
+  // body never sets state synchronously, and SSR renders an empty value —
+  // avoiding a hydration mismatch on the date).
   useEffect(() => {
-    const applyDefaultDate = () => {
-      const tomorrow = new Date();
-      tomorrow.setDate(tomorrow.getDate() + 1);
-      const yyyy = tomorrow.getFullYear();
-      const mm = String(tomorrow.getMonth() + 1).padStart(2, "0");
-      const dd = String(tomorrow.getDate()).padStart(2, "0");
-      setSelectedDate(`${yyyy}-${mm}-${dd}`);
-    };
-    applyDefaultDate();
+    const id = setTimeout(() => {
+      const t = new Date();
+      t.setDate(t.getDate() + 1);
+      setSelectedDate(
+        `${t.getFullYear()}-${String(t.getMonth() + 1).padStart(
+          2,
+          "0",
+        )}-${String(t.getDate()).padStart(2, "0")}`,
+      );
+    }, 0);
+    return () => clearTimeout(id);
   }, []);
 
-  // Fetch available slots from backend whenever the date changes
+  // Load the consultants who offer the selected service whenever it changes.
+  // All state updates happen inside the async body (never synchronously in
+  // the effect) so the effect stays render-safe.
   useEffect(() => {
-    if (!selectedTherapist || !selectedDate) return;
+    if (!selectedService) return;
+    let cancelled = false;
+    const load = async () => {
+      setLoadingConsultants(true);
+      setErrorMsg("");
+      setConsultants([]);
+      setSelectedConsultant(null);
+      try {
+        const res = await fetch(
+          `/api/consultants?service=${encodeURIComponent(selectedService.slug)}`,
+        );
+        const data = await res.json();
+        if (cancelled) return;
+        if (res.ok) setConsultants(data.consultants || []);
+        else setErrorMsg(data.error || "Failed to load consultants.");
+      } catch (err) {
+        if (!cancelled) {
+          console.error(err);
+          setErrorMsg("Network error loading consultants.");
+        }
+      } finally {
+        if (!cancelled) setLoadingConsultants(false);
+      }
+    };
+    load();
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedService]);
+
+  // Load the chosen consultant's slots for the chosen date.
+  useEffect(() => {
+    if (!selectedConsultant || !selectedDate) return;
+    let cancelled = false;
     const load = async () => {
       setLoadingSlots(true);
       setErrorMsg("");
       setSelectedSlot(null);
       try {
         const res = await fetch(
-          `/api/bookings/available-slots?therapist=${selectedTherapist.slug}&date=${selectedDate}`,
+          `/api/bookings/available-slots?therapist=${selectedConsultant.slug}&date=${selectedDate}`,
         );
         const data = await res.json();
-        if (res.ok) {
-          setSlots(data.slots || []);
-        } else {
-          setErrorMsg(data.error || "Failed to load available slots.");
-        }
+        if (cancelled) return;
+        if (res.ok) setSlots(data.slots || []);
+        else setErrorMsg(data.error || "Failed to load available slots.");
       } catch (err) {
-        console.error(err);
-        setErrorMsg("Network error loading available slots.");
+        if (!cancelled) {
+          console.error(err);
+          setErrorMsg("Network error loading available slots.");
+        }
       } finally {
-        setLoadingSlots(false);
+        if (!cancelled) setLoadingSlots(false);
       }
     };
     load();
-  }, [selectedTherapist, selectedDate]);
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedConsultant, selectedDate]);
 
   const handleClientDetailChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setClientDetails({
-      ...clientDetails,
+    setClientDetails((prev) => ({
+      ...prev,
       [name]: type === "checkbox" ? checked : value,
-    });
+    }));
   };
 
   const handleNextStep = () => {
     if (step === 1) {
-      if (!selectedService) {
-        setErrorMsg("Please select a therapeutic service to continue.");
-        return;
-      }
-      setErrorMsg("");
-      setStep(2);
+      if (!selectedService)
+        return setErrorMsg("Please select a service to continue.");
     } else if (step === 2) {
-      if (!selectedDate || !selectedSlot) {
-        setErrorMsg("Please select an available date and time slot.");
-        return;
-      }
-      setErrorMsg("");
-      setStep(3);
+      if (!selectedConsultant)
+        return setErrorMsg("Please choose a consultant to continue.");
     } else if (step === 3) {
+      if (!selectedDate || !selectedSlot)
+        return setErrorMsg("Please select an available date and time slot.");
+    } else if (step === 4) {
       const { name, email, phone, dob, emergencyContact, gdprConsent } =
         clientDetails;
-      if (!name || !email || !phone || !dob || !emergencyContact) {
-        setErrorMsg("Please fill out all client information fields.");
-        return;
-      }
-      if (!gdprConsent) {
-        setErrorMsg(
-          "You must consent to the Privacy Policy and IT Acts terms.",
+      if (!name || !email || !phone || !dob || !emergencyContact)
+        return setErrorMsg("Please fill out all client information fields.");
+      if (!gdprConsent)
+        return setErrorMsg(
+          "You must consent to the Privacy Policy and IT Act terms.",
         );
-        return;
-      }
-      setErrorMsg("");
-      setStep(4);
     }
+    setErrorMsg("");
+    setStep((s) => Math.min(STEPS.length, s + 1));
   };
 
   const handlePrevStep = () => {
     setErrorMsg("");
-    setStep((prev) => Math.max(1, prev - 1));
+    // If the service was preselected from a service page, step 1 is skipped.
+    const floor = preselected ? 2 : 1;
+    setStep((s) => Math.max(floor, s - 1));
   };
 
   const handleBookingSubmit = async (e) => {
     e.preventDefault();
     if (isSubmitting) return;
-
     setIsSubmitting(true);
     setErrorMsg("");
-
     try {
       const res = await fetch("/api/bookings", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          therapistSlug: selectedTherapist.slug,
+          therapistSlug: selectedConsultant.slug,
           serviceSlug: selectedService.slug,
           date: selectedDate,
           time: selectedSlot.startTime,
@@ -152,19 +192,15 @@ export default function BookingWizard({
           paymentOption,
         }),
       });
-
       const data = await res.json();
-
       if (!res.ok) {
         setIsSubmitting(false);
         setErrorMsg(data.error || "Failed to create booking.");
         return;
       }
-
       const booking = data.booking;
       // PAY_NOW: hand off to the gateway's secure checkout — confirmation
       // happens server-side (webhook / status poll), never in this client.
-      // Keep isSubmitting on through the redirect so the button stays locked.
       if (data.payment?.checkoutUrl) {
         window.location.assign(data.payment.checkoutUrl);
         return;
@@ -181,9 +217,10 @@ export default function BookingWizard({
     }
   };
 
+  const fee = selectedConsultant?.feeMinor ?? 0;
+
   return (
     <div className="max-w-3xl mx-auto">
-      {/* Header */}
       <div className="text-center mb-12">
         <h1 className="font-cormorant text-5xl font-semibold text-charcoal mb-3">
           Reserve Your Space
@@ -195,12 +232,7 @@ export default function BookingWizard({
 
       {/* Progress Indicators */}
       <div className="flex justify-between mb-10 border-b border-mist/35 pb-6 text-xs tracking-wider uppercase text-sage">
-        {[
-          { stepNum: 1, label: "Services" },
-          { stepNum: 2, label: "Schedule" },
-          { stepNum: 3, label: "Details" },
-          { stepNum: 4, label: "Confirm" },
-        ].map((item) => (
+        {STEPS.map((item) => (
           <div
             key={item.stepNum}
             className={`flex flex-col items-center gap-1 transition-all ${
@@ -223,7 +255,6 @@ export default function BookingWizard({
         ))}
       </div>
 
-      {/* Booking Form Container */}
       <div className="glass-card p-8 md:p-12 rounded-2xl border border-mist/30 shadow-warm-soft relative">
         {errorMsg && (
           <div className="mb-6 p-4 rounded bg-rose-50 border border-red-200 text-red-700 text-sm font-medium">
@@ -238,8 +269,8 @@ export default function BookingWizard({
               Select a Service
             </h2>
             <p className="text-sage mb-6 text-sm">
-              Select from our range of therapeutic and mental wellness practices
-              with Dr. Madhumati Dhumak.
+              Choose the kind of session you&apos;re looking for. Next, you
+              will pick the consultant who offers it.
             </p>
 
             <div className="space-y-4 mb-8">
@@ -253,23 +284,17 @@ export default function BookingWizard({
                       : "border-mist/40 bg-warm-white/40 hover:border-sage"
                   }`}
                 >
-                  <div className="flex justify-between items-start">
+                  <div className="flex justify-between items-start gap-4">
                     <div>
                       <h4 className="font-cormorant text-xl font-bold text-charcoal">
                         {service.name}
                       </h4>
-                      <p className="text-sage text-xs leading-relaxed mt-1 pr-6">
+                      <p className="text-sage text-xs leading-relaxed mt-1">
                         {service.description}
                       </p>
                     </div>
-                    <span className="text-terracotta font-semibold text-lg shrink-0">
-                      ₹{(service.priceMinor / 100).toLocaleString("en-IN")}
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center mt-3 pt-3 border-t border-mist/10 text-xs text-sage">
-                    <span>Duration: {service.durationMinutes} Min</span>
-                    <span className="text-forest font-medium">
-                      Dr. Madhumati Dhumak
+                    <span className="text-xs text-sage shrink-0 mt-1">
+                      {service.durationMinutes} min
                     </span>
                   </div>
                 </div>
@@ -288,22 +313,103 @@ export default function BookingWizard({
           </div>
         )}
 
-        {/* Step 2: Date and Slots */}
+        {/* Step 2: Choose Consultant */}
         {step === 2 && (
+          <div className="animate-[fadeIn_0.5s_ease-out]">
+            {!preselected && (
+              <button
+                onClick={handlePrevStep}
+                className="mb-6 flex items-center gap-2 text-sage hover:text-charcoal transition-colors text-xs font-semibold"
+              >
+                ← Back to Services
+              </button>
+            )}
+            <h2 className="font-cormorant text-3xl font-semibold text-charcoal mb-2 border-b border-mist/20 pb-2">
+              Choose Your Consultant
+            </h2>
+            <p className="text-sage mb-6 text-sm">
+              These practitioners offer{" "}
+              <span className="font-semibold text-forest">
+                {selectedService?.name}
+              </span>
+              . Each sets their own session fee.
+            </p>
+
+            {loadingConsultants ? (
+              <p className="text-sage text-sm italic py-8 text-center">
+                Loading consultants…
+              </p>
+            ) : consultants.length === 0 ? (
+              <p className="text-terracotta text-sm italic bg-red-50 p-4 rounded-xl border border-red-100">
+                No consultants are currently available for this service. Please
+                check back soon or contact us.
+              </p>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+                {consultants.map((c) => (
+                  <div
+                    key={c.id}
+                    onClick={() => setSelectedConsultant(c)}
+                    className={`p-5 rounded-xl border cursor-pointer transition-all flex gap-4 ${
+                      selectedConsultant?.id === c.id
+                        ? "border-forest bg-warm-white shadow-sm ring-1 ring-forest/10"
+                        : "border-mist/40 bg-warm-white/40 hover:border-sage"
+                    }`}
+                  >
+                    {c.photo && (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={c.photo}
+                        alt={c.name}
+                        className="h-16 w-16 rounded-full object-cover object-top shrink-0 border border-mist/30"
+                      />
+                    )}
+                    <div className="min-w-0">
+                      <h4 className="font-cormorant text-lg font-bold text-charcoal leading-tight">
+                        {c.name}
+                      </h4>
+                      <p className="text-sage text-[11px] leading-relaxed mt-1 line-clamp-3">
+                        {c.bio}
+                      </p>
+                      <span className="text-terracotta font-semibold text-sm mt-2 inline-block">
+                        {rupees(c.feeMinor)}{" "}
+                        <span className="text-sage font-normal text-xs">
+                          / session
+                        </span>
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <div className="flex justify-end pt-4 border-t border-mist/20">
+              <button
+                type="button"
+                onClick={handleNextStep}
+                disabled={consultants.length === 0}
+                className="bg-forest hover:bg-terracotta text-warm-white font-medium px-8 py-3 rounded-full transition-colors shadow-sm hover:shadow-md disabled:opacity-50"
+              >
+                Continue
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Step 3: Date and Slots */}
+        {step === 3 && (
           <div className="animate-[fadeIn_0.5s_ease-out]">
             <button
               onClick={handlePrevStep}
               className="mb-6 flex items-center gap-2 text-sage hover:text-charcoal transition-colors text-xs font-semibold"
             >
-              ← Back to Services
+              ← Back to Consultants
             </button>
-
             <h2 className="font-cormorant text-3xl font-semibold text-charcoal mb-6 border-b border-mist/20 pb-2">
-              Schedule Session
+              Schedule with {selectedConsultant?.name}
             </h2>
 
             <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start mb-8">
-              {/* Date selection */}
               <div className="md:col-span-5 flex flex-col gap-3">
                 <label className="text-xs font-bold tracking-wider uppercase text-sage">
                   Select Appointment Date
@@ -317,7 +423,6 @@ export default function BookingWizard({
                 />
               </div>
 
-              {/* Slots selection */}
               <div className="md:col-span-7 flex flex-col gap-3">
                 <label className="text-xs font-bold tracking-wider uppercase text-sage">
                   Available Time Slots
@@ -348,7 +453,7 @@ export default function BookingWizard({
                   </div>
                 ) : (
                   <p className="text-terracotta text-sm italic bg-red-50 p-4 rounded-xl border border-red-100">
-                    No availability listed for Dr. Madhumati Dhumak on{" "}
+                    No availability for {selectedConsultant?.name} on{" "}
                     {selectedDate}. Please select another date.
                   </p>
                 )}
@@ -367,8 +472,8 @@ export default function BookingWizard({
           </div>
         )}
 
-        {/* Step 3: Details */}
-        {step === 3 && (
+        {/* Step 4: Details */}
+        {step === 4 && (
           <div className="animate-[fadeIn_0.5s_ease-out]">
             <button
               onClick={handlePrevStep}
@@ -376,7 +481,6 @@ export default function BookingWizard({
             >
               ← Back to Schedule
             </button>
-
             <h2 className="font-cormorant text-3xl font-semibold text-charcoal mb-8 border-b border-mist/20 pb-2">
               Client Details
             </h2>
@@ -458,7 +562,6 @@ export default function BookingWizard({
                 </div>
               </div>
 
-              {/* GDPR/Compliance Consent */}
               <div className="pt-4 flex items-start gap-4">
                 <input
                   type="checkbox"
@@ -488,14 +591,14 @@ export default function BookingWizard({
                 onClick={handleNextStep}
                 className="bg-forest hover:bg-terracotta text-warm-white font-medium px-8 py-3 rounded-full transition-colors shadow-sm hover:shadow-md"
               >
-                Proceed to Payment
+                Continue
               </button>
             </div>
           </div>
         )}
 
-        {/* Step 4: Summary & Payment */}
-        {step === 4 && (
+        {/* Step 5: Summary & Payment */}
+        {step === 5 && (
           <div className="animate-[fadeIn_0.5s_ease-out]">
             <button
               onClick={handlePrevStep}
@@ -503,44 +606,41 @@ export default function BookingWizard({
             >
               ← Back to Details
             </button>
-
             <h2 className="font-cormorant text-3xl font-semibold text-charcoal mb-6 border-b border-mist/20 pb-2">
               Confirm Booking
             </h2>
 
-            {/* Summary */}
             <div className="bg-warm-white/50 p-6 rounded-xl border border-mist/20 flex flex-col gap-4 mb-8">
               <div className="flex justify-between items-center border-b border-mist/10 pb-3">
                 <span className="text-xs font-bold uppercase text-sage">
-                  Therapist
+                  Consultant
                 </span>
                 <span className="text-sm font-bold text-charcoal">
-                  {selectedTherapist.name}
+                  {selectedConsultant?.name}
                 </span>
               </div>
               <div className="flex justify-between items-center border-b border-mist/10 pb-3">
                 <span className="text-xs font-bold uppercase text-sage">
-                  Therapeutic Service
+                  Service
                 </span>
                 <span className="text-sm font-bold text-charcoal">
-                  {selectedService.name}
+                  {selectedService?.name}
                 </span>
               </div>
               <div className="flex justify-between items-center border-b border-mist/10 pb-3">
                 <span className="text-xs font-bold uppercase text-sage">
-                  Appointment Date & Time
+                  Date & Time
                 </span>
                 <span className="text-sm font-bold text-charcoal">
-                  {selectedDate} at {selectedSlot.startTime} (
-                  {selectedService.durationMinutes} Min)
+                  {selectedDate} at {selectedSlot?.startTime}
                 </span>
               </div>
-              <div className="flex justify-between items-center pt-2">
-                <span className="text-xs font-bold uppercase text-forest font-bold">
+              <div className="flex justify-between items-center">
+                <span className="text-xs font-bold uppercase text-forest">
                   Total Amount Due
                 </span>
                 <span className="text-2xl text-terracotta font-bold">
-                  ₹{(selectedService.priceMinor / 100).toLocaleString("en-IN")}
+                  {rupees(fee)}
                 </span>
               </div>
             </div>
@@ -569,16 +669,11 @@ export default function BookingWizard({
               </label>
 
               {paymentOption === "PAY_NOW" && (
-                <div className="p-5 bg-mist/10 rounded-xl border border-mist/30 animate-[fadeIn_0.3s_ease-out]">
+                <div className="p-5 bg-mist/10 rounded-xl border border-mist/30">
                   <div className="flex flex-wrap items-center justify-between gap-3">
                     <div className="text-xs text-charcoal">
                       Amount payable:{" "}
-                      <strong className="text-terracotta">
-                        ₹
-                        {(selectedService.priceMinor / 100).toLocaleString(
-                          "en-IN",
-                        )}
-                      </strong>
+                      <strong className="text-terracotta">{rupees(fee)}</strong>
                     </div>
                     <span className="text-[10px] font-bold tracking-wider uppercase text-sage">
                       Secured by PhonePe Payment Gateway

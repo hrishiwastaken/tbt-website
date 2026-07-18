@@ -1,14 +1,28 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Wifi, MapPin, ArrowLeft } from "lucide-react";
+import { Wifi, MapPin, ArrowLeft, Clock } from "lucide-react";
 import Container from "../../../components/ui/Container";
 import Surface from "../../../components/ui/Surface";
 import Badge from "../../../components/ui/Badge";
 import Button from "../../../components/ui/Button";
-import { SERVICES, getServiceBySlug } from "../../../lib/services-data";
+import { prisma } from "@/lib/db";
 
-export function generateStaticParams() {
-  return SERVICES.map((service) => ({ slug: service.slug }));
+export const dynamic = "force-dynamic";
+
+function getServiceBySlug(slug: string) {
+  return prisma.service.findFirst({
+    where: { slug, isActive: true },
+    select: {
+      name: true,
+      slug: true,
+      tagline: true,
+      description: true,
+      durationMinutes: true,
+      availability: true,
+      suitableFor: true,
+      process: true,
+    },
+  });
 }
 
 export async function generateMetadata({
@@ -17,7 +31,7 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const service = getServiceBySlug(slug);
+  const service = await getServiceBySlug(slug);
   if (!service) return {};
   return {
     title: `${service.name} | The Brain Tea`,
@@ -31,7 +45,7 @@ export default async function ServiceDetail({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const service = getServiceBySlug(slug);
+  const service = await getServiceBySlug(slug);
   if (!service) notFound();
 
   return (
@@ -47,11 +61,17 @@ export default async function ServiceDetail({
           <h1 className="font-cormorant text-4xl md:text-5xl font-semibold text-forest-slate leading-tight mb-4 text-balance">
             {service.name}
           </h1>
-          <p className="text-teal-sage font-medium mb-6">{service.tagline}</p>
+          {service.tagline && (
+            <p className="text-teal-sage font-medium mb-6">{service.tagline}</p>
+          )}
           <div className="flex flex-wrap gap-2 mb-8">
+            <Badge tone="sand">
+              <Clock className="w-3 h-3" />
+              {service.durationMinutes} min
+            </Badge>
             {service.availability.map((mode) => (
               <Badge key={mode} tone="sand">
-                {mode === "Online" ? (
+                {mode.toLowerCase() === "online" ? (
                   <Wifi className="w-3 h-3" />
                 ) : (
                   <MapPin className="w-3 h-3" />

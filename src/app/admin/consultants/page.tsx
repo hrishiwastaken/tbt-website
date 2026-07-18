@@ -21,6 +21,7 @@ interface ConsultantRow {
   feeMinor: number;
   commissionBps: number | null;
   effectiveCommissionBps: number;
+  services: { id: string; name: string }[];
   totalBookings: number;
   earnedMinor: number;
   paidMinor: number;
@@ -45,7 +46,9 @@ interface ConsultantDetail {
       startTime: string;
       endTime: string;
     }[];
+    services: { id: string; name: string; slug: string }[];
   };
+  allServices: { id: string; name: string; slug: string }[];
   balance: {
     earnedMinor: number;
     paidMinor: number;
@@ -161,6 +164,18 @@ export default function AdminConsultantsPage() {
                       <div className="text-xs text-ink-muted">
                         {row.email || row.slug}
                       </div>
+                      {row.services.length > 0 && (
+                        <div className="mt-1 flex flex-wrap gap-1">
+                          {row.services.map((s) => (
+                            <span
+                              key={s.id}
+                              className="rounded-full bg-surface-sunken px-2 py-0.5 text-[10px] font-medium text-ocean-deep"
+                            >
+                              {s.name}
+                            </span>
+                          ))}
+                        </div>
+                      )}
                     </td>
                     <td className="px-3 py-3.5">
                       <StatusPill status={row.status} />
@@ -221,6 +236,7 @@ function ConsultantDetailModal({
   const [busy, setBusy] = useState(false);
   const [feeRupees, setFeeRupees] = useState("");
   const [commissionPct, setCommissionPct] = useState("");
+  const [serviceIds, setServiceIds] = useState<string[]>([]);
 
   const load = useCallback(async () => {
     const res = await fetch(`/api/admin/consultants/${consultantId}`);
@@ -235,6 +251,9 @@ function ConsultantDetailModal({
       data.consultant.commissionBps !== null
         ? String(data.consultant.commissionBps / 100)
         : "",
+    );
+    setServiceIds(
+      (data.consultant.services ?? []).map((s: { id: string }) => s.id),
     );
   }, [consultantId]);
 
@@ -374,6 +393,61 @@ function ConsultantDetailModal({
               Rate changes only affect future bookings — historical bookings
               keep their snapshotted commission.
             </p>
+          </div>
+
+          {/* Services offered */}
+          <div>
+            <h4 className="mb-2 text-[10px] font-bold uppercase tracking-wider text-ink-muted">
+              Services offered
+            </h4>
+            <p className="mb-3 text-[11px] italic text-ink-muted">
+              Clients booking these services can choose this consultant.
+            </p>
+            {detail.allServices.length === 0 ? (
+              <p className="text-xs italic text-ink-muted">
+                No active services to assign.
+              </p>
+            ) : (
+              <>
+                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                  {detail.allServices.map((svc) => {
+                    const checked = serviceIds.includes(svc.id);
+                    return (
+                      <label
+                        key={svc.id}
+                        className={`flex cursor-pointer items-center gap-2 rounded-soft border px-3 py-2 text-sm transition-colors ${
+                          checked
+                            ? "border-ocean/40 bg-surface-sunken text-ocean-deep"
+                            : "border-ocean/15 text-ink hover:bg-surface-sunken/60"
+                        }`}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={checked}
+                          onChange={(e) =>
+                            setServiceIds((prev) =>
+                              e.target.checked
+                                ? [...prev, svc.id]
+                                : prev.filter((x) => x !== svc.id),
+                            )
+                          }
+                          className="h-4 w-4 accent-ocean"
+                        />
+                        {svc.name}
+                      </label>
+                    );
+                  })}
+                </div>
+                <button
+                  type="button"
+                  disabled={busy}
+                  onClick={() => patch({ serviceIds })}
+                  className="mt-3 rounded-full bg-ocean px-5 py-2 text-xs font-bold uppercase tracking-wider text-white shadow-surface-raised-sm disabled:opacity-40"
+                >
+                  Save services
+                </button>
+              </>
+            )}
           </div>
 
           {/* Availability */}

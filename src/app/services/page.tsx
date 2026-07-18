@@ -1,9 +1,21 @@
-"use client";
-
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Clock, Laptop, CheckCircle2 } from "lucide-react";
+import { prisma } from "@/lib/db";
+
+export const dynamic = "force-dynamic";
+
+const FALLBACK_IMAGE =
+  "https://images.unsplash.com/photo-1527689368864-3a821dbccc34?auto=format&fit=crop&w=800&q=80";
+
+function formatLabel(availability: string[]): string {
+  if (!availability.length) return "In-Person or Online";
+  const labels = availability.map((a) =>
+    a.toLowerCase() === "online" ? "Online" : "In-Person",
+  );
+  return [...new Set(labels)].join(" or ");
+}
 
 // Organic leaf shapes (same paths as the homepage testimonial accents)
 const SINGLE_LEAF = "M17 8C8 10 9 19 9 19s8-.5 10-6.5c1.5-4.5-2-4.5-2-4.5z";
@@ -166,54 +178,28 @@ const ROW_SCATTERS: LeafSpec[][] = [
   ],
 ];
 
-export default function Services() {
-  const services = [
-    {
-      title: "Individual Therapy",
-      duration: "50 Minutes",
-      format: "In-Person or Online",
-      description:
-        "One-on-one sessions tailored specifically to you. We collaborate to help you process emotional pain, unpack destructive thoughts, and build actionable skills to navigate life's challenges.",
-      image:
-        "https://images.unsplash.com/photo-1527689368864-3a821dbccc34?auto=format&fit=crop&w=800&q=80",
+export default async function Services() {
+  const dbServices = await prisma.service.findMany({
+    where: { isActive: true },
+    orderBy: { createdAt: "asc" },
+    select: {
+      slug: true,
+      name: true,
+      description: true,
+      durationMinutes: true,
+      image: true,
+      availability: true,
     },
-    {
-      title: "Couples & Family Therapy",
-      duration: "60 – 75 Minutes",
-      format: "In-Person Only",
-      description:
-        "A neutral, structured environment for couples and family systems alike. Address relational conflict, build communication bridges, improve boundary-setting, and restore emotional connection — whether between partners or across the whole family.",
-      image:
-        "https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?auto=format&fit=crop&w=800&q=80",
-    },
-    {
-      title: "Child & Adolescent Therapy",
-      duration: "45 Minutes",
-      format: "In-Person Only",
-      description:
-        "Supporting younger individuals navigating developmental changes, emotional dysregulation, peer conflict, or trauma. We combine talk therapy with creative, play-integrated therapeutic tools.",
-      image:
-        "https://images.unsplash.com/photo-1502086223501-7ea6ecd79368?auto=format&fit=crop&w=800&q=80",
-    },
-    {
-      title: "Trauma-Focused Therapy",
-      duration: "60 Minutes",
-      format: "In-Person Only",
-      description:
-        "Gentle, trauma-informed clinical care incorporating EMDR principles, somatic awareness, and cognitive processing. We support you as you process past trauma and move forward at your own pace.",
-      image:
-        "https://images.unsplash.com/photo-1447752875215-b2761acb3c5d?auto=format&fit=crop&w=800&q=80",
-    },
-    {
-      title: "Online Therapy",
-      duration: "50 Minutes",
-      format: "Video Consultation",
-      description:
-        "Providing high-quality clinical support from the safety and convenience of your home. Conducted via encrypted, HIPAA-compliant video platforms to maintain absolute privacy and comfort.",
-      image:
-        "https://images.unsplash.com/photo-1588196749597-9ff075ee6b5b?auto=format&fit=crop&w=800&q=80",
-    },
-  ];
+  });
+
+  const services = dbServices.map((s) => ({
+    slug: s.slug,
+    title: s.name,
+    duration: `${s.durationMinutes} Minutes`,
+    format: formatLabel(s.availability),
+    description: s.description,
+    image: s.image || FALLBACK_IMAGE,
+  }));
 
   const pricingPlans = [
     {
@@ -355,7 +341,7 @@ export default function Services() {
 
                     <div className="pt-2">
                       <Link
-                        href="/team"
+                        href={`/book?service=${encodeURIComponent(service.slug)}`}
                         className="inline-flex items-center gap-2 bg-teal-sage hover:bg-forest-slate text-warm-sand text-sm font-semibold px-8 py-3.5 rounded-full hover:shadow-lg transition-all btn-shimmer"
                       >
                         Book This Session

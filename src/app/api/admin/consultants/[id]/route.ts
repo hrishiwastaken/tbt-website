@@ -29,6 +29,10 @@ export const GET = handleApi(
       include: {
         user: { select: { email: true } },
         availability: { orderBy: [{ dayOfWeek: "asc" }, { startTime: "asc" }] },
+        services: {
+          select: { id: true, name: true, slug: true },
+          orderBy: { name: "asc" },
+        },
       },
     });
     if (!therapist) throw notFound("Consultant not found");
@@ -40,6 +44,7 @@ export const GET = handleApi(
       recentBookings,
       earningsEntries,
       commissionHistory,
+      allServices,
     ] = await Promise.all([
       consultantBalance(id),
       getDefaultCommissionBps(),
@@ -72,6 +77,11 @@ export const GET = handleApi(
         orderBy: { createdAt: "desc" },
         take: 10,
       }),
+      prisma.service.findMany({
+        where: { isActive: true },
+        select: { id: true, name: true, slug: true },
+        orderBy: { name: "asc" },
+      }),
     ]);
 
     return NextResponse.json({
@@ -87,6 +97,7 @@ export const GET = handleApi(
       earningsEntries,
       commissionHistory,
       defaultCommissionBps: defaultBps,
+      allServices,
     });
   },
 );
@@ -99,6 +110,8 @@ const patchSchema = z.object({
   status: z.enum(["PENDING", "APPROVED", "SUSPENDED"]).optional(),
   // null clears the override back to the platform default
   commissionBps: z.number().int().min(0).max(10000).nullable().optional(),
+  // Full replacement set of the services this consultant offers.
+  serviceIds: z.array(z.string().min(1)).optional(),
   availability: z
     .array(
       z.object({
@@ -134,6 +147,9 @@ export const PATCH = handleApi(
       if (body.status !== undefined) {
         data.status = body.status;
         data.isActive = body.status === "APPROVED";
+      }
+      if (body.serviceIds !== undefined) {
+        data.services = { set: body.serviceIds.map((sid) => ({ id: sid })) };
       }
       if (Object.keys(data).length > 0) {
         await tx.therapist.update({ where: { id }, data });

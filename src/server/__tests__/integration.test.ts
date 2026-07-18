@@ -126,6 +126,7 @@ suite("booking & finance integration", () => {
         durationMinutes: 50,
         priceMinor: 100000,
         slug: SERVICE_SLUG,
+        therapists: { connect: { id: therapist.id } },
       },
     });
     serviceId = service.id;

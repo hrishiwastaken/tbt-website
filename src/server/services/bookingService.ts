@@ -137,8 +137,15 @@ export async function createBooking(input: CreateBookingInput) {
     }
     const service = await tx.service.findUnique({
       where: { slug: input.serviceSlug },
+      include: { therapists: { where: { id: therapist.id }, select: { id: true } } },
     });
     if (!service || !service.isActive) throw notFound("Service not found");
+    // The service-first flow only ever offers consultants who provide the
+    // chosen service; enforce it server-side so a crafted request can't book
+    // a consultant for a service they don't offer.
+    if (service.therapists.length === 0) {
+      throw conflict("This consultant does not offer the selected service");
+    }
 
     await validateSlotWithinSchedule(
       tx,
@@ -171,7 +178,9 @@ export async function createBooking(input: CreateBookingInput) {
         clientId: client.id,
         dateTime: input.dateTime,
         durationMinutes: service.durationMinutes,
-        amountMinor: service.priceMinor,
+        // The client pays the consultant's own rate (fee model), not a
+        // fixed per-service price.
+        amountMinor: therapist.feeMinor,
         commissionBps,
         status: initialStatus,
         paymentStatus: "UNPAID",

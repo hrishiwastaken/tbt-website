@@ -111,57 +111,115 @@ async function main() {
   }
 
   // ── Services (prices in paise) ────────────────────────────────────────
+  // The DB is the single source of truth for the public services catalogue —
+  // each row carries the presentation content the /services pages render.
+  const IMG = (id) =>
+    `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=800&q=80`;
   const serviceRows = [
-    [
-      "Individual Therapy",
-      "A focused, one-on-one session designed to explore personal narratives, address psychological blocks, and cultivate self-awareness.",
-      50,
-      150000,
-      "individual-therapy",
-    ],
-    [
-      "Couples Counseling",
-      "Structured mediation to enhance relational dynamics, dismantle communication barriers, and restore intimacy.",
-      60,
-      220000,
-      "couples-counseling",
-    ],
-    [
-      "Somatic Experiencing",
-      "A body-centric therapy focusing on trauma resolution, releasing trapped nervous system stress, and restoring equilibrium.",
-      50,
-      180000,
-      "somatic-experiencing",
-    ],
-    [
-      "Mental Health Assessment",
-      "Comprehensive diagnostic evaluations using standardized psychometric tools to guide customized treatment plans.",
-      75,
-      250000,
-      "mental-health-assessment",
-    ],
-    [
-      "Career & Academic Counselling",
-      "Structured guidance for career transitions, academic stress, and decision-making clarity.",
-      45,
-      140000,
-      "career-academic-counselling",
-    ],
+    {
+      name: "Individual Therapy",
+      slug: "individual-therapy",
+      durationMinutes: 50,
+      priceMinor: 150000,
+      description:
+        "A focused, one-on-one session designed to explore personal narratives, address psychological blocks, and cultivate self-awareness.",
+      tagline: "A steady space to understand yourself.",
+      image: IMG("1527689368864-3a821dbccc34"),
+      suitableFor: [
+        "Anxiety",
+        "Depression",
+        "Stress & burnout",
+        "Self-esteem",
+        "Grief & loss",
+        "Emotional regulation",
+      ],
+      availability: ["Online", "Offline"],
+      process: null,
+    },
+    {
+      name: "Couples & Family Therapy",
+      slug: "couples-counseling",
+      durationMinutes: 60,
+      priceMinor: 220000,
+      description:
+        "Structured mediation to enhance relational dynamics, dismantle communication barriers, and restore intimacy — for couples and families at any stage.",
+      tagline: "Reconnect through structured, guided conversation.",
+      image: IMG("1516589178581-6cd7833ae3b2"),
+      suitableFor: [
+        "Relationship conflict",
+        "Marital concerns",
+        "Family dynamics",
+        "Parenting challenges",
+        "Premarital counselling",
+        "Communication skills",
+      ],
+      availability: ["Offline"],
+      process: null,
+    },
+    {
+      name: "Somatic Experiencing",
+      slug: "somatic-experiencing",
+      durationMinutes: 50,
+      priceMinor: 180000,
+      description:
+        "A body-centric therapy focusing on trauma resolution, releasing trapped nervous system stress, and restoring equilibrium.",
+      tagline: "Release what the body has been holding.",
+      image: IMG("1447752875215-b2761acb3c5d"),
+      suitableFor: [
+        "Trauma & PTSD",
+        "Chronic stress",
+        "Nervous-system regulation",
+        "Anxiety",
+        "Somatic complaints",
+      ],
+      availability: ["Offline"],
+      process: null,
+    },
+    {
+      name: "Mental Health Assessment",
+      slug: "mental-health-assessment",
+      durationMinutes: 75,
+      priceMinor: 250000,
+      description:
+        "Comprehensive diagnostic evaluations using standardized psychometric tools to guide customized treatment plans.",
+      tagline: "Clear, evidence-based answers.",
+      image: IMG("1516534775068-ba3e7458af70"),
+      suitableFor: [
+        "Personality assessment",
+        "Cognitive assessment",
+        "Learning difficulty screening",
+        "ADHD screening",
+        "Diagnostic evaluation",
+      ],
+      availability: ["Offline"],
+      process:
+        "Each assessment includes a clear purpose, session duration, testing process, and a defined report timeline.",
+    },
+    {
+      name: "Career & Academic Counselling",
+      slug: "career-academic-counselling",
+      durationMinutes: 45,
+      priceMinor: 140000,
+      description:
+        "Structured guidance for career transitions, academic stress, and decision-making clarity.",
+      tagline: "Direction when the path feels unclear.",
+      image: IMG("1454165804606-c3d57bc86b40"),
+      suitableFor: [
+        "Career transitions",
+        "Academic stress",
+        "Decision-making",
+        "Young-adult identity",
+        "Study-life balance",
+      ],
+      availability: ["Online", "Offline"],
+      process: null,
+    },
   ];
   const services = [];
-  for (const [
-    name,
-    description,
-    durationMinutes,
-    priceMinor,
-    slug,
-  ] of serviceRows) {
-    services.push(
-      await prisma.service.create({
-        data: { name, description, durationMinutes, priceMinor, slug },
-      }),
-    );
+  for (const row of serviceRows) {
+    services.push(await prisma.service.create({ data: row }));
   }
+  const serviceBySlug = (slug) => services.find((s) => s.slug === slug);
 
   // ── Users & consultants ───────────────────────────────────────────────
   const adminUser = await prisma.user.create({
@@ -195,6 +253,11 @@ async function main() {
       activeFromDay: -HISTORY_DAYS,
       activeToDay: FUTURE_DAYS,
       schedule: { days: [1, 2, 3, 4, 5], hours: [9, 10, 11, 13, 14, 15, 16] },
+      serviceSlugs: [
+        "individual-therapy",
+        "couples-counseling",
+        "mental-health-assessment",
+      ],
     },
     {
       email: "rohan@thebraintea.com",
@@ -210,6 +273,7 @@ async function main() {
       activeFromDay: -HISTORY_DAYS,
       activeToDay: FUTURE_DAYS,
       schedule: { days: [1, 2, 3, 4, 5, 6], hours: [9, 10, 11] },
+      serviceSlugs: ["individual-therapy", "somatic-experiencing"],
     },
     {
       email: "kavita@thebraintea.com",
@@ -225,6 +289,7 @@ async function main() {
       activeFromDay: -Math.round(HISTORY_DAYS * 0.7),
       activeToDay: FUTURE_DAYS,
       schedule: { days: [1, 2, 3, 4], hours: [10, 11, 13, 14, 15] },
+      serviceSlugs: ["couples-counseling", "individual-therapy"],
     },
     {
       email: "vikram@thebraintea.com",
@@ -240,6 +305,7 @@ async function main() {
       activeFromDay: -Math.round(HISTORY_DAYS * 0.35),
       activeToDay: FUTURE_DAYS,
       schedule: { days: [2, 3, 4, 5], hours: [14, 15, 16] },
+      serviceSlugs: ["career-academic-counselling", "individual-therapy"],
     },
     {
       email: "meera@thebraintea.com",
@@ -255,6 +321,7 @@ async function main() {
       activeFromDay: -HISTORY_DAYS,
       activeToDay: -50, // stopped taking sessions 50 days ago
       schedule: { days: [1, 2, 3, 4, 5], hours: [9, 10, 11, 13, 14] },
+      serviceSlugs: ["somatic-experiencing", "individual-therapy"],
     },
     {
       email: null,
@@ -270,6 +337,7 @@ async function main() {
       activeFromDay: 0,
       activeToDay: 0,
       schedule: { days: [], hours: [] },
+      serviceSlugs: ["mental-health-assessment", "individual-therapy"],
     },
   ];
 
@@ -297,6 +365,12 @@ async function main() {
         status: spec.status,
         isActive: spec.status === "APPROVED",
         photo: spec.photo,
+        services: {
+          connect: (spec.serviceSlugs || [])
+            .map((slug) => serviceBySlug(slug))
+            .filter(Boolean)
+            .map((s) => ({ id: s.id })),
+        },
       },
     });
     if (spec.commissionBps != null) {
@@ -656,7 +730,12 @@ async function main() {
           startAt < addDays(new Date(), 7));
       if (blocked) continue;
 
-      const service = pick(services);
+      // Book a service this consultant actually offers, so the seeded data
+      // stays consistent with the service→consultant model.
+      const offered = (therapist.serviceSlugs || [])
+        .map((slug) => serviceBySlug(slug))
+        .filter(Boolean);
+      const service = offered.length ? pick(offered) : pick(services);
       const eligibleClients = clients.filter((c) => c.createdAt <= startAt);
       if (eligibleClients.length === 0) continue;
       const client = pick(eligibleClients);
@@ -707,7 +786,8 @@ async function main() {
           clientId: client.id,
           dateTime: startAt,
           durationMinutes: service.durationMinutes,
-          amountMinor: service.priceMinor,
+          // Consultant's own rate is what a client is charged (fee model).
+          amountMinor: therapist.feeMinor,
           discountMinor,
           commissionBps,
           counselingType,

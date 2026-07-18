@@ -22,7 +22,10 @@ export const GET = handleApi(async (request: Request) => {
 
   const [therapists, balances, defaultBps, bookingCounts] = await Promise.all([
     prisma.therapist.findMany({
-      include: { user: { select: { email: true } } },
+      include: {
+        user: { select: { email: true } },
+        services: { select: { id: true, name: true }, orderBy: { name: "asc" } },
+      },
       orderBy: { name: "asc" },
     }),
     consultantBalances(),
@@ -48,6 +51,7 @@ export const GET = handleApi(async (request: Request) => {
       feeMinor: t.feeMinor,
       commissionBps: t.commissionBps,
       effectiveCommissionBps: t.commissionBps ?? defaultBps,
+      services: t.services,
       totalBookings: countMap.get(t.id) ?? 0,
       earnedMinor: balanceMap.get(t.id)?.earnedMinor ?? 0,
       paidMinor: balanceMap.get(t.id)?.paidMinor ?? 0,
@@ -72,6 +76,7 @@ const createSchema = z.object({
   email: z.string().email().optional(),
   password: z.string().min(10).max(100).optional(),
   status: z.enum(["PENDING", "APPROVED", "SUSPENDED"]).default("PENDING"),
+  serviceIds: z.array(z.string().min(1)).optional(),
 });
 
 export const POST = handleApi(async (request: Request) => {
@@ -110,6 +115,9 @@ export const POST = handleApi(async (request: Request) => {
         commissionBps: body.commissionBps ?? null,
         status: body.status,
         isActive: body.status === "APPROVED",
+        ...(body.serviceIds && body.serviceIds.length > 0
+          ? { services: { connect: body.serviceIds.map((sid) => ({ id: sid })) } }
+          : {}),
       },
     });
     if (body.commissionBps != null) {
