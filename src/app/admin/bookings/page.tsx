@@ -100,6 +100,7 @@ interface BookingDetail extends BookingRow {
     status: string;
     providerPaymentId: string | null;
     providerRef: string | null;
+    failureReason: string | null;
     createdAt: string;
   }[];
   ledgerEntries: {
@@ -854,6 +855,10 @@ function BookingDetailModal({
     detail &&
     ["PENDING", "AWAITING_PAYMENT", "CONFIRMED"].includes(detail.status);
   const netMinor = detail ? detail.amountMinor - detail.discountMinor : 0;
+  // An async gateway refund in flight: block re-execution until it settles.
+  const refundInFlight = detail?.payments.some(
+    (p) => p.kind === "REFUND" && ["CREATED", "PROCESSING"].includes(p.status),
+  );
 
   return (
     <Modal title="Appointment Detail" onClose={onClose} wide>
@@ -964,7 +969,12 @@ function BookingDetailModal({
               ),
             )}
             {detail.status === "REFUND_PENDING" &&
-              detail.paymentStatus === "PAID" && (
+              detail.paymentStatus === "PAID" &&
+              (refundInFlight ? (
+                <span className="inline-flex items-center rounded-full border border-amber-200 bg-amber-50 px-4 py-2 text-xs font-bold uppercase tracking-wider text-amber-800">
+                  Refund processing at gateway…
+                </span>
+              ) : (
                 <button
                   type="button"
                   disabled={busy}
@@ -978,7 +988,7 @@ function BookingDetailModal({
                 >
                   Execute refund ({formatINR(netMinor)})
                 </button>
-              )}
+              ))}
             {canReschedule && (
               <button
                 type="button"
@@ -1091,19 +1101,27 @@ function BookingDetailModal({
                 {detail.payments.map((p) => (
                   <div
                     key={p.id}
-                    className="surface-inset flex flex-wrap items-center justify-between gap-2 rounded-soft px-4 py-2.5 text-xs"
+                    className="surface-inset space-y-1 rounded-soft px-4 py-2.5 text-xs"
                   >
-                    <span className="font-semibold text-ocean-deep">
-                      {p.kind === "CHARGE" ? "Charge" : "Refund"} · {p.provider}
-                    </span>
-                    <span className="font-mono text-ink-muted">
-                      {p.providerRef || p.providerPaymentId || "—"}
-                    </span>
-                    <span className="tabular-nums font-semibold text-ink">
-                      {p.kind === "REFUND" ? "−" : ""}
-                      {formatINR(p.amountMinor)}
-                    </span>
-                    <StatusPill status={p.status} />
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <span className="font-semibold text-ocean-deep">
+                        {p.kind === "CHARGE" ? "Charge" : "Refund"} ·{" "}
+                        {p.provider}
+                      </span>
+                      <span className="font-mono text-ink-muted">
+                        {p.providerRef || p.providerPaymentId || "—"}
+                      </span>
+                      <span className="tabular-nums font-semibold text-ink">
+                        {p.kind === "REFUND" ? "−" : ""}
+                        {formatINR(p.amountMinor)}
+                      </span>
+                      <StatusPill status={p.status} />
+                    </div>
+                    {p.failureReason && (
+                      <div className="text-[11px] font-medium text-red-700">
+                        {p.failureReason}
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>

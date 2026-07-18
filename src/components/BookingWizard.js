@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { SITE_NAME } from "../lib/site";
 
 export default function BookingWizard({
   therapists = [],
@@ -40,7 +39,6 @@ export default function BookingWizard({
   });
 
   const [paymentOption, setPaymentOption] = useState("PAY_NOW"); // PAY_NOW, PAY_LATER
-  const [upiUtr, setUpiUtr] = useState("");
 
   // API loading & slot states
   const [slots, setSlots] = useState([]);
@@ -138,15 +136,6 @@ export default function BookingWizard({
     e.preventDefault();
     if (isSubmitting) return;
 
-    if (paymentOption === "PAY_NOW") {
-      if (!upiUtr || upiUtr.length !== 12) {
-        setErrorMsg(
-          "Please enter a valid 12-digit UPI Reference / UTR Number.",
-        );
-        return;
-      }
-    }
-
     setIsSubmitting(true);
     setErrorMsg("");
 
@@ -161,7 +150,6 @@ export default function BookingWizard({
           time: selectedSlot.startTime,
           ...clientDetails,
           paymentOption,
-          upiUtr,
         }),
       });
 
@@ -174,6 +162,17 @@ export default function BookingWizard({
       }
 
       const booking = data.booking;
+      // PAY_NOW: hand off to the gateway's secure checkout — confirmation
+      // happens server-side (webhook / status poll), never in this client.
+      // Keep isSubmitting on through the redirect so the button stays locked.
+      if (data.payment?.checkoutUrl) {
+        window.location.assign(data.payment.checkoutUrl);
+        return;
+      }
+      if (paymentOption === "PAY_NOW") {
+        router.push(`/booking/payment-status?bookingId=${booking.id}`);
+        return;
+      }
       router.push(`/booking-confirmed?id=${booking.id}`);
     } catch (err) {
       console.error(err);
@@ -553,10 +552,7 @@ export default function BookingWizard({
                   type="radio"
                   name="payment"
                   checked={paymentOption === "PAY_NOW"}
-                  onChange={() => {
-                    setPaymentOption("PAY_NOW");
-                    setUpiUtr("");
-                  }}
+                  onChange={() => setPaymentOption("PAY_NOW")}
                   className="mt-1 text-forest focus:ring-forest"
                 />
                 <div>
@@ -564,39 +560,19 @@ export default function BookingWizard({
                     Pay Online via UPI Now
                   </h4>
                   <p className="text-xs text-sage mt-1">
-                    Scan the secure UPI QR Code using GPay, PhonePe, Paytm or
-                    any UPI app to pay immediately.
+                    You&apos;ll be redirected to a secure checkout — pay with
+                    any UPI app (GPay, PhonePe, Paytm, BHIM...) with the amount
+                    pre-filled. Your session is confirmed the moment the
+                    payment succeeds.
                   </p>
                 </div>
               </label>
 
               {paymentOption === "PAY_NOW" && (
-                <div className="p-6 bg-mist/10 rounded-xl border border-mist/30 flex flex-col items-center gap-6 animate-[fadeIn_0.3s_ease-out]">
-                  <div className="text-center">
-                    <span className="text-[10px] font-bold tracking-wider uppercase text-sage block mb-1">
-                      Scan to Pay via UPI
-                    </span>
-                    <span className="font-dmsans text-xs text-sage">
-                      Scan QR using GPay, PhonePe, BHIM, or Paytm
-                    </span>
-                  </div>
-
-                  {/* QR Image — dynamic external QR (api.qrserver.com) built from
-                      a data-dependent URL; next/image adds no benefit here. */}
-                  <div className="bg-white p-4 rounded-xl border border-mist/20 shadow-sm relative w-[212px] h-[212px] flex items-center justify-center">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(
-                        `upi://pay?pa=millionairemanthan@fam&pn=${encodeURIComponent(SITE_NAME)}&am=${selectedService.priceMinor / 100}&cu=INR&tn=${encodeURIComponent(`${SITE_NAME} Session`)}`,
-                      )}`}
-                      alt="UPI QR Code"
-                      className="w-[180px] h-[180px]"
-                    />
-                  </div>
-
-                  <div className="text-center space-y-1">
+                <div className="p-5 bg-mist/10 rounded-xl border border-mist/30 animate-[fadeIn_0.3s_ease-out]">
+                  <div className="flex flex-wrap items-center justify-between gap-3">
                     <div className="text-xs text-charcoal">
-                      Amount:{" "}
+                      Amount payable:{" "}
                       <strong className="text-terracotta">
                         ₹
                         {(selectedService.priceMinor / 100).toLocaleString(
@@ -604,35 +580,15 @@ export default function BookingWizard({
                         )}
                       </strong>
                     </div>
-                    <div className="text-[11px] text-sage font-mono">
-                      UPI ID:{" "}
-                      <strong className="text-forest">
-                        millionairemanthan@fam
-                      </strong>
-                    </div>
-                  </div>
-
-                  {/* Transaction UTR ID Input */}
-                  <div className="w-full max-w-sm space-y-2 border-t border-mist/20 pt-4">
-                    <label className="text-[10px] font-bold tracking-wider uppercase text-sage block">
-                      Enter 12-Digit UPI Ref. No. / UTR *
-                    </label>
-                    <input
-                      type="text"
-                      maxLength={12}
-                      value={upiUtr}
-                      onChange={(e) =>
-                        setUpiUtr(e.target.value.replace(/\D/g, ""))
-                      }
-                      placeholder="e.g. 123456789012"
-                      className="w-full text-center px-4 py-3 bg-white rounded-lg border border-mist/40 font-mono text-xs text-charcoal focus:outline-none focus:border-forest"
-                      required
-                    />
-                    <span className="text-[9px] text-sage block leading-relaxed text-center">
-                      * You will find the 12-digit UTR/Ref number in your
-                      payment transaction details screen on your UPI App.
+                    <span className="text-[10px] font-bold tracking-wider uppercase text-sage">
+                      Secured by PhonePe Payment Gateway
                     </span>
                   </div>
+                  <p className="mt-2 text-[11px] leading-relaxed text-sage">
+                    Your slot is reserved for 30 minutes while you pay. If the
+                    payment fails or is cancelled, nothing is charged and you
+                    can retry or pick another slot.
+                  </p>
                 </div>
               )}
 
@@ -641,10 +597,7 @@ export default function BookingWizard({
                   type="radio"
                   name="payment"
                   checked={paymentOption === "PAY_LATER"}
-                  onChange={() => {
-                    setPaymentOption("PAY_LATER");
-                    setUpiUtr("");
-                  }}
+                  onChange={() => setPaymentOption("PAY_LATER")}
                   className="mt-1 text-forest focus:ring-forest"
                 />
                 <div>
@@ -667,13 +620,14 @@ export default function BookingWizard({
               <button
                 type="button"
                 onClick={handleBookingSubmit}
-                disabled={
-                  isSubmitting ||
-                  (paymentOption === "PAY_NOW" && upiUtr.length !== 12)
-                }
+                disabled={isSubmitting}
                 className="bg-forest hover:bg-terracotta text-warm-white font-medium px-8 py-4 rounded-full transition-colors disabled:opacity-50 min-w-[200px] shadow-sm hover:shadow-md"
               >
-                {isSubmitting ? "Processing..." : "Complete Booking"}
+                {isSubmitting
+                  ? "Processing..."
+                  : paymentOption === "PAY_NOW"
+                    ? "Proceed to Payment"
+                    : "Complete Booking"}
               </button>
             </div>
           </div>
