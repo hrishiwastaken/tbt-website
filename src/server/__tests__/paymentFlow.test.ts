@@ -103,11 +103,20 @@ const clientInput = (n: number) => ({
   gdprConsent: true as const,
 });
 
-async function bookPayNow(n: number, daysAhead: number, hour: number) {
+// Each booking gets its own week-spaced weekday slot keyed off `n`, so two
+// bookings can never collide on (therapist, startAt) regardless of what day
+// the suite runs (weekend-skip can collapse adjacent daysAhead onto the same
+// Monday, so spacing by whole weeks is the reliable guarantee). The legacy
+// daysAhead/hour params are ignored.
+async function bookPayNow(
+  n: number,
+  _daysAhead?: number,
+  _hour?: number,
+) {
   const { booking, payment } = await createBooking({
     therapistSlug: SLUG,
     serviceSlug: SERVICE_SLUG,
-    dateTime: futureSlot(daysAhead, hour),
+    dateTime: futureSlot(7 * (n + 1), 10),
     client: clientInput(n),
     paymentOption: "PAY_NOW",
   });
@@ -188,6 +197,7 @@ suite("async payment flow & races", () => {
         durationMinutes: 50,
         priceMinor: 100000,
         slug: SERVICE_SLUG,
+        therapists: { connect: { id: therapist.id } },
       },
     });
     serviceId = service.id;
