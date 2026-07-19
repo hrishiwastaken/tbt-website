@@ -5,6 +5,7 @@ import Header from "../components/Header";
 import Footer from "../components/Footer";
 import WhatsAppButton from "../components/WhatsAppButton";
 import PhonePreview from "../components/PhonePreview";
+import IntroOverlay from "../components/IntroOverlay";
 
 const cormorant = Cormorant_Garamond({
   subsets: ["latin"],
@@ -40,6 +41,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${cormorant.variable} ${dmsans.variable}`}>
       <body className="bg-ivory text-charcoal min-h-screen flex flex-col justify-between">
+        <IntroOverlay />
         <Header />
         <main className="flex-grow">{children}</main>
         <Footer />
