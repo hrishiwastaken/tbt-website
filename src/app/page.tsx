@@ -36,7 +36,7 @@ const staggerContainer = {
 };
 
 export default function Home() {
-  const whatsappNumber = "917558493155";
+  const whatsappNumber = "919960792329";
   const message =
     "Hello! I'd like to book an appointment at The Brain Tea. Could you please let me know your availability?";
   const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
