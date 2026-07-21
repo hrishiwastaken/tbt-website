@@ -195,7 +195,7 @@ export default function FAQ() {
               Contact Us Form
             </Link>
             <a
-              href="https://wa.me/917558493155?text=Hi!%20I%20have%20a%20few%20questions%20about%20your%20services."
+              href="https://wa.me/919960792329?text=Hi!%20I%20have%20a%20few%20questions%20about%20your%20services."
               target="_blank"
               rel="noopener noreferrer"
               className="border border-teal-sage text-teal-sage hover:bg-teal-sage hover:text-warm-sand font-semibold px-8 py-3.5 rounded-full text-sm transition-all btn-shimmer"

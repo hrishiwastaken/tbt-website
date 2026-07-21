@@ -96,15 +96,19 @@ export default function Footer() {
           <div className="font-dmsans text-sm text-warm-sand/80 space-y-3 leading-relaxed">
             <p>
               <span className="block font-medium text-warm-sand">Address:</span>
-              12, Green Meadow Lane, Sector 4,
+              Flat No. 8, 5th Floor, Abhimanshree Society,
               <br />
-              New Delhi, DL 110001
+              Baner-Pashan Link Road, above ICICI Direct, Pune - 411008
+              <br />
+              <span className="text-warm-sand/60 text-xs">
+                Near Ramnagar Metro Station
+              </span>
             </p>
             <p>
               <span className="block font-medium text-warm-sand">
                 Phone / WhatsApp:
               </span>
-              +91 75584 93155
+              +91 99607 92329
             </p>
             <p>
               <span className="block font-medium text-warm-sand">Email:</span>

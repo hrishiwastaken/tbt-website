@@ -48,9 +48,12 @@ export default function Contact() {
                     Clinic Address
                   </h4>
                   <p className="font-dmsans text-sm text-sage leading-relaxed mt-1">
-                    12, Green Meadow Lane, Sector 4,
+                    Flat No. 8, 5th Floor, Abhimanshree Society,
                     <br />
-                    New Delhi, DL 110001
+                    Baner-Pashan Link Road, above ICICI Direct, Pune - 411008
+                  </p>
+                  <p className="font-dmsans text-xs text-sage/70 mt-1">
+                    Near Ramnagar Metro Station
                   </p>
                 </div>
               </div>
@@ -64,7 +67,7 @@ export default function Contact() {
                     Phone & WhatsApp
                   </h4>
                   <p className="font-dmsans text-sm text-sage leading-relaxed mt-1">
-                    +91 75584 93155
+                    +91 99607 92329
                   </p>
                 </div>
               </div>
@@ -127,7 +130,7 @@ export default function Contact() {
               {/* Using a clean filter on standard iframe embed to keep aesthetics matching the ivory/sand look */}
               <iframe
                 title="The Brain Tea Location Map"
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3502.5620138981146!2d77.218224!3d28.613939!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x390cfd5d34190c1f%3A0x63351ec30c5e7b57!2sConnaught%20Place%2C%20New%20Delhi%2C%20Delhi%20110001!5e0!3m2!1sen!2sin!4v1700000000000!5m2!1sen!2sin"
+                src="https://www.google.com/maps?q=Abhimanshree+Society%2C+Baner-Pashan+Link+Road%2C+Pune+411008&output=embed"
                 width="100%"
                 height="100%"
                 style={{
