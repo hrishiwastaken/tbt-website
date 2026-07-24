@@ -87,9 +87,10 @@ export default function TermsPage() {
       <p>
         Cancellations, rescheduling, and refunds are governed by our{" "}
         <Link href="/refund-policy">Refund &amp; Cancellation Policy</Link>,
-        which forms part of these Terms. In summary, sessions cancelled with at least
-        24 hours&rsquo; notice are eligible for a refund or reschedule, while
-        late cancellations and no-shows are charged in full.
+        which forms part of these Terms. In summary, cancellations require at
+        least 48 hours&rsquo; notice and rescheduling requires at least 24
+        hours&rsquo; notice to avoid a charge, while late cancellations and
+        no-shows are charged in full.
       </p>
 
       <h2>6. Your Responsibilities</h2>

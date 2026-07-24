@@ -120,7 +120,7 @@ export default function FAQ() {
     {
       question: "How do I cancel or reschedule?",
       answer:
-        "We have a standard 24-hour cancellation policy. If you need to cancel or reschedule your session, please notify us at least 24 hours in advance. Sessions cancelled with less than 24 hours' notice will be charged at the full session rate, as that hour was reserved specifically for you.",
+        "Cancellations require at least 48 hours' notice, while rescheduling requires at least 24 hours' notice. If you don't stick to these windows, your session will be charged in full, as that hour was reserved specifically for you.",
     },
     {
       question: "Do you work with children?",

@@ -709,8 +709,8 @@ export default function BookingWizard({ services = [], initialService = "" }) {
 
             <div className="flex flex-col sm:flex-row justify-between gap-4 pt-6 border-t border-mist/20">
               <span className="text-xs text-sage leading-relaxed max-w-sm">
-                * Note: Sessions can be rescheduled or cancelled up to 12 hours
-                before slot start.
+                * Note: Sessions can be cancelled up to 48 hours, or
+                rescheduled up to 24 hours, before slot start.
               </span>
               <button
                 type="button"

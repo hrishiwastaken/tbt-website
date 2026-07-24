@@ -28,12 +28,11 @@ export default function RefundPolicyPage() {
       <h2>1. Cancellation by You</h2>
       <ul>
         <li>
-          <strong>24 hours or more before the session:</strong> you may cancel
-          free of charge and request a full refund or a reschedule at no extra
-          cost.
+          <strong>48 hours or more before the session:</strong> you may cancel
+          free of charge and request a full refund.
         </li>
         <li>
-          <strong>Less than 24 hours before the session:</strong> the session is
+          <strong>Less than 48 hours before the session:</strong> the session is
           charged in full and is not eligible for a refund, as the slot was
           reserved exclusively for you.
         </li>
@@ -44,7 +43,7 @@ export default function RefundPolicyPage() {
       </ul>
       <p>
         To cancel or reschedule, contact us by phone, WhatsApp, email, or
-        through your account before the deadline above.
+        through your account before the applicable deadline above.
       </p>
 
       <h2>2. Rescheduling</h2>
@@ -52,7 +51,9 @@ export default function RefundPolicyPage() {
         Sessions may be rescheduled at no charge when requested at least 24
         hours in advance, subject to consultant availability. A rescheduled
         session carries forward your original payment; no additional charge
-        applies unless you move to a higher-priced service.
+        applies unless you move to a higher-priced service. Requests made less
+        than 24 hours before the session are treated as a late cancellation and
+        charged in full.
       </p>
 
       <h2>3. Cancellation by the Clinic</h2>
