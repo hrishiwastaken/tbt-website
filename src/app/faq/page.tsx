@@ -115,7 +115,7 @@ export default function FAQ() {
     {
       question: "What is the cost per session?",
       answer:
-        "Individual therapy sessions start at ₹1,500, and couple therapy sessions start at ₹2,000. We believe that mental health care should be accessible, so we reserve a limited number of sliding-scale slots based on financial hardship and student status.",
+        "Individual therapy sessions are 50 minutes and start at ₹1,500. Couple therapy sessions are also 50 minutes and start at ₹2,000. The exact fee depends on the therapist's experience and area of expertise. We believe that mental health care should be accessible, so we reserve a limited number of sliding-scale slots based on financial hardship and student status.",
     },
     {
       question: "How do I cancel or reschedule?",
