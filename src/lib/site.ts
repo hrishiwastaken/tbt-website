@@ -1,6 +1,17 @@
 export const SITE_NAME = "The Brain Tea";
 export const SITE_TAGLINE = "A space to unwind and heal";
 
+/**
+ * Legal / merchant identity. Used across the policy pages that payment
+ * aggregators (PhonePe) require to be published and linked before a gateway
+ * can be activated. Keep the legal name and contact block in sync with the
+ * details registered on the PhonePe merchant dashboard.
+ */
+export const SITE_LEGAL_NAME = "The Brain Tea Mental Health Clinic";
+export const SITE_URL = "https://www.thebraintea.com";
+/** Effective / last-updated date shown on the legal pages. */
+export const LEGAL_EFFECTIVE_DATE = "24 July 2026";
+
 export const WHATSAPP_NUMBER = "919960792329";
 export const WHATSAPP_MESSAGE =
   "Hello! I'd like to book an appointment at The Brain Tea. Could you please let me know your availability?";

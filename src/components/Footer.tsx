@@ -124,6 +124,27 @@ export default function Footer() {
         </div>
       </div>
 
+      {/* Legal / Policy Links */}
+      <div className="max-w-7xl mx-auto px-6 md:px-12 border-t border-muted-sage/20 pt-8 pb-6">
+        <nav className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs font-dmsans">
+          {[
+            { name: "Terms & Conditions", href: "/terms" },
+            { name: "Privacy Policy", href: "/privacy" },
+            { name: "Refund & Cancellation Policy", href: "/refund-policy" },
+            { name: "Shipping & Delivery Policy", href: "/shipping-policy" },
+            { name: "Contact Us", href: "/contact" },
+          ].map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              className="text-warm-sand/70 hover:text-warm-sand transition-colors"
+            >
+              {link.name}
+            </Link>
+          ))}
+        </nav>
+      </div>
+
       {/* Bottom Bar */}
       <div className="max-w-7xl mx-auto px-6 md:px-12 border-t border-muted-sage/20 pt-8 flex flex-col md:flex-row items-center justify-between text-xs text-warm-sand/50 font-dmsans">
         <p>
