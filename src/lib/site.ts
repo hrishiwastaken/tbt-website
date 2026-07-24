@@ -12,14 +12,14 @@ export const SITE_URL = "https://www.thebraintea.com";
 /** Effective / last-updated date shown on the legal pages. */
 export const LEGAL_EFFECTIVE_DATE = "24 July 2026";
 
-export const WHATSAPP_NUMBER = "919960792329";
+export const WHATSAPP_NUMBER = "919309833817";
 export const WHATSAPP_MESSAGE =
   "Hello! I'd like to book an appointment at The Brain Tea. Could you please let me know your availability?";
 export const WHATSAPP_URL = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
   WHATSAPP_MESSAGE,
 )}`;
 
-export const CONTACT_PHONE = "+91 99607 92329";
+export const CONTACT_PHONE = "+91 93098 33817";
 export const CONTACT_EMAIL = "contact@thebraintea.com";
 export const CONTACT_ADDRESS = {
   line1: "Flat No. 8, 5th Floor, Abhimanshree Society,",

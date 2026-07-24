@@ -21,9 +21,9 @@ const PROGRAMS = [
   {
     title: "BA Psychology -- Administrative Focus",
     audience: "Graduate Internship",
-    duration: "6 months",
+    duration: "4 weeks, extendable",
     commitment: "4 hours/day -- 25 hours/week",
-    supervisionFee: "₹4,000",
+    supervisionFee: "₹5,000",
     learning: [
       "Clinic administration",
       "Client coordination",
@@ -33,6 +33,8 @@ const PROGRAMS = [
       "Workshop coordination",
       "Mental-health awareness",
       "Administrative operations",
+      "Case discussion",
+      "Assessment observation",
     ],
     eligibility: [
       "BA/BSc Psychology student or graduate",

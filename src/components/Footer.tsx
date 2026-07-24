@@ -108,7 +108,7 @@ export default function Footer() {
               <span className="block font-medium text-warm-sand">
                 Phone / WhatsApp:
               </span>
-              +91 99607 92329
+              +91 93098 33817
             </p>
             <p>
               <span className="block font-medium text-warm-sand">Email:</span>
