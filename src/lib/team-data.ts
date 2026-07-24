@@ -22,9 +22,9 @@ export const TEAM: TeamMember[] = [
     qualification: "M.Phil Clinical Psychology · RCI Licensed",
     experience: "12+ years in clinical practice",
     approaches: [
-      "Cognitive Behavioral Therapy",
-      "Acceptance & Commitment Therapy",
+      "Integrative & Evidence-Based Therapy",
       "Trauma-Informed Care",
+      "Personalized Treatment Planning",
     ],
     specialisations: ["Anxiety & Stress", "Trauma & PTSD", "Life Transitions"],
     languages: ["English", "Hindi", "Marathi"],
