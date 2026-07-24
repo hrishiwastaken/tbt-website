@@ -130,7 +130,7 @@ export default function FAQ() {
     {
       question: "What therapeutic approaches do you use?",
       answer:
-        "Our practitioners are trained in a variety of evidence-based modalities, including Cognitive Behavioral Therapy (CBT), Acceptance and Commitment Therapy (ACT), psychodynamic therapy, and trauma-informed systems. We do not use a one-size-fits-all approach; we tailor our methods to your specific goals and personality.",
+        "At The Brain Tea, we don't believe in a one-size-fits-all approach to therapy. Every individual is unique, which is why we tailor therapy to your needs, goals, personality, and life experiences. We practice integrative, evidence-based psychotherapy rather than following a single therapeutic model. This allows our psychologists to thoughtfully draw from different therapeutic approaches, based on their areas of expertise, to create a treatment plan that is best suited to you. As your needs evolve, therapy evolves with you, ensuring that the support you receive remains relevant throughout your journey.",
     },
     {
       question: "How long does therapy typically last?",
