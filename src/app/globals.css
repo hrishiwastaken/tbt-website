@@ -1,0 +1,312 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-warm-sand: #dad7ca;
+  --color-muted-sage: #9faca5;
+  --color-warm-tan: #dccdb2;
+  --color-teal-sage: #698e8b;
+  --color-forest-slate: #55665d;
+  --color-near-black: #202623;
+
+  /* Legacy mappings */
+  --color-forest: #698e8b;
+  --color-sage: #9faca5;
+  --color-mist: #9faca5;
+  --color-ivory: #fdfbf7; /* Bright, warm off-white */
+  --color-sand: #dccdb2;
+  --color-terracotta: #698e8b;
+  --color-charcoal: #55665d;
+  --color-warm-white: #fdfbf7; /* Bright, warm off-white */
+
+  /* Admin / Therapist panel palette (ocean design system) */
+  --color-ocean: #5d768b;
+  --color-ocean-deep: #26333d;
+  --color-surface: #fffcf8;
+  --color-surface-sunken: #f1e4d5;
+}
+
+body {
+  background-color: var(--color-warm-white);
+  color: var(--color-near-black);
+  font-family: var(--font-dm-sans), sans-serif;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Custom scrollbars matching the earthy Sage/Forest palette */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-ivory);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-sage);
+  border: 2px solid var(--color-ivory);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-forest);
+}
+
+/* Custom Selection styling */
+::selection {
+  background-color: var(--color-mist);
+  color: var(--color-forest);
+}
+
+/* Remove default focus outlines and use custom ring focus states */
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+  border-color: var(--color-forest) !important;
+  box-shadow: 0 0 0 3px rgba(46, 74, 56, 0.15) !important;
+}
+
+/* Admin/therapist panels keep their ocean-tinted focus states */
+[data-panel] input:focus,
+[data-panel] textarea:focus,
+[data-panel] select:focus,
+[data-panel] button:focus-visible,
+[data-panel] a:focus-visible {
+  outline: none;
+  border-color: var(--color-ocean) !important;
+  box-shadow: 0 0 0 3px rgba(93, 118, 139, 0.25) !important;
+}
+
+/* Base styles for standard HTML elements */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-cormorant), serif;
+  color: var(--color-charcoal);
+}
+
+a {
+  transition: all 0.2s ease-in-out;
+}
+
+/* Subtle, organic leafy decorative patterns (SVG inline styling) */
+.organic-pattern {
+  position: absolute;
+  pointer-events: none;
+  opacity: 0.12;
+  color: var(--color-sage);
+}
+
+/* Float Animations for Organic Background Accents */
+@keyframes float-slow {
+  0%,
+  100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-20px) rotate(4deg);
+  }
+}
+
+@keyframes float-reverse {
+  0%,
+  100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(20px) rotate(-4deg);
+  }
+}
+
+.animate-float-slow {
+  animation: float-slow 12s ease-in-out infinite;
+}
+
+.animate-float-reverse {
+  animation: float-reverse 15s ease-in-out infinite;
+}
+
+/* Glassmorphic Panel Design Token */
+.glass-card {
+  background: linear-gradient(
+    135deg,
+    rgba(220, 205, 178, 0.65),
+    rgba(159, 172, 165, 0.45)
+  );
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(159, 172, 165, 0.55);
+  box-shadow:
+    inset 0 1.5px 0 rgba(255, 255, 255, 0.5),
+    0 8px 32px rgba(85, 102, 93, 0.08);
+}
+
+/* Ocean-tinted glass variant used by the admin panel login */
+.glass-card-ocean {
+  background: linear-gradient(
+    135deg,
+    rgba(227, 201, 164, 0.55),
+    rgba(93, 118, 139, 0.18)
+  );
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(93, 118, 139, 0.25);
+  box-shadow:
+    inset 0 1.5px 0 rgba(255, 255, 255, 0.5),
+    0 8px 32px rgba(38, 51, 61, 0.08);
+}
+
+/* Soft sculptural neumorphic surfaces for the admin/therapist panels --
+   shadows tinted with the panels' ocean blue */
+.surface-raised {
+  background: var(--color-surface);
+  border-radius: 24px;
+  box-shadow:
+    8px 8px 20px rgba(93, 118, 139, 0.16),
+    -8px -8px 20px rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(93, 118, 139, 0.08);
+}
+
+.surface-inset {
+  background: var(--color-surface-sunken);
+  border-radius: 16px;
+  box-shadow:
+    inset 4px 4px 10px rgba(93, 118, 139, 0.16),
+    inset -4px -4px 10px rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(93, 118, 139, 0.08);
+}
+
+.surface-raised-interactive {
+  transition:
+    transform 0.2s var(--ease-out-soft, cubic-bezier(0.23, 1, 0.32, 1)),
+    box-shadow 0.2s ease;
+}
+
+.surface-raised-interactive:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    10px 10px 24px rgba(93, 118, 139, 0.18),
+    -10px -10px 24px rgba(255, 255, 255, 0.85);
+}
+
+.surface-raised-interactive:active {
+  transform: translateY(0);
+  box-shadow:
+    inset 4px 4px 10px rgba(93, 118, 139, 0.16),
+    inset -4px -4px 10px rgba(255, 255, 255, 0.7);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Tactile button shimmer sweep on hover */
+.btn-shimmer {
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-shimmer::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.15) 30%,
+    rgba(255, 255, 255, 0.35) 50%,
+    rgba(255, 255, 255, 0.15) 70%,
+    transparent 100%
+  );
+  transform: translateX(-100%);
+  transition: transform 0.65s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.btn-shimmer:hover::after {
+  transform: translateX(100%);
+}
+
+/* Floating labels for contact inputs */
+.floating-group {
+  position: relative;
+}
+
+.floating-input {
+  width: 100%;
+  background-color: rgba(235, 224, 208, 0.15);
+  border: 1px solid rgba(200, 217, 204, 0.35);
+  color: var(--color-charcoal);
+  border-radius: 14px;
+  padding: 22px 16px 6px 16px;
+  font-size: 14px;
+  font-family: var(--font-dm-sans), sans-serif;
+  outline: none;
+  transition: all 0.25s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.floating-input:focus {
+  background-color: var(--color-warm-white) !important;
+  border-color: var(--color-forest) !important;
+  box-shadow: 0 0 0 3px rgba(46, 74, 56, 0.1) !important;
+}
+
+.floating-label {
+  position: absolute;
+  left: 16px;
+  top: 14px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--color-sage);
+  pointer-events: none;
+  text-transform: uppercase;
+  transition: all 0.25s cubic-bezier(0.23, 1, 0.32, 1);
+  transform-origin: left top;
+}
+
+/* Animate label when input is focused or filled */
+.floating-input:focus ~ .floating-label,
+.floating-input:not(:placeholder-shown) ~ .floating-label {
+  transform: translateY(-8px) scale(0.85);
+  color: var(--color-forest);
+}
+
+/* Typography Enhancements */
+.text-balance {
+  text-wrap: balance;
+}
+
+.text-pretty {
+  text-wrap: pretty;
+}
+
+/* Custom Spin Animations */
+@keyframes spin-slow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin-slow {
+  animation: spin-slow 22s linear infinite;
+}

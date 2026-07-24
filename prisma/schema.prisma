@@ -1,0 +1,346 @@
+// Prisma schema for The Brain Tea clinic platform.
+//
+// Conventions:
+//  - All monetary values are stored as integers in minor units (paise for INR).
+//    Fields carrying money end in `Minor`. Never store money as floats.
+//  - Ledger entries are immutable: corrections are posted as reversal /
+//    adjustment entries, never edits or deletes.
+//  - Status fields are strings constrained by the domain layer
+//    (src/server/domain) rather than DB enums, so SQLite-compatible tooling
+//    and future statuses stay cheap. The domain layer is the source of truth.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id           String     @id @default(uuid())
+  email        String     @unique
+  passwordHash String
+  role         String // "ADMIN" | "THERAPIST"
+  therapist    Therapist?
+  auditLogs    AuditLog[]
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+}
+
+model Therapist {
+  id            String                  @id @default(uuid())
+  userId        String?                 @unique
+  user          User?                   @relation(fields: [userId], references: [id], onDelete: SetNull)
+  name          String
+  photo         String?
+  bio           String
+  feeMinor      Int // default session fee in paise
+  slug          String                  @unique
+  // "PENDING" | "APPROVED" | "SUSPENDED" — controls bookability and payouts
+  status        String                  @default("APPROVED")
+  isActive      Boolean                 @default(true)
+  // Per-consultant commission override in basis points (e.g. 3200 = 32%).
+  // Null means the platform default applies. Bookings snapshot the resolved
+  // value at creation time, so changing this never rewrites history.
+  commissionBps Int?
+  availability  TherapistAvailability[]
+  slotBlocks    SlotBlock[]
+  bookings      Booking[]
+  payouts       Payout[]
+  ledgerEntries LedgerEntry[]
+  // Services this consultant offers. The public booking flow is service-first:
+  // a client picks a service, then chooses among the consultants that offer it.
+  services      Service[]               @relation("TherapistServices")
+  createdAt     DateTime                @default(now())
+  updatedAt     DateTime                @updatedAt
+
+  @@index([status])
+}
+
+model TherapistAvailability {
+  id          String    @id @default(uuid())
+  therapistId String
+  therapist   Therapist @relation(fields: [therapistId], references: [id], onDelete: Cascade)
+  dayOfWeek   Int // 0 = Sunday ... 6 = Saturday
+  startTime   String // "HH:MM"
+  endTime     String // "HH:MM"
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@unique([therapistId, dayOfWeek, startTime, endTime])
+}
+
+// One-off unavailability (leave, holidays, blocked slots) layered on top of
+// the weekly availability template.
+model SlotBlock {
+  id          String    @id @default(uuid())
+  therapistId String
+  therapist   Therapist @relation(fields: [therapistId], references: [id], onDelete: Cascade)
+  startAt     DateTime
+  endAt       DateTime
+  reason      String?
+  createdAt   DateTime  @default(now())
+
+  @@index([therapistId, startAt])
+}
+
+model Service {
+  id              String    @id @default(uuid())
+  name            String
+  description     String
+  durationMinutes Int
+  // Indicative price (paise). The public flow charges the chosen consultant's
+  // own rate; this is kept for reference and admin display.
+  priceMinor      Int
+  slug            String    @unique
+  isActive        Boolean   @default(true)
+  // Presentation content for the public services pages (DB is the single
+  // source of truth for the catalogue).
+  tagline         String?
+  image           String?
+  process         String?
+  suitableFor     String[]  @default([])
+  availability    String[]  @default([]) // e.g. ["Online", "Offline"]
+  bookings        Booking[]
+  // Consultants who offer this service (inverse of Therapist.services).
+  therapists      Therapist[] @relation("TherapistServices")
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}
+
+model Client {
+  id               String    @id @default(uuid())
+  name             String
+  email            String    @unique
+  phone            String
+  dob              String // YYYY-MM-DD
+  emergencyContact String
+  gdprConsent      Boolean   @default(false)
+  bookings         Booking[]
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  @@index([createdAt])
+}
+
+model Booking {
+  id              String   @id @default(uuid())
+  therapistId     String
+  therapist       Therapist @relation(fields: [therapistId], references: [id])
+  serviceId       String
+  service         Service   @relation(fields: [serviceId], references: [id])
+  clientId        String
+  client          Client    @relation(fields: [clientId], references: [id])
+  dateTime        DateTime // session start
+  durationMinutes Int
+
+  // High-level counselling category captured for admin-scheduled sessions:
+  // "INDIVIDUAL" | "COUPLE_FAMILY". Null for legacy/self-service bookings that
+  // predate the field. Constrained by src/server/domain/counselingType.ts.
+  counselingType  String?
+
+  // Financial snapshot (paise). netMinor = gross - discount - tax is the
+  // commission base; commissionBps is resolved and frozen at booking time.
+  amountMinor     Int
+  discountMinor   Int    @default(0)
+  taxMinor        Int    @default(0)
+  currency        String @default("INR")
+  commissionBps   Int
+
+  // Domain state machine — see src/server/domain/bookingStatus.ts:
+  // PENDING | AWAITING_PAYMENT | CONFIRMED | COMPLETED | CANCELLED |
+  // NO_SHOW | REFUND_PENDING | REFUNDED
+  status             String
+  // Denormalised payment rollup kept in sync inside the same transactions
+  // that write PaymentRecord/Ledger rows: "UNPAID" | "PAID" | "REFUNDED"
+  paymentStatus      String    @default("UNPAID")
+  // Reservation TTL: AWAITING_PAYMENT holds expire after this and free the slot
+  expiresAt          DateTime?
+  cancellationReason String?
+  notes              String? // AES-256-GCM encrypted clinical notes
+  invoiceNumber      String?   @unique
+
+  slot          BookingSlot?
+  payments      PaymentRecord[]
+  ledgerEntries LedgerEntry[]
+  statusHistory BookingStatusHistory[]
+  createdAt     DateTime               @default(now())
+  updatedAt     DateTime               @updatedAt
+
+  @@index([therapistId, dateTime])
+  @@index([status])
+  @@index([paymentStatus])
+  @@index([dateTime])
+  @@index([clientId])
+  @@index([createdAt])
+}
+
+// Concurrency guard for double-booking: one row per live hold on a
+// (therapist, start time). Created inside the booking transaction — the
+// unique constraint makes races lose at the DB level. Rows are removed when
+// a booking is cancelled/expired, freeing the slot.
+model BookingSlot {
+  id          String   @id @default(uuid())
+  therapistId String
+  startAt     DateTime
+  bookingId   String   @unique
+  booking     Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+
+  @@unique([therapistId, startAt])
+}
+
+model BookingStatusHistory {
+  id         String   @id @default(uuid())
+  bookingId  String
+  booking    Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  fromStatus String?
+  toStatus   String
+  reason     String?
+  actorType  String // "ADMIN" | "THERAPIST" | "CLIENT" | "SYSTEM"
+  actorId    String?
+  createdAt  DateTime @default(now())
+
+  @@index([bookingId, createdAt])
+}
+
+// Provider-agnostic payment attempt/refund record. `provider` names the
+// adapter (see src/server/payments); no gateway SDK types leak in here.
+model PaymentRecord {
+  id                String  @id @default(uuid())
+  bookingId         String
+  booking           Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  provider          String // "manual" | future gateway adapters
+  kind              String // "CHARGE" | "REFUND"
+  amountMinor       Int
+  currency          String  @default("INR")
+  // "CREATED" | "PROCESSING" | "SUCCEEDED" | "FAILED" | "CANCELLED"
+  status            String
+  providerOrderId   String?
+  providerPaymentId String?
+  providerRef       String? // e.g. UPI UTR for manual payments
+  idempotencyKey    String? @unique
+  failureReason     String?
+  metadata          String? // JSON
+  ledgerEntries     LedgerEntry[]
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@index([bookingId])
+  @@index([status])
+  @@index([provider, providerPaymentId])
+  // Webhooks and reconciliation resolve records by merchant order id
+  @@index([provider, providerOrderId])
+}
+
+// Inbound webhook dedupe/journal: (provider, externalId) unique so an event
+// replay can never double-post financials.
+model WebhookEvent {
+  id          String    @id @default(uuid())
+  provider    String
+  externalId  String
+  eventType   String
+  payload     String
+  status      String    @default("RECEIVED") // "RECEIVED" | "PROCESSED" | "FAILED" | "SKIPPED"
+  error       String?
+  processedAt DateTime?
+  createdAt   DateTime  @default(now())
+
+  @@unique([provider, externalId])
+}
+
+// Append-only financial ledger. Amounts are signed paise. Balances are sums
+// over entries — never stored counters. Entry types:
+//   GROSS_REVENUE, DISCOUNT, TAX_COLLECTED, REFUND,
+//   COMMISSION_ACCRUED, COMMISSION_REVERSED,
+//   PLATFORM_REVENUE, PLATFORM_REVENUE_REVERSED,
+//   PAYOUT_PAID, ADJUSTMENT
+model LedgerEntry {
+  id              String         @id @default(uuid())
+  entryType       String
+  amountMinor     Int // signed
+  currency        String         @default("INR")
+  description     String
+  bookingId       String?
+  booking         Booking?       @relation(fields: [bookingId], references: [id])
+  paymentRecordId String?
+  paymentRecord   PaymentRecord? @relation(fields: [paymentRecordId], references: [id])
+  therapistId     String?
+  therapist       Therapist?     @relation(fields: [therapistId], references: [id])
+  payoutId        String?
+  payout          Payout?        @relation(fields: [payoutId], references: [id])
+  createdAt       DateTime       @default(now())
+
+  @@index([entryType, createdAt])
+  @@index([therapistId, entryType])
+  @@index([bookingId])
+  @@index([paymentRecordId])
+  @@index([createdAt])
+}
+
+model Payout {
+  id            String        @id @default(uuid())
+  therapistId   String
+  therapist     Therapist     @relation(fields: [therapistId], references: [id])
+  amountMinor   Int
+  currency      String        @default("INR")
+  status        String // "PENDING" | "PROCESSING" | "PAID" | "FAILED" | "CANCELLED"
+  method        String? // e.g. "BANK_TRANSFER", "UPI"
+  reference     String? // settlement/transfer reference
+  note          String?
+  initiatedById String?
+  paidAt        DateTime?
+  ledgerEntries LedgerEntry[]
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  @@index([therapistId, status])
+  @@index([status])
+}
+
+// Append-only commission configuration history. The row with the latest
+// effectiveFrom (<= now) for scope "DEFAULT" is the platform default;
+// "THERAPIST" rows journal per-consultant overrides for auditability.
+model CommissionSetting {
+  id            String   @id @default(uuid())
+  scope         String // "DEFAULT" | "THERAPIST"
+  therapistId   String?
+  commissionBps Int
+  effectiveFrom DateTime @default(now())
+  createdById   String?
+  createdAt     DateTime @default(now())
+
+  @@index([scope, effectiveFrom])
+  @@index([therapistId])
+}
+
+model AuditLog {
+  id          String   @id @default(uuid())
+  actorUserId String?
+  actor       User?    @relation(fields: [actorUserId], references: [id], onDelete: SetNull)
+  actorEmail  String?
+  actorRole   String?
+  action      String // e.g. "booking.cancel", "payout.mark_paid"
+  entityType  String
+  entityId    String?
+  detail      String? // JSON
+  ip          String?
+  createdAt   DateTime @default(now())
+
+  @@index([entityType, entityId])
+  @@index([createdAt])
+  @@index([actorUserId])
+}
+
+model Testimonial {
+  id         String   @id @default(uuid())
+  clientName String
+  quote      String
+  status     String // "PENDING" | "APPROVED" | "HIDDEN"
+  rating     Int      @default(5)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
