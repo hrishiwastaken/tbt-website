@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 // Service-first booking flow:
@@ -578,9 +579,17 @@ export default function BookingWizard({ services = [], initialService = "" }) {
                 >
                   I consent to the collection and secure storage of my contact
                   and health information in accordance with the{" "}
-                  <strong>Privacy Policy</strong> and India IT Act guidelines. I
-                  understand my records are encrypted and accessible only to my
-                  therapist and clinical admins.
+                  <Link
+                    href="/privacy"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-semibold text-forest underline underline-offset-2 hover:text-terracotta"
+                  >
+                    Privacy Policy
+                  </Link>{" "}
+                  and India IT Act guidelines. I understand my records are
+                  encrypted and accessible only to my therapist and clinical
+                  admins.
                 </label>
               </div>
             </form>
