@@ -26,8 +26,7 @@ const rupees = (minor) => `₹${(minor / 100).toLocaleString("en-IN")}`;
 export default function BookingWizard({ services = [], initialService = "" }) {
   const router = useRouter();
 
-  const preselected =
-    services.find((s) => s.slug === initialService) || null;
+  const preselected = services.find((s) => s.slug === initialService) || null;
 
   const [step, setStep] = useState(preselected ? 2 : 1);
   const [selectedService, setSelectedService] = useState(preselected);
@@ -270,43 +269,62 @@ export default function BookingWizard({ services = [], initialService = "" }) {
               Select a Service
             </h2>
             <p className="text-sage mb-6 text-sm">
-              Choose the kind of session you&apos;re looking for. Next, you
-              will pick the consultant who offers it.
+              Choose the kind of session you&apos;re looking for. Next, you will
+              pick the consultant who offers it.
             </p>
 
-            <div className="space-y-4 mb-8">
-              {services.map((service) => (
-                <div
-                  key={service.id}
-                  onClick={() => setSelectedService(service)}
-                  className={`p-5 rounded-xl border cursor-pointer transition-all ${
-                    selectedService?.id === service.id
-                      ? "border-forest bg-warm-white shadow-sm ring-1 ring-forest/10"
-                      : "border-mist/40 bg-warm-white/40 hover:border-sage"
-                  }`}
-                >
-                  <div className="flex justify-between items-start gap-4">
-                    <div>
-                      <h4 className="font-cormorant text-xl font-bold text-charcoal">
-                        {service.name}
-                      </h4>
-                      <p className="text-sage text-xs leading-relaxed mt-1">
-                        {service.description}
-                      </p>
+            {/* A service reached via /book?service=… is only preselected if it
+                is actually bookable; say so rather than silently dropping the
+                client back to an unexplained list. */}
+            {initialService && !preselected && services.length > 0 && (
+              <p className="text-terracotta text-sm italic bg-red-50 p-4 rounded-xl border border-red-100 mb-6">
+                The service you came here for isn&apos;t open for booking right
+                now. Please choose one of the sessions below.
+              </p>
+            )}
+
+            {services.length === 0 ? (
+              <p className="text-terracotta text-sm italic bg-red-50 p-4 rounded-xl border border-red-100 mb-8">
+                No services are open for booking at the moment. Please check
+                back soon, or contact us and we&apos;ll arrange a session for
+                you.
+              </p>
+            ) : (
+              <div className="space-y-4 mb-8">
+                {services.map((service) => (
+                  <div
+                    key={service.id}
+                    onClick={() => setSelectedService(service)}
+                    className={`p-5 rounded-xl border cursor-pointer transition-all ${
+                      selectedService?.id === service.id
+                        ? "border-forest bg-warm-white shadow-sm ring-1 ring-forest/10"
+                        : "border-mist/40 bg-warm-white/40 hover:border-sage"
+                    }`}
+                  >
+                    <div className="flex justify-between items-start gap-4">
+                      <div>
+                        <h4 className="font-cormorant text-xl font-bold text-charcoal">
+                          {service.name}
+                        </h4>
+                        <p className="text-sage text-xs leading-relaxed mt-1">
+                          {service.description}
+                        </p>
+                      </div>
+                      <span className="text-xs text-sage shrink-0 mt-1">
+                        {service.durationMinutes} min
+                      </span>
                     </div>
-                    <span className="text-xs text-sage shrink-0 mt-1">
-                      {service.durationMinutes} min
-                    </span>
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
 
             <div className="flex justify-end pt-4 border-t border-mist/20">
               <button
                 type="button"
                 onClick={handleNextStep}
-                className="bg-forest hover:bg-terracotta text-warm-white font-medium px-8 py-3 rounded-full transition-colors shadow-sm hover:shadow-md"
+                disabled={services.length === 0}
+                className="bg-forest hover:bg-terracotta text-warm-white font-medium px-8 py-3 rounded-full transition-colors shadow-sm hover:shadow-md disabled:opacity-50"
               >
                 Continue
               </button>
@@ -671,8 +689,8 @@ export default function BookingWizard({ services = [], initialService = "" }) {
                   <p className="text-xs text-sage mt-1">
                     You&apos;ll be redirected to a secure checkout — pay with
                     any UPI app (GPay, PhonePe, Paytm, BHIM...) with the amount
-                    pre-filled. Your session is confirmed the moment the
-                    payment succeeds.
+                    pre-filled. Your session is confirmed the moment the payment
+                    succeeds.
                   </p>
                 </div>
               </label>
@@ -718,8 +736,8 @@ export default function BookingWizard({ services = [], initialService = "" }) {
 
             <div className="flex flex-col sm:flex-row justify-between gap-4 pt-6 border-t border-mist/20">
               <span className="text-xs text-sage leading-relaxed max-w-sm">
-                * Note: Sessions can be cancelled up to 48 hours, or
-                rescheduled up to 24 hours, before slot start.
+                * Note: Sessions can be cancelled up to 48 hours, or rescheduled
+                up to 24 hours, before slot start.
               </span>
               <button
                 type="button"
