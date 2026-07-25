@@ -31,6 +31,16 @@ export const CONTACT_HOURS = {
   weekend: "Saturday: 10:00 AM – 4:00 PM",
 };
 
+/**
+ * Published cancellation / rescheduling windows, in hours before the session
+ * starts. These are the numbers quoted on the FAQ, the Terms, the Refund &
+ * Cancellation policy, the booking wizard and the confirmation screen — the
+ * server-side guards import them from here so enforcement can never drift
+ * away from what the client was told.
+ */
+export const CANCELLATION_NOTICE_HOURS = 48;
+export const RESCHEDULE_NOTICE_HOURS = 24;
+
 export const MAIN_NAV = [
   { name: "Home", href: "/" },
   { name: "About", href: "/about" },

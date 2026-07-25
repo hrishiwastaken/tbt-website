@@ -16,34 +16,42 @@ export async function createPayout(input: {
   note?: string;
   session: Session;
 }) {
-  const therapist = await prisma.therapist.findUnique({
-    where: { id: input.therapistId },
-  });
-  if (!therapist) throw notFound("Consultant not found");
+  // The balance check and the reservation must be atomic: read-then-create
+  // without a lock lets concurrent admins each see the same payable balance
+  // and every one of them pass the guard, over-drawing the consultant.
+  // The FOR UPDATE lock on the consultant row serializes payout creation.
+  const { payout, amountMinor } = await prisma.$transaction(async (tx) => {
+    const locked = await tx.$queryRaw<
+      { id: string }[]
+    >`SELECT id FROM "Therapist" WHERE id = ${input.therapistId} FOR UPDATE`;
+    if (locked.length === 0) throw notFound("Consultant not found");
 
-  const balance = await consultantBalance(input.therapistId);
-  const amountMinor = input.amountMinor ?? balance.payableMinor;
-  if (!Number.isSafeInteger(amountMinor) || amountMinor <= 0) {
-    throw badRequest(
-      "Payout amount must be a positive integer amount in paise",
-    );
-  }
-  if (amountMinor > balance.payableMinor) {
-    throw conflict(
-      `Payout exceeds payable balance (${balance.payableMinor} paise available)`,
-    );
-  }
+    const balance = await consultantBalance(input.therapistId, tx);
+    const amount = input.amountMinor ?? balance.payableMinor;
+    if (!Number.isSafeInteger(amount) || amount <= 0) {
+      throw badRequest(
+        "Payout amount must be a positive integer amount in paise",
+      );
+    }
+    if (amount > balance.payableMinor) {
+      throw conflict(
+        `Payout exceeds payable balance (${balance.payableMinor} paise available)`,
+      );
+    }
 
-  const payout = await prisma.payout.create({
-    data: {
-      therapistId: input.therapistId,
-      amountMinor,
-      status: "PENDING",
-      method: input.method ?? "BANK_TRANSFER",
-      note: input.note ?? null,
-      initiatedById: input.session.userId,
-    },
+    const created = await tx.payout.create({
+      data: {
+        therapistId: input.therapistId,
+        amountMinor: amount,
+        status: "PENDING",
+        method: input.method ?? "BANK_TRANSFER",
+        note: input.note ?? null,
+        initiatedById: input.session.userId,
+      },
+    });
+    return { payout: created, amountMinor: amount };
   });
+
   await recordAudit({
     session: input.session,
     action: "payout.create",
@@ -80,18 +88,35 @@ export async function transitionPayout(input: {
       );
     }
 
-    const updated = await tx.payout.update({
-      where: { id: payout.id },
+    // Compare-and-swap on the status we validated against. A plain update
+    // would let concurrent PAID transitions each pass the guard above and
+    // each post a PAYOUT_PAID entry, permanently corrupting the append-only
+    // ledger. Only the caller whose CAS wins (count === 1) may post.
+    const gate = await tx.payout.updateMany({
+      where: { id: payout.id, status: payout.status },
       data: {
         status: input.toStatus,
         reference: input.reference ?? payout.reference,
         paidAt: input.toStatus === "PAID" ? new Date() : payout.paidAt,
       },
     });
+    if (gate.count !== 1) {
+      // Someone else moved this payout while we were validating.
+      const current = await tx.payout.findUniqueOrThrow({
+        where: { id: payout.id },
+      });
+      if (current.status === input.toStatus) return current; // idempotent
+      throw conflict(
+        `Illegal payout transition ${current.status} → ${input.toStatus}`,
+      );
+    }
+    const updated = await tx.payout.findUniqueOrThrow({
+      where: { id: payout.id },
+    });
 
     if (input.toStatus === "PAID") {
-      // Settlement hits the ledger exactly once — guarded by the status
-      // transition above (PAID is terminal and idempotent-checked).
+      // Settlement hits the ledger exactly once — authorized by the CAS above
+      // and posted inside the same transaction as that CAS.
       await insertPostings(tx, [
         payoutPaidPosting({
           payoutId: payout.id,

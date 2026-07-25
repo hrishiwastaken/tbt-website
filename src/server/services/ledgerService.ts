@@ -105,9 +105,10 @@ export interface ConsultantBalance {
 /** Lifetime payable balance per consultant, derived entirely from the ledger. */
 export async function consultantBalances(
   therapistId?: string,
+  tx: Prisma.TransactionClient = prisma,
 ): Promise<ConsultantBalance[]> {
   const [entries, reservations] = await Promise.all([
-    prisma.ledgerEntry.groupBy({
+    tx.ledgerEntry.groupBy({
       by: ["therapistId", "entryType"],
       _sum: { amountMinor: true },
       where: {
@@ -117,7 +118,7 @@ export async function consultantBalances(
         },
       },
     }),
-    prisma.payout.groupBy({
+    tx.payout.groupBy({
       by: ["therapistId"],
       _sum: { amountMinor: true },
       where: {
@@ -161,8 +162,9 @@ export async function consultantBalances(
 
 export async function consultantBalance(
   therapistId: string,
+  tx: Prisma.TransactionClient = prisma,
 ): Promise<ConsultantBalance> {
-  const [balance] = await consultantBalances(therapistId);
+  const [balance] = await consultantBalances(therapistId, tx);
   return (
     balance ?? {
       therapistId,
