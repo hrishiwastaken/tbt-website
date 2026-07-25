@@ -273,39 +273,58 @@ export default function BookingWizard({ services = [], initialService = "" }) {
               will pick the consultant who offers it.
             </p>
 
-            <div className="space-y-4 mb-8">
-              {services.map((service) => (
-                <div
-                  key={service.id}
-                  onClick={() => setSelectedService(service)}
-                  className={`p-5 rounded-xl border cursor-pointer transition-all ${
-                    selectedService?.id === service.id
-                      ? "border-forest bg-warm-white shadow-sm ring-1 ring-forest/10"
-                      : "border-mist/40 bg-warm-white/40 hover:border-sage"
-                  }`}
-                >
-                  <div className="flex justify-between items-start gap-4">
-                    <div>
-                      <h4 className="font-cormorant text-xl font-bold text-charcoal">
-                        {service.name}
-                      </h4>
-                      <p className="text-sage text-xs leading-relaxed mt-1">
-                        {service.description}
-                      </p>
+            {/* A service reached via /book?service=… is only preselected if it
+                is actually bookable; say so rather than silently dropping the
+                client back to an unexplained list. */}
+            {initialService && !preselected && services.length > 0 && (
+              <p className="text-terracotta text-sm italic bg-red-50 p-4 rounded-xl border border-red-100 mb-6">
+                The service you came here for isn&apos;t open for booking right
+                now. Please choose one of the sessions below.
+              </p>
+            )}
+
+            {services.length === 0 ? (
+              <p className="text-terracotta text-sm italic bg-red-50 p-4 rounded-xl border border-red-100 mb-8">
+                No services are open for booking at the moment. Please check
+                back soon, or contact us and we&apos;ll arrange a session for
+                you.
+              </p>
+            ) : (
+              <div className="space-y-4 mb-8">
+                {services.map((service) => (
+                  <div
+                    key={service.id}
+                    onClick={() => setSelectedService(service)}
+                    className={`p-5 rounded-xl border cursor-pointer transition-all ${
+                      selectedService?.id === service.id
+                        ? "border-forest bg-warm-white shadow-sm ring-1 ring-forest/10"
+                        : "border-mist/40 bg-warm-white/40 hover:border-sage"
+                    }`}
+                  >
+                    <div className="flex justify-between items-start gap-4">
+                      <div>
+                        <h4 className="font-cormorant text-xl font-bold text-charcoal">
+                          {service.name}
+                        </h4>
+                        <p className="text-sage text-xs leading-relaxed mt-1">
+                          {service.description}
+                        </p>
+                      </div>
+                      <span className="text-xs text-sage shrink-0 mt-1">
+                        {service.durationMinutes} min
+                      </span>
                     </div>
-                    <span className="text-xs text-sage shrink-0 mt-1">
-                      {service.durationMinutes} min
-                    </span>
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
 
             <div className="flex justify-end pt-4 border-t border-mist/20">
               <button
                 type="button"
                 onClick={handleNextStep}
-                className="bg-forest hover:bg-terracotta text-warm-white font-medium px-8 py-3 rounded-full transition-colors shadow-sm hover:shadow-md"
+                disabled={services.length === 0}
+                className="bg-forest hover:bg-terracotta text-warm-white font-medium px-8 py-3 rounded-full transition-colors shadow-sm hover:shadow-md disabled:opacity-50"
               >
                 Continue
               </button>
