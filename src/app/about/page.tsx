@@ -51,7 +51,7 @@ export default function About() {
     {
       icon: <Award className="w-8 h-8 text-forest" />,
       title: "Evidence-Based Care",
-      text: "Our methodologies are grounded in active research. We employ Cognitive Behavioral, Acceptance & Commitment, and Trauma-Informed modalities that are scientifically validated to support recovery.",
+      text: "Our methodologies are grounded in active research. We draw from a range of scientifically validated, trauma-informed approaches, thoughtfully tailored to support your recovery.",
     },
     {
       icon: <HeartHandshake className="w-8 h-8 text-forest" />,

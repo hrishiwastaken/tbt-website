@@ -3,7 +3,8 @@
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 
 // Full-screen brand intro that plays once per browser session.
-// Plays public/intro/tbt-intro.mp4 (~2.1s), then wipes away to reveal the site.
+// Plays the transparent public/intro/tbt-animation.webm over a solid
+// background color, then wipes away to reveal the site.
 // Falls back safely: if the video errors, is blocked, or stalls, a timeout
 // dismisses it so the site is never blocked.
 
@@ -101,9 +102,9 @@ export default function IntroOverlay() {
         position: "fixed",
         inset: 0,
         zIndex: 9999,
-        // Matches the video's light-gray backdrop so there is no flash before
-        // the first frame paints, and the `contain` letterbox bars are invisible.
-        backgroundColor: "#cbcbcb",
+        // Solid brand backdrop behind the transparent animation — brighter
+        // than the site's own warm-ivory surface (#fffcf8).
+        backgroundColor: "#ffffff",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
@@ -118,7 +119,7 @@ export default function IntroOverlay() {
     >
       <video
         ref={videoRef}
-        src="/intro/tbt-intro.mp4"
+        src="/intro/tbt-animation.webm"
         muted
         autoPlay
         playsInline
@@ -128,8 +129,8 @@ export default function IntroOverlay() {
         style={{
           width: "100%",
           height: "100%",
-          // `contain` keeps the full square logo visible on every aspect ratio;
-          // the gray letterbox blends into the matching overlay background.
+          // The video has an alpha channel, so `contain` shows the full
+          // animation on every aspect ratio with the solid backdrop behind it.
           objectFit: "contain",
         }}
       />

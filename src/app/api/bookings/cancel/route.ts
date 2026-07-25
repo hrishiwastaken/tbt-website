@@ -9,8 +9,11 @@ import {
   notFound,
   parseBody,
 } from "@/server/http";
+import { CANCELLATION_NOTICE_HOURS } from "@/lib/site";
 
-const CUTOFF_HOURS = 12;
+// The window we publish to clients is the window we enforce — imported from
+// the shared site config so the guard and the copy can never diverge.
+const CUTOFF_HOURS = CANCELLATION_NOTICE_HOURS;
 
 const cancelSchema = z.object({
   bookingId: z.string().min(1),

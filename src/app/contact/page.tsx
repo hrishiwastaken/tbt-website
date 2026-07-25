@@ -67,7 +67,7 @@ export default function Contact() {
                     Phone & WhatsApp
                   </h4>
                   <p className="font-dmsans text-sm text-sage leading-relaxed mt-1">
-                    +91 99607 92329
+                    +91 93098 33817
                   </p>
                 </div>
               </div>

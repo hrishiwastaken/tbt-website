@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 // Service-first booking flow:
@@ -25,8 +26,7 @@ const rupees = (minor) => `₹${(minor / 100).toLocaleString("en-IN")}`;
 export default function BookingWizard({ services = [], initialService = "" }) {
   const router = useRouter();
 
-  const preselected =
-    services.find((s) => s.slug === initialService) || null;
+  const preselected = services.find((s) => s.slug === initialService) || null;
 
   const [step, setStep] = useState(preselected ? 2 : 1);
   const [selectedService, setSelectedService] = useState(preselected);
@@ -269,8 +269,8 @@ export default function BookingWizard({ services = [], initialService = "" }) {
               Select a Service
             </h2>
             <p className="text-sage mb-6 text-sm">
-              Choose the kind of session you&apos;re looking for. Next, you
-              will pick the consultant who offers it.
+              Choose the kind of session you&apos;re looking for. Next, you will
+              pick the consultant who offers it.
             </p>
 
             {/* A service reached via /book?service=… is only preselected if it
@@ -597,9 +597,17 @@ export default function BookingWizard({ services = [], initialService = "" }) {
                 >
                   I consent to the collection and secure storage of my contact
                   and health information in accordance with the{" "}
-                  <strong>Privacy Policy</strong> and India IT Act guidelines. I
-                  understand my records are encrypted and accessible only to my
-                  therapist and clinical admins.
+                  <Link
+                    href="/privacy"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-semibold text-forest underline underline-offset-2 hover:text-terracotta"
+                  >
+                    Privacy Policy
+                  </Link>{" "}
+                  and India IT Act guidelines. I understand my records are
+                  encrypted and accessible only to my therapist and clinical
+                  admins.
                 </label>
               </div>
             </form>
@@ -681,8 +689,8 @@ export default function BookingWizard({ services = [], initialService = "" }) {
                   <p className="text-xs text-sage mt-1">
                     You&apos;ll be redirected to a secure checkout — pay with
                     any UPI app (GPay, PhonePe, Paytm, BHIM...) with the amount
-                    pre-filled. Your session is confirmed the moment the
-                    payment succeeds.
+                    pre-filled. Your session is confirmed the moment the payment
+                    succeeds.
                   </p>
                 </div>
               </label>
@@ -728,8 +736,8 @@ export default function BookingWizard({ services = [], initialService = "" }) {
 
             <div className="flex flex-col sm:flex-row justify-between gap-4 pt-6 border-t border-mist/20">
               <span className="text-xs text-sage leading-relaxed max-w-sm">
-                * Note: Sessions can be rescheduled or cancelled up to 12 hours
-                before slot start.
+                * Note: Sessions can be cancelled up to 48 hours, or rescheduled
+                up to 24 hours, before slot start.
               </span>
               <button
                 type="button"

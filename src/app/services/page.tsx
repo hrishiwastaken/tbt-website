@@ -1,7 +1,7 @@
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Clock, Laptop, CheckCircle2 } from "lucide-react";
+import { Clock, Laptop } from "lucide-react";
 import { prisma } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
@@ -202,32 +202,8 @@ export default async function Services() {
   }));
 
   const pricingPlans = [
-    {
-      type: "Standard Consultation",
-      price: "₹3,000",
-      period: "per 50-minute session",
-      description:
-        "Perfect for ongoing individual therapy and general support.",
-      features: [
-        "In-person or Online sessions",
-        "Direct contact with therapist",
-        "HIPAA-secure portal access",
-        "CBT and Somatic materials",
-      ],
-    },
-    {
-      type: "Couples & Family Sessions",
-      price: "₹4,500",
-      period: "per 60 to 75-minute session",
-      description:
-        "Best for collaborative relationship structures and family systems.",
-      features: [
-        "Systemic relational work",
-        "Multi-member participation",
-        "Custom conflict-resolution blueprints",
-        "Dedicated follow-up summaries",
-      ],
-    },
+    { type: "Individual Therapy", price: "₹1,500" },
+    { type: "Couple Therapy", price: "₹2,000" },
   ];
 
   return (
@@ -406,68 +382,32 @@ export default async function Services() {
           </div>
 
           {/* Pricing Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto mb-12">
-            {pricingPlans.map((plan) => {
-              const isRecommended = plan.type.includes("Couples");
-              return (
-                <div
-                  key={plan.type}
-                  className={`rounded-2xl p-8 md:p-12 shadow-warm-soft flex flex-col justify-between relative transition-all duration-300 ${
-                    isRecommended
-                      ? "bg-warm-white border-2 border-teal-sage hover:border-forest-slate"
-                      : "glass-card hover:border-teal-sage/35"
-                  }`}
-                >
-                  {isRecommended && (
-                    <span className="absolute top-0 right-8 -translate-y-1/2 bg-teal-sage text-warm-sand text-[10px] font-bold tracking-wider uppercase px-3.5 py-1 rounded-full shadow-sm">
-                      Most Requested
-                    </span>
-                  )}
-                  <div>
-                    <h3 className="font-cormorant text-2xl font-semibold text-forest-slate mb-2">
-                      {plan.type}
-                    </h3>
-                    <p className="text-sm text-forest-slate/80 mb-6 font-dmsans">
-                      {plan.description}
-                    </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-2xl mx-auto mb-12">
+            {pricingPlans.map((plan) => (
+              <div
+                key={plan.type}
+                className="glass-card rounded-2xl p-8 text-center shadow-warm-soft"
+              >
+                <h3 className="font-cormorant text-xl font-semibold text-forest-slate mb-2">
+                  {plan.type}
+                </h3>
+                <p className="text-3xl md:text-4xl font-cormorant font-semibold text-forest-slate">
+                  {plan.price}
+                </p>
+                <p className="text-xs text-forest-slate/70 mt-1 font-dmsans">
+                  Starting price / session
+                </p>
+              </div>
+            ))}
+          </div>
 
-                    {/* Price */}
-                    <div className="mb-8 flex items-baseline gap-1">
-                      <span className="text-4xl md:text-5xl font-cormorant font-semibold text-forest-slate">
-                        {plan.price}
-                      </span>
-                      <span className="text-xs text-forest-slate/80 font-dmsans">
-                        / {plan.period}
-                      </span>
-                    </div>
-
-                    {/* Features */}
-                    <ul className="space-y-4 mb-8">
-                      {plan.features.map((feat) => (
-                        <li
-                          key={feat}
-                          className="flex items-center gap-3 text-sm text-forest-slate/80 font-dmsans"
-                        >
-                          <CheckCircle2 className="w-4 h-4 text-teal-sage shrink-0" />
-                          <span>{feat}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-
-                  <Link
-                    href="/contact"
-                    className={`w-full text-center text-sm font-semibold py-3.5 rounded-full transition-all block btn-shimmer ${
-                      isRecommended
-                        ? "bg-teal-sage hover:bg-forest-slate text-warm-sand shadow-md hover:shadow-lg hover:-translate-y-0.5"
-                        : "bg-forest-slate hover:bg-teal-sage text-warm-sand hover:-translate-y-0.5"
-                    }`}
-                  >
-                    Book consultation
-                  </Link>
-                </div>
-              );
-            })}
+          <div className="text-center mb-8">
+            <Link
+              href="/contact"
+              className="inline-flex items-center justify-center bg-teal-sage hover:bg-forest-slate text-warm-sand text-sm font-semibold px-8 py-3.5 rounded-full transition-all btn-shimmer"
+            >
+              Book consultation
+            </Link>
           </div>
 
           {/* Sliding scale text */}

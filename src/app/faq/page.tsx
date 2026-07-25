@@ -115,12 +115,12 @@ export default function FAQ() {
     {
       question: "What is the cost per session?",
       answer:
-        "Our standard individual therapy sessions are ₹3,000 for 50 minutes. Couples and family sessions are ₹4,500 for 60 to 75 minutes. We believe that mental health care should be accessible, so we reserve a limited number of sliding-scale slots based on financial hardship and student status.",
+        "Individual therapy sessions are 50 minutes and start at ₹1,500. Couple therapy sessions are also 50 minutes and start at ₹2,000. The exact fee depends on the therapist's experience and area of expertise. We believe that mental health care should be accessible, so we reserve a limited number of sliding-scale slots based on financial hardship and student status.",
     },
     {
       question: "How do I cancel or reschedule?",
       answer:
-        "We have a standard 24-hour cancellation policy. If you need to cancel or reschedule your session, please notify us at least 24 hours in advance. Sessions cancelled with less than 24 hours' notice will be charged at the full session rate, as that hour was reserved specifically for you.",
+        "Cancellations require at least 48 hours' notice, while rescheduling requires at least 24 hours' notice. If you don't stick to these windows, your session will be charged in full, as that hour was reserved specifically for you.",
     },
     {
       question: "Do you work with children?",
@@ -130,7 +130,7 @@ export default function FAQ() {
     {
       question: "What therapeutic approaches do you use?",
       answer:
-        "Our practitioners are trained in a variety of evidence-based modalities, including Cognitive Behavioral Therapy (CBT), Acceptance and Commitment Therapy (ACT), psychodynamic therapy, and trauma-informed systems. We do not use a one-size-fits-all approach; we tailor our methods to your specific goals and personality.",
+        "At The Brain Tea, we don't believe in a one-size-fits-all approach to therapy. Every individual is unique, which is why we tailor therapy to your needs, goals, personality, and life experiences. We practice integrative, evidence-based psychotherapy rather than following a single therapeutic model. This allows our psychologists to thoughtfully draw from different therapeutic approaches, based on their areas of expertise, to create a treatment plan that is best suited to you. As your needs evolve, therapy evolves with you, ensuring that the support you receive remains relevant throughout your journey.",
     },
     {
       question: "How long does therapy typically last?",
@@ -195,7 +195,7 @@ export default function FAQ() {
               Contact Us Form
             </Link>
             <a
-              href="https://wa.me/919960792329?text=Hi!%20I%20have%20a%20few%20questions%20about%20your%20services."
+              href="https://wa.me/919309833817?text=Hi!%20I%20have%20a%20few%20questions%20about%20your%20services."
               target="_blank"
               rel="noopener noreferrer"
               className="border border-teal-sage text-teal-sage hover:bg-teal-sage hover:text-warm-sand font-semibold px-8 py-3.5 rounded-full text-sm transition-all btn-shimmer"

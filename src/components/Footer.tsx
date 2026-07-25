@@ -108,7 +108,7 @@ export default function Footer() {
               <span className="block font-medium text-warm-sand">
                 Phone / WhatsApp:
               </span>
-              +91 99607 92329
+              +91 93098 33817
             </p>
             <p>
               <span className="block font-medium text-warm-sand">Email:</span>
@@ -122,6 +122,27 @@ export default function Footer() {
             </p>
           </div>
         </div>
+      </div>
+
+      {/* Legal / Policy Links */}
+      <div className="max-w-7xl mx-auto px-6 md:px-12 border-t border-muted-sage/20 pt-8 pb-6">
+        <nav className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs font-dmsans">
+          {[
+            { name: "Terms & Conditions", href: "/terms" },
+            { name: "Privacy Policy", href: "/privacy" },
+            { name: "Refund & Cancellation Policy", href: "/refund-policy" },
+            { name: "Shipping & Delivery Policy", href: "/shipping-policy" },
+            { name: "Contact Us", href: "/contact" },
+          ].map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              className="text-warm-sand/70 hover:text-warm-sand transition-colors"
+            >
+              {link.name}
+            </Link>
+          ))}
+        </nav>
       </div>
 
       {/* Bottom Bar */}
