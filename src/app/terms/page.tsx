@@ -2,7 +2,12 @@ import React from "react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import LegalLayout from "@/components/legal/LegalLayout";
-import { SITE_LEGAL_NAME, SITE_URL, CONTACT_EMAIL } from "@/lib/site";
+import {
+  SITE_LEGAL_NAME,
+  SITE_URL,
+  CONTACT_EMAIL,
+  CONTACT_PHONE,
+} from "@/lib/site";
 
 export const metadata: Metadata = {
   title: `Terms & Conditions | ${SITE_LEGAL_NAME}`,
@@ -155,7 +160,8 @@ export default function TermsPage() {
       <h2>12. Contact</h2>
       <p>
         For any questions about these Terms, contact us at{" "}
-        <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a> or through our{" "}
+        <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>, {CONTACT_PHONE},
+        or through our{" "}
         <Link href="/contact">Contact page</Link>.
       </p>
     </LegalLayout>
