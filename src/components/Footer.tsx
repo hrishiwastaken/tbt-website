@@ -25,7 +25,10 @@ export default function Footer() {
             className="flex items-center"
             aria-label="The Brain Tea — Home"
           >
-            <Logo className="w-24 h-24 shadow-warm-soft ring-1 ring-warm-sand/20 shrink-0" />
+            <Logo
+              variant="light"
+              className="w-24 h-24 shadow-warm-soft ring-1 ring-warm-sand/20 shrink-0"
+            />
           </Link>
           <p className="font-dmsans text-sm text-warm-sand/80 leading-relaxed max-w-sm">
             A compassionate, safe, and professional mental health practice
