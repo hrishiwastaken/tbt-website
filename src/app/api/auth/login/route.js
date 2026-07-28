@@ -70,19 +70,16 @@ export async function POST(request) {
     // Each portal accepts exactly one role — a consultant signing in on the
     // admin console is rejected outright rather than being handed an admin
     // session. Unknown/absent `portal` falls back to "admin" so a malformed
-    // request can never widen access.
+    // request can never widen access. The response is identical to a wrong
+    // password (same message, same 401) so a cross-portal attempt can't be
+    // used to confirm which role an email belongs to.
     const requestedPortal = portal === "therapist" ? "therapist" : "admin";
     const allowedRole = requestedPortal === "therapist" ? "THERAPIST" : "ADMIN";
 
     if (user.role !== allowedRole) {
       return NextResponse.json(
-        {
-          error:
-            requestedPortal === "therapist"
-              ? "This login is for consultants only. Use the admin console instead."
-              : "This login is for administrators only. Use the therapist login instead.",
-        },
-        { status: 403 },
+        { error: "Invalid email or password" },
+        { status: 401 },
       );
     }
 
