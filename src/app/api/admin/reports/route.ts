@@ -1,11 +1,11 @@
 import { prisma } from "@/lib/db";
-import { handleApi, requireStaff } from "@/server/http";
+import { handleApi, requireAdmin } from "@/server/http";
 import { minorToRupees } from "@/server/money";
 
 // CSV export of booking + financial records.
 
 export const GET = handleApi(async (request: Request) => {
-  await requireStaff(request);
+  await requireAdmin(request);
 
   const bookings = await prisma.booking.findMany({
     include: { therapist: true, client: true, service: true },

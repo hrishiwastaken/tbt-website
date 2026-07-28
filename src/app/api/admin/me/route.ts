@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
-import { handleApi, requireStaff } from "@/server/http";
+import { handleApi, requireAdmin } from "@/server/http";
 
 export const GET = handleApi(async (request: Request) => {
-  const session = await requireStaff(request);
+  const session = await requireAdmin(request);
   return NextResponse.json({ user: session });
 });

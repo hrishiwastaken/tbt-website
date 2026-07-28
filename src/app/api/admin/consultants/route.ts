@@ -7,7 +7,6 @@ import {
   badRequest,
   parseBody,
   requireAdmin,
-  requireStaff,
 } from "@/server/http";
 import { consultantBalances } from "@/server/services/ledgerService";
 import { getDefaultCommissionBps } from "@/server/services/commissionService";
@@ -18,7 +17,7 @@ import { recordAudit } from "@/server/audit";
 // Consultant roster with live financial balances derived from the ledger.
 
 export const GET = handleApi(async (request: Request) => {
-  await requireStaff(request);
+  await requireAdmin(request);
 
   const [therapists, balances, defaultBps, bookingCounts] = await Promise.all([
     prisma.therapist.findMany({

@@ -29,12 +29,13 @@ function guard(request, { prefix, loginPath, allowedRoles }) {
 export function middleware(request) {
   const { pathname } = request.nextUrl;
 
-  // Admin console: ADMIN and THERAPIST staff can both reach it
+  // Admin console: ADMIN only. A consultant session carries no admin access —
+  // they belong in /therapist, which is scoped to their own data.
   if (pathname.startsWith("/admin") && !pathname.startsWith("/admin/login")) {
     return guard(request, {
       prefix: "/admin",
       loginPath: "/admin/login",
-      allowedRoles: ["ADMIN", "THERAPIST"],
+      allowedRoles: ["ADMIN"],
     });
   }
 

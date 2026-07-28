@@ -9,7 +9,6 @@ import {
   notFound,
   parseBody,
   requireAdmin,
-  requireStaff,
 } from "@/server/http";
 import { isBookingStatus } from "@/server/domain/bookingStatus";
 import {
@@ -27,7 +26,7 @@ import { recordAudit } from "@/server/audit";
 
 export const GET = handleApi(
   async (request: Request, ctx: { params: Promise<{ id: string }> }) => {
-    await requireStaff(request);
+    await requireAdmin(request);
     const { id } = await ctx.params;
 
     const booking = await prisma.booking.findUnique({
@@ -81,7 +80,7 @@ export const PATCH = handleApi(
 
     switch (body.action) {
       case "transition": {
-        const session = await requireStaff(request);
+        const session = await requireAdmin(request);
         if (!isBookingStatus(body.toStatus))
           throw badRequest("Unknown booking status");
         const booking = await transitionBooking({
@@ -94,7 +93,7 @@ export const PATCH = handleApi(
         return NextResponse.json({ booking });
       }
       case "reschedule": {
-        const session = await requireStaff(request);
+        const session = await requireAdmin(request);
         const newDateTime = new Date(body.dateTime);
         if (isNaN(newDateTime.getTime())) throw badRequest("Invalid date");
         const booking = await rescheduleBooking({
@@ -119,7 +118,7 @@ export const PATCH = handleApi(
         return NextResponse.json({ booking });
       }
       case "notes": {
-        const session = await requireStaff(request);
+        const session = await requireAdmin(request);
         const booking = await prisma.booking.update({
           where: { id },
           data: { notes: body.notes ? encryptText(body.notes) : null },

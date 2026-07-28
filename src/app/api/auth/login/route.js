@@ -67,13 +67,20 @@ export async function POST(request) {
       );
     }
 
-    // The consultant portal is therapist-only; the admin console welcomes
-    // both staff roles (a therapist may still prefer the shared console).
-    if (portal === "therapist" && user.role !== "THERAPIST") {
+    // Each portal accepts exactly one role — a consultant signing in on the
+    // admin console is rejected outright rather than being handed an admin
+    // session. Unknown/absent `portal` falls back to "admin" so a malformed
+    // request can never widen access.
+    const requestedPortal = portal === "therapist" ? "therapist" : "admin";
+    const allowedRole = requestedPortal === "therapist" ? "THERAPIST" : "ADMIN";
+
+    if (user.role !== allowedRole) {
       return NextResponse.json(
         {
           error:
-            "This login is for consultants only. Use the admin console instead.",
+            requestedPortal === "therapist"
+              ? "This login is for consultants only. Use the admin console instead."
+              : "This login is for administrators only. Use the therapist login instead.",
         },
         { status: 403 },
       );
@@ -86,7 +93,7 @@ export async function POST(request) {
       role: user.role,
     });
 
-    const redirectUrl = portal === "therapist" ? "/therapist" : "/admin";
+    const redirectUrl = requestedPortal === "therapist" ? "/therapist" : "/admin";
 
     const response = NextResponse.json({
       message: "Login successful",
