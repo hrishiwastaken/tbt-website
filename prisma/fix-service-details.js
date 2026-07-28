@@ -18,11 +18,16 @@ async function main() {
     where: { slug: "career-academic-counselling" },
     data: { durationMinutes: 50 },
   });
-  await prisma.service.update({
+  // Deactivated rather than deleted: Booking.serviceId is a required,
+  // non-cascading FK, so hard-deleting a service with any booking history
+  // against it would fail (or orphan data if it didn't). isActive: false
+  // is what the public services pages already filter on, so this removes
+  // it from the site without touching past bookings.
+  await prisma.service.updateMany({
     where: { slug: "somatic-experiencing" },
-    data: { availability: ["Online", "Offline"] },
+    data: { isActive: false },
   });
-  console.log("Service details updated: couples/career durations -> 50, somatic-experiencing -> Online + Offline.");
+  console.log("Service details updated: couples/career durations -> 50, somatic-experiencing deactivated.");
 }
 
 main()

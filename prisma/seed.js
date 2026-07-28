@@ -157,25 +157,6 @@ async function main() {
       process: null,
     },
     {
-      name: "Somatic Experiencing",
-      slug: "somatic-experiencing",
-      durationMinutes: 50,
-      priceMinor: 180000,
-      description:
-        "A body-centric therapy focusing on trauma resolution, releasing trapped nervous system stress, and restoring equilibrium.",
-      tagline: "Release what the body has been holding.",
-      image: IMG("1447752875215-b2761acb3c5d"),
-      suitableFor: [
-        "Trauma & PTSD",
-        "Chronic stress",
-        "Nervous-system regulation",
-        "Anxiety",
-        "Somatic complaints",
-      ],
-      availability: ["Online", "Offline"],
-      process: null,
-    },
-    {
       name: "Mental Health Assessment",
       slug: "mental-health-assessment",
       durationMinutes: 75,
@@ -264,7 +245,7 @@ async function main() {
       password: "DrRohan123!",
       name: "Dr. Rohan Gupta",
       slug: "dr-rohan-gupta",
-      bio: "Specialist in Somatic Experiencing and trauma recovery, providing clients with practical, scientifically-grounded tools to resolve physiological fight-or-flight blockages.",
+      bio: "Specialist in trauma recovery and nervous-system regulation, providing clients with practical, scientifically-grounded tools to resolve physiological fight-or-flight blockages.",
       feeMinor: 130000,
       commissionBps: 3500, // negotiated override
       status: "APPROVED",
@@ -273,7 +254,7 @@ async function main() {
       activeFromDay: -HISTORY_DAYS,
       activeToDay: FUTURE_DAYS,
       schedule: { days: [1, 2, 3, 4, 5, 6], hours: [9, 10, 11] },
-      serviceSlugs: ["individual-therapy", "somatic-experiencing"],
+      serviceSlugs: ["individual-therapy"],
     },
     {
       email: "kavita@thebraintea.com",
@@ -321,7 +302,7 @@ async function main() {
       activeFromDay: -HISTORY_DAYS,
       activeToDay: -50, // stopped taking sessions 50 days ago
       schedule: { days: [1, 2, 3, 4, 5], hours: [9, 10, 11, 13, 14] },
-      serviceSlugs: ["somatic-experiencing", "individual-therapy"],
+      serviceSlugs: ["individual-therapy"],
     },
     {
       email: null,
