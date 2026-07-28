@@ -6,6 +6,7 @@ import Surface from "../../../components/ui/Surface";
 import Badge from "../../../components/ui/Badge";
 import Button from "../../../components/ui/Button";
 import { prisma } from "@/lib/db";
+import { formatServiceDuration } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
 
@@ -67,7 +68,7 @@ export default async function ServiceDetail({
           <div className="flex flex-wrap gap-2 mb-8">
             <Badge tone="sand">
               <Clock className="w-3 h-3" />
-              {service.durationMinutes} min
+              {formatServiceDuration(service.slug, service.durationMinutes)}
             </Badge>
             {service.availability.map((mode) => (
               <Badge key={mode} tone="sand">

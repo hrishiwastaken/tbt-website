@@ -139,7 +139,7 @@ async function main() {
     {
       name: "Couples & Family Therapy",
       slug: "couples-counseling",
-      durationMinutes: 60,
+      durationMinutes: 50,
       priceMinor: 220000,
       description:
         "Structured mediation to enhance relational dynamics, dismantle communication barriers, and restore intimacy — for couples and families at any stage.",
@@ -172,7 +172,7 @@ async function main() {
         "Anxiety",
         "Somatic complaints",
       ],
-      availability: ["Offline"],
+      availability: ["Online", "Offline"],
       process: null,
     },
     {
@@ -198,7 +198,7 @@ async function main() {
     {
       name: "Career & Academic Counselling",
       slug: "career-academic-counselling",
-      durationMinutes: 45,
+      durationMinutes: 50,
       priceMinor: 140000,
       description:
         "Structured guidance for career transitions, academic stress, and decision-making clarity.",
