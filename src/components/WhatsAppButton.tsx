@@ -42,11 +42,6 @@ export default function WhatsAppButton() {
         whileTap={{ scale: 0.95 }}
         aria-label="Contact us on WhatsApp"
       >
-        <span
-          className="absolute inset-0 rounded-full bg-[#25D366] opacity-40 animate-ping pointer-events-none motion-reduce:animate-none"
-          style={{ animationDuration: "2s" }}
-        />
-
         <svg
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 24 24"
