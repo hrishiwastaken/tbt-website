@@ -60,12 +60,13 @@ function splitPayment({
 const invoiceNumberFor = (bookingId, year) =>
   `INV-${year}-${bookingId.slice(0, 6).toUpperCase()}`;
 
-// ── Commission rate history: two eras, oldest first ─────────────────────
+// ── Commission rate history ───────────────────────────────────────────
 // Bookings snapshot whichever rate was in effect at their creation time
-// (unless the consultant carries a personal override).
+// (unless the consultant carries a personal override). Platform default
+// has been a flat 30% throughout; Dr. Rohan Gupta (35%) and Dr. Kavita Rao
+// (32%) carry individually negotiated overrides above that default.
 const COMMISSION_ERAS = [
   { effectiveFrom: addDays(new Date(), -400), commissionBps: 3000 },
-  { effectiveFrom: addDays(new Date(), -90), commissionBps: 3200 },
 ];
 function defaultBpsAt(date) {
   let bps = COMMISSION_ERAS[0].commissionBps;
