@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Clock, Laptop } from "lucide-react";
 import { prisma } from "@/lib/db";
+import { formatServiceDuration } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
 
@@ -195,7 +196,7 @@ export default async function Services() {
   const services = dbServices.map((s) => ({
     slug: s.slug,
     title: s.name,
-    duration: `${s.durationMinutes} Minutes`,
+    duration: formatServiceDuration(s.slug, s.durationMinutes),
     format: formatLabel(s.availability),
     description: s.description,
     image: s.image || FALLBACK_IMAGE,

@@ -10,12 +10,11 @@ import {
   parseBody,
   parsePagination,
   requireAdmin,
-  requireStaff,
 } from "@/server/http";
 import { recordAudit } from "@/server/audit";
 
 export const GET = handleApi(async (request: Request) => {
-  await requireStaff(request);
+  await requireAdmin(request);
   const { searchParams } = new URL(request.url);
   const pagination = parsePagination(searchParams, 25);
 

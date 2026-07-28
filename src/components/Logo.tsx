@@ -2,23 +2,33 @@ import React from "react";
 import Image from "next/image";
 
 /**
- * The Brain Tea brand logo — the exact brand asset (public/tbt-logo.png),
- * presented as a circular badge. `className` controls the box size
- * (e.g. "w-14 h-14"). The image is zoomed slightly so the emblem fills
- * the circle instead of floating in the file's built-in padding.
+ * The Brain Tea brand logo — a transparent-background mark, trimmed to its
+ * own artwork (no badge, no circular frame or fill around it), presented at
+ * the size `className` specifies (e.g. "w-14 h-14").
+ *
+ * `variant="dark"` (default) is the forest-green mark for light surfaces
+ * (header, admin/therapist chrome). `variant="light"` swaps in the
+ * warm-white recolor for dark surfaces (e.g. the footer), since the dark
+ * ink would otherwise wash out against a dark background.
  */
-export default function Logo({ className = "" }: { className?: string }) {
+export default function Logo({
+  className = "",
+  variant = "dark",
+}: {
+  className?: string;
+  variant?: "dark" | "light";
+}) {
+  const src = variant === "light" ? "/tbt-logo-light.png" : "/tbt-logo.png";
   return (
-    <span
-      className={`relative inline-block overflow-hidden rounded-full ${className}`}
-    >
+    <span className={`relative inline-block ${className}`}>
       <Image
-        src="/tbt-logo.png"
+        src={src}
         alt="The Brain Tea"
         fill
         sizes="128px"
-        className="object-cover scale-[1.42]"
+        className="object-contain"
         priority
+        unoptimized
       />
     </span>
   );

@@ -6,7 +6,6 @@ import {
   notFound,
   parseBody,
   requireAdmin,
-  requireStaff,
 } from "@/server/http";
 import { consultantBalance } from "@/server/services/ledgerService";
 import {
@@ -21,7 +20,7 @@ import { recordAudit } from "@/server/audit";
 
 export const GET = handleApi(
   async (request: Request, ctx: { params: Promise<{ id: string }> }) => {
-    await requireStaff(request);
+    await requireAdmin(request);
     const { id } = await ctx.params;
 
     const therapist = await prisma.therapist.findUnique({

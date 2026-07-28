@@ -10,7 +10,6 @@ import {
   parseBody,
   parsePagination,
   requireAdmin,
-  requireStaff,
 } from "@/server/http";
 import { BOOKING_STATUSES } from "@/server/domain/bookingStatus";
 import { COUNSELING_TYPES } from "@/server/domain/counselingType";
@@ -23,7 +22,7 @@ import { rupeesToMinor } from "@/server/money";
 const SORTABLE = new Set(["dateTime", "createdAt", "amountMinor", "status"]);
 
 export const GET = handleApi(async (request: Request) => {
-  await requireStaff(request);
+  await requireAdmin(request);
   const { searchParams } = new URL(request.url);
   const pagination = parsePagination(searchParams);
 

@@ -5,7 +5,7 @@ import {
   handleApi,
   paginated,
   parsePagination,
-  requireStaff,
+  requireAdmin,
 } from "@/server/http";
 import { financialSummary } from "@/server/services/ledgerService";
 
@@ -13,7 +13,7 @@ import { financialSummary } from "@/server/services/ledgerService";
 // lifetime financial summary strip.
 
 export const GET = handleApi(async (request: Request) => {
-  await requireStaff(request);
+  await requireAdmin(request);
   const { searchParams } = new URL(request.url);
   const pagination = parsePagination(searchParams);
 

@@ -60,12 +60,13 @@ function splitPayment({
 const invoiceNumberFor = (bookingId, year) =>
   `INV-${year}-${bookingId.slice(0, 6).toUpperCase()}`;
 
-// ── Commission rate history: two eras, oldest first ─────────────────────
+// ── Commission rate history ───────────────────────────────────────────
 // Bookings snapshot whichever rate was in effect at their creation time
-// (unless the consultant carries a personal override).
+// (unless the consultant carries a personal override). Platform default
+// has been a flat 30% throughout; Dr. Rohan Gupta (35%) and Dr. Kavita Rao
+// (32%) carry individually negotiated overrides above that default.
 const COMMISSION_ERAS = [
   { effectiveFrom: addDays(new Date(), -400), commissionBps: 3000 },
-  { effectiveFrom: addDays(new Date(), -90), commissionBps: 3200 },
 ];
 function defaultBpsAt(date) {
   let bps = COMMISSION_ERAS[0].commissionBps;
@@ -139,7 +140,7 @@ async function main() {
     {
       name: "Couples & Family Therapy",
       slug: "couples-counseling",
-      durationMinutes: 60,
+      durationMinutes: 50,
       priceMinor: 220000,
       description:
         "Structured mediation to enhance relational dynamics, dismantle communication barriers, and restore intimacy — for couples and families at any stage.",
@@ -152,25 +153,6 @@ async function main() {
         "Parenting challenges",
         "Premarital counselling",
         "Communication skills",
-      ],
-      availability: ["Offline"],
-      process: null,
-    },
-    {
-      name: "Somatic Experiencing",
-      slug: "somatic-experiencing",
-      durationMinutes: 50,
-      priceMinor: 180000,
-      description:
-        "A body-centric therapy focusing on trauma resolution, releasing trapped nervous system stress, and restoring equilibrium.",
-      tagline: "Release what the body has been holding.",
-      image: IMG("1447752875215-b2761acb3c5d"),
-      suitableFor: [
-        "Trauma & PTSD",
-        "Chronic stress",
-        "Nervous-system regulation",
-        "Anxiety",
-        "Somatic complaints",
       ],
       availability: ["Offline"],
       process: null,
@@ -198,7 +180,7 @@ async function main() {
     {
       name: "Career & Academic Counselling",
       slug: "career-academic-counselling",
-      durationMinutes: 45,
+      durationMinutes: 50,
       priceMinor: 140000,
       description:
         "Structured guidance for career transitions, academic stress, and decision-making clarity.",
@@ -264,7 +246,7 @@ async function main() {
       password: "DrRohan123!",
       name: "Dr. Rohan Gupta",
       slug: "dr-rohan-gupta",
-      bio: "Specialist in Somatic Experiencing and trauma recovery, providing clients with practical, scientifically-grounded tools to resolve physiological fight-or-flight blockages.",
+      bio: "Specialist in trauma recovery and nervous-system regulation, providing clients with practical, scientifically-grounded tools to resolve physiological fight-or-flight blockages.",
       feeMinor: 130000,
       commissionBps: 3500, // negotiated override
       status: "APPROVED",
@@ -273,7 +255,7 @@ async function main() {
       activeFromDay: -HISTORY_DAYS,
       activeToDay: FUTURE_DAYS,
       schedule: { days: [1, 2, 3, 4, 5, 6], hours: [9, 10, 11] },
-      serviceSlugs: ["individual-therapy", "somatic-experiencing"],
+      serviceSlugs: ["individual-therapy"],
     },
     {
       email: "kavita@thebraintea.com",
@@ -321,7 +303,7 @@ async function main() {
       activeFromDay: -HISTORY_DAYS,
       activeToDay: -50, // stopped taking sessions 50 days ago
       schedule: { days: [1, 2, 3, 4, 5], hours: [9, 10, 11, 13, 14] },
-      serviceSlugs: ["somatic-experiencing", "individual-therapy"],
+      serviceSlugs: ["individual-therapy"],
     },
     {
       email: null,

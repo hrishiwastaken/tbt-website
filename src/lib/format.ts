@@ -49,6 +49,18 @@ export function formatDateTime(value: string | Date): string {
   return `${formatDate(value)}, ${formatTime(value)}`;
 }
 
+// Mental Health Assessment sessions vary in length by design (the intake
+// determines how much testing is needed), so the public services pages show
+// this instead of the DB's durationMinutes — which still drives real slot
+// scheduling and stays a normal number there.
+export function formatServiceDuration(
+  slug: string,
+  durationMinutes: number,
+): string {
+  if (slug === "mental-health-assessment") return "Depending on Assessment";
+  return `${durationMinutes} Minutes`;
+}
+
 export function titleCase(value: string): string {
   return value
     .toLowerCase()

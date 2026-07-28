@@ -47,8 +47,6 @@ export async function requireSession(
 
 export const requireAdmin = (request: Request) =>
   requireSession(request, ["ADMIN"]);
-export const requireStaff = (request: Request) =>
-  requireSession(request, ["ADMIN", "THERAPIST"]);
 
 export interface TherapistContext {
   session: Session;
