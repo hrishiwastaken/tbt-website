@@ -404,20 +404,11 @@ export default async function Services() {
 
           <div className="text-center mb-8">
             <Link
-              href="/contact"
+              href="/book"
               className="inline-flex items-center justify-center bg-teal-sage hover:bg-forest-slate text-warm-sand text-sm font-semibold px-8 py-3.5 rounded-full transition-all btn-shimmer"
             >
               Book consultation
             </Link>
-          </div>
-
-          {/* Sliding scale text */}
-          <div className="text-center max-w-lg mx-auto">
-            <p className="text-xs md:text-sm text-forest-slate/75 leading-relaxed italic font-dmsans">
-              * Sliding scale slots are reserved for students, low-income
-              individuals, and those facing sudden economic hardships. Please
-              speak with us during your initial consultation.
-            </p>
           </div>
         </div>
       </section>
