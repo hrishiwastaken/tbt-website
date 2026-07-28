@@ -15,9 +15,10 @@ import {
   Settings,
   Menu,
   X,
+  GraduationCap,
 } from "lucide-react";
-import { SITE_NAME } from "../../lib/site";
 import { NavLink } from "../../components/ui/NavLink";
+import Logo from "../../components/Logo";
 
 export default function AdminLayout({ children }) {
   const router = useRouter();
@@ -78,6 +79,11 @@ export default function AdminLayout({ children }) {
     { name: "Payouts", href: "/admin/payouts", icon: Banknote },
     { name: "Clients", href: "/admin/clients", icon: Users },
     { name: "Transactions", href: "/admin/payments", icon: CreditCard },
+    {
+      name: "Internship Applications",
+      href: "/admin/internship-applications",
+      icon: GraduationCap,
+    },
     { name: "Settings", href: "/admin/settings", icon: Settings },
   ];
 
@@ -122,11 +128,8 @@ export default function AdminLayout({ children }) {
     >
       {/* Mobile top bar */}
       <div className="md:hidden flex items-center justify-between bg-surface border-b border-ocean/10 px-4 py-3">
-        <Link
-          href="/"
-          className="font-cormorant font-semibold text-xl text-ocean-deep"
-        >
-          {SITE_NAME}
+        <Link href="/" className="flex items-center" aria-label="The Brain Tea — Home">
+          <Logo className="h-9 w-9 shrink-0" />
         </Link>
         <button
           type="button"
@@ -148,9 +151,10 @@ export default function AdminLayout({ children }) {
           <div className="px-3 mb-8">
             <Link
               href="/"
-              className="font-cormorant font-semibold text-2xl text-ocean-deep block hover:opacity-90 leading-tight"
+              className="flex items-center hover:opacity-90"
+              aria-label="The Brain Tea — Home"
             >
-              {SITE_NAME}
+              <Logo className="h-12 w-12 shrink-0" />
             </Link>
             <span className="font-dmsans text-[10px] text-ocean uppercase tracking-widest font-bold flex items-center gap-1 mt-1">
               <ShieldAlert size={10} /> Admin Console

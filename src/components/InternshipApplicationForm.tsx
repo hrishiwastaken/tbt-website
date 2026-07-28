@@ -7,10 +7,33 @@ import Surface from "./ui/Surface";
 
 export default function InternshipApplicationForm() {
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setSubmitted(true);
+    setErrorMsg("");
+    setSubmitting(true);
+
+    try {
+      const formData = new FormData(e.currentTarget);
+      const res = await fetch("/api/internship", {
+        method: "POST",
+        body: formData,
+      });
+      const data = await res.json();
+
+      if (res.ok) {
+        setSubmitted(true);
+      } else {
+        setErrorMsg(data.error || "Something went wrong. Please try again.");
+        setSubmitting(false);
+      }
+    } catch (err) {
+      console.error(err);
+      setErrorMsg("A network error occurred. Please try again.");
+      setSubmitting(false);
+    }
   };
 
   if (submitted) {
@@ -20,9 +43,8 @@ export default function InternshipApplicationForm() {
           Thanks for your interest!
         </h3>
         <p className="text-sm text-charcoal/80 leading-relaxed">
-          This is a prototype of the application flow -- our real intake process
-          isn&apos;t connected yet. Please reach out via the Contact page in the
-          meantime.
+          Your application has been received. We&apos;ll review it and reach
+          out by email if it&apos;s a good fit.
         </p>
       </Surface>
     );
@@ -30,18 +52,39 @@ export default function InternshipApplicationForm() {
 
   return (
     <Surface variant="raised" radius="surface" className="p-6 md:p-10">
+      {errorMsg && (
+        <div className="mb-6 p-4 rounded-xl bg-rose-50 border border-red-200 text-red-700 text-sm font-medium">
+          {errorMsg}
+        </div>
+      )}
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Input label="Full Name" id="fullName" required />
-          <Input label="Email" id="email" type="email" required />
+          <Input label="Full Name" id="fullName" name="fullName" required />
+          <Input
+            label="Email"
+            id="email"
+            name="email"
+            type="email"
+            required
+          />
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Input label="Phone" id="phone" type="tel" required />
-          <Input label="College / University" id="college" required />
+          <Input label="Phone" id="phone" name="phone" type="tel" required />
+          <Input
+            label="College / University"
+            id="college"
+            name="college"
+            required
+          />
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Input label="Current Course" id="course" required />
-          <Input label="Year / Semester" id="year" required />
+          <Input label="Current Course" id="course" name="course" required />
+          <Input
+            label="Year / Semester"
+            id="year"
+            name="yearOrSemester"
+            required
+          />
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
@@ -53,6 +96,7 @@ export default function InternshipApplicationForm() {
             </label>
             <select
               id="internshipType"
+              name="internshipType"
               required
               className="floating-input"
               defaultValue=""
@@ -69,11 +113,18 @@ export default function InternshipApplicationForm() {
           <Input
             label="Preferred Start Date"
             id="startDate"
+            name="preferredStart"
             type="date"
             required
           />
         </div>
-        <Textarea label="Statement of Purpose" id="sop" required rows={5} />
+        <Textarea
+          label="Statement of Purpose"
+          id="sop"
+          name="statementOfPurpose"
+          required
+          rows={5}
+        />
         <div>
           <label
             htmlFor="resume"
@@ -83,6 +134,7 @@ export default function InternshipApplicationForm() {
           </label>
           <input
             id="resume"
+            name="resume"
             type="file"
             accept=".pdf,.doc,.docx"
             required
@@ -90,8 +142,13 @@ export default function InternshipApplicationForm() {
           />
         </div>
         <div className="pt-2">
-          <Button type="submit" size="lg" className="w-full sm:w-auto">
-            Submit Application
+          <Button
+            type="submit"
+            size="lg"
+            className="w-full sm:w-auto"
+            disabled={submitting}
+          >
+            {submitting ? "Submitting..." : "Submit Application"}
           </Button>
         </div>
       </form>
