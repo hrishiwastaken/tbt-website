@@ -12,6 +12,8 @@ export const SITE_URL = "https://www.thebraintea.com";
 /** Effective / last-updated date shown on the legal pages. */
 export const LEGAL_EFFECTIVE_DATE = "24 July 2026";
 
+export const INSTAGRAM_URL = "https://www.instagram.com/thebraintea.community";
+
 export const WHATSAPP_NUMBER = "919309833817";
 export const WHATSAPP_MESSAGE =
   "Hello! I'd like to book an appointment at The Brain Tea. Could you please let me know your availability?";

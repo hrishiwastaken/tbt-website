@@ -2,12 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { hashPassword } from "@/lib/auth";
-import {
-  handleApi,
-  badRequest,
-  parseBody,
-  requireAdmin,
-} from "@/server/http";
+import { handleApi, badRequest, parseBody, requireAdmin } from "@/server/http";
 import { consultantBalances } from "@/server/services/ledgerService";
 import { getDefaultCommissionBps } from "@/server/services/commissionService";
 import { isValidCommissionBps } from "@/server/domain/commission";
@@ -23,7 +18,10 @@ export const GET = handleApi(async (request: Request) => {
     prisma.therapist.findMany({
       include: {
         user: { select: { email: true } },
-        services: { select: { id: true, name: true }, orderBy: { name: "asc" } },
+        services: {
+          select: { id: true, name: true },
+          orderBy: { name: "asc" },
+        },
       },
       orderBy: { name: "asc" },
     }),
@@ -115,7 +113,11 @@ export const POST = handleApi(async (request: Request) => {
         status: body.status,
         isActive: body.status === "APPROVED",
         ...(body.serviceIds && body.serviceIds.length > 0
-          ? { services: { connect: body.serviceIds.map((sid) => ({ id: sid })) } }
+          ? {
+              services: {
+                connect: body.serviceIds.map((sid) => ({ id: sid })),
+              },
+            }
           : {}),
       },
     });

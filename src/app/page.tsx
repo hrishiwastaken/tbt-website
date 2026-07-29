@@ -390,7 +390,6 @@ export default function Home() {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
             {/* Left Column: Portrait in Arch Frame */}
             <div className="lg:col-span-5 relative p-4 w-full max-w-sm mx-auto">
-              <div className="absolute -inset-1 border border-teal-sage/20 rounded-t-full -z-10 translate-x-4 translate-y-4" />
               <div className="relative aspect-[4/5] rounded-t-full overflow-hidden shadow-warm-soft bg-warm-tan border border-muted-sage/35">
                 <Image
                   src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=800&q=80"

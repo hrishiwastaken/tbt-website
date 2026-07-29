@@ -1,6 +1,11 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import { handleApi, requireAdmin, parsePagination, paginated } from "@/server/http";
+import {
+  handleApi,
+  requireAdmin,
+  parsePagination,
+  paginated,
+} from "@/server/http";
 
 // Internship applications submitted via the public /internship page.
 // Resume bytes are intentionally excluded here — fetched separately via

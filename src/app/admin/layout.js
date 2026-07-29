@@ -128,7 +128,11 @@ export default function AdminLayout({ children }) {
     >
       {/* Mobile top bar */}
       <div className="md:hidden flex items-center justify-between bg-surface border-b border-ocean/10 px-4 py-3">
-        <Link href="/" className="flex items-center" aria-label="The Brain Tea — Home">
+        <Link
+          href="/"
+          className="flex items-center"
+          aria-label="The Brain Tea — Home"
+        >
           <Logo className="h-9 w-9 shrink-0" />
         </Link>
         <button

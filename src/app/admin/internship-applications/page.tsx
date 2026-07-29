@@ -137,9 +137,7 @@ export default function AdminInternshipApplicationsPage() {
                       <div className="font-semibold text-ocean-deep">
                         {row.fullName}
                       </div>
-                      <div className="text-xs text-ink-muted">
-                        {row.email}
-                      </div>
+                      <div className="text-xs text-ink-muted">{row.email}</div>
                     </td>
                     <td className="px-3 py-3.5 text-xs text-ink-muted">
                       {row.internshipType === "graduate"
@@ -161,15 +159,16 @@ export default function AdminInternshipApplicationsPage() {
             </table>
           </div>
         )}
-        <Pager page={page} pageCount={pageCount} total={total} onPage={setPage} />
+        <Pager
+          page={page}
+          pageCount={pageCount}
+          total={total}
+          onPage={setPage}
+        />
       </Panel>
 
       {viewing && (
-        <Modal
-          title={viewing.fullName}
-          onClose={() => setViewing(null)}
-          wide
-        >
+        <Modal title={viewing.fullName} onClose={() => setViewing(null)} wide>
           <div className="space-y-4 font-dmsans">
             <div className="grid grid-cols-1 gap-3 text-sm sm:grid-cols-2">
               <div>

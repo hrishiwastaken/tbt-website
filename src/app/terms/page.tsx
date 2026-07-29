@@ -160,9 +160,8 @@ export default function TermsPage() {
       <h2>12. Contact</h2>
       <p>
         For any questions about these Terms, contact us at{" "}
-        <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>, {CONTACT_PHONE},
-        or through our{" "}
-        <Link href="/contact">Contact page</Link>.
+        <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>, {CONTACT_PHONE}
+        , or through our <Link href="/contact">Contact page</Link>.
       </p>
     </LegalLayout>
   );

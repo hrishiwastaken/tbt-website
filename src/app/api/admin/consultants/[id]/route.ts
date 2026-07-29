@@ -1,12 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
-import {
-  handleApi,
-  notFound,
-  parseBody,
-  requireAdmin,
-} from "@/server/http";
+import { handleApi, notFound, parseBody, requireAdmin } from "@/server/http";
 import { consultantBalance } from "@/server/services/ledgerService";
 import {
   getDefaultCommissionBps,

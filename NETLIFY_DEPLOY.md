@@ -104,6 +104,7 @@ Netlify scheduled functions, point any external cron at
 `POST /api/cron/reconcile-payments` with `Authorization: Bearer $CRON_SECRET`.)
 
 Notes:
+
 - Refunds executed from the admin console go back through PhonePe to the
   payer's UPI account; they show as "processing" until PhonePe confirms.
 - Admin-scheduled appointments with "fee already paid" always record through

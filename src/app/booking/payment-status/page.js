@@ -213,9 +213,7 @@ function PaymentStatusInner() {
   if (state === "REFUND_PENDING" || state === "REFUNDED") {
     return (
       <StatusShell
-        title={
-          state === "REFUNDED" ? "Payment refunded" : "Refund on its way"
-        }
+        title={state === "REFUNDED" ? "Payment refunded" : "Refund on its way"}
         tone="info"
         body={
           state === "REFUNDED"
@@ -301,9 +299,9 @@ function StatusShell({ title, body, tone, action, error, spinner = false }) {
         )}
         {action}
         <p className="mt-8 text-[11px] leading-relaxed text-sage/80">
-          Payments are verified directly with the payment gateway. You are
-          never charged for an unconfirmed session — failed or expired
-          payments are reversed automatically by UPI.
+          Payments are verified directly with the payment gateway. You are never
+          charged for an unconfirmed session — failed or expired payments are
+          reversed automatically by UPI.
         </p>
       </div>
     </div>

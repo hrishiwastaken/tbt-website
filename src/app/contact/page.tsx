@@ -1,6 +1,14 @@
-import React, { Suspense } from "react";
-import { Phone, Mail, MapPin, Clock, Instagram, Linkedin } from "lucide-react";
-import ContactForm from "@/components/ContactForm";
+import React from "react";
+import {
+  Phone,
+  Mail,
+  MapPin,
+  Clock,
+  Instagram,
+  Linkedin,
+  MessageCircle,
+} from "lucide-react";
+import { INSTAGRAM_URL, WHATSAPP_URL } from "@/lib/site";
 
 export default function Contact() {
   return (
@@ -106,7 +114,7 @@ export default function Contact() {
             {/* Social Icons */}
             <div className="flex items-center gap-4 pt-2">
               <a
-                href="https://instagram.com"
+                href={INSTAGRAM_URL}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="p-3 bg-sand hover:bg-mist/30 hover:text-forest rounded-full text-sage transition-all"
@@ -144,17 +152,31 @@ export default function Contact() {
             </div>
           </div>
 
-          {/* Right Column: Appointment Request Form */}
+          {/* Right Column: WhatsApp CTA */}
           <div className="lg:col-span-7">
-            <Suspense
-              fallback={
-                <div className="bg-warm-white p-8 rounded-2xl shadow-warm-soft border border-mist/20 text-center py-20 font-dmsans text-sage">
-                  Loading Request Form...
-                </div>
-              }
-            >
-              <ContactForm />
-            </Suspense>
+            <div className="glass-card p-8 md:p-12 rounded-2xl border border-mist/30 shadow-warm-soft flex flex-col items-center text-center gap-6">
+              <div className="p-4 bg-[#25D366]/10 rounded-full text-[#25D366]">
+                <MessageCircle className="w-10 h-10" />
+              </div>
+              <div>
+                <h3 className="font-cormorant text-3xl font-semibold text-charcoal mb-3">
+                  Chat With Us on WhatsApp
+                </h3>
+                <p className="font-dmsans text-sm text-sage leading-relaxed max-w-md">
+                  For the fastest response, message us directly on WhatsApp and
+                  we&apos;ll help you find the right support or book a session.
+                </p>
+              </div>
+              <a
+                href={WHATSAPP_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 bg-[#25D366] hover:bg-[#1ebe5a] text-white font-medium px-8 py-3 rounded-full transition-colors shadow-sm hover:shadow-md"
+              >
+                <MessageCircle className="w-5 h-5" />
+                Start WhatsApp Chat
+              </a>
+            </div>
           </div>
         </div>
       </section>

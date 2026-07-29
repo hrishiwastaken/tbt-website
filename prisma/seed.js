@@ -969,7 +969,7 @@ async function main() {
       {
         clientName: "Priyanka Roy",
         quote:
-          "Dr. Rohan's somatic practices changed how I handle work-related stress. The physical deceleration exercises have had a lasting impact on my day-to-day life.",
+          "Dr. Rohan's therapeutic techniques changed how I handle work-related stress. The physical deceleration exercises have had a lasting impact on my day-to-day life.",
         status: "APPROVED",
         rating: 5,
       },

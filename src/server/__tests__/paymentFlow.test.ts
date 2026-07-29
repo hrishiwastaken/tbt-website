@@ -108,11 +108,7 @@ const clientInput = (n: number) => ({
 // the suite runs (weekend-skip can collapse adjacent daysAhead onto the same
 // Monday, so spacing by whole weeks is the reliable guarantee). The legacy
 // daysAhead/hour params are ignored.
-async function bookPayNow(
-  n: number,
-  _daysAhead?: number,
-  _hour?: number,
-) {
+async function bookPayNow(n: number, _daysAhead?: number, _hour?: number) {
   const { booking, payment } = await createBooking({
     therapistSlug: SLUG,
     serviceSlug: SERVICE_SLUG,
@@ -617,7 +613,10 @@ suite("async payment flow & races", () => {
       providerRefundId: "RFD_RECON",
       status: "PROCESSING",
     };
-    await executeRefund({ bookingId: second.booking.id, session: adminSession });
+    await executeRefund({
+      bookingId: second.booking.id,
+      session: adminSession,
+    });
 
     gw.statusResult = {
       status: "SUCCEEDED",

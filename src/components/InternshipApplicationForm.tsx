@@ -43,8 +43,8 @@ export default function InternshipApplicationForm() {
           Thanks for your interest!
         </h3>
         <p className="text-sm text-charcoal/80 leading-relaxed">
-          Your application has been received. We&apos;ll review it and reach
-          out by email if it&apos;s a good fit.
+          Your application has been received. We&apos;ll review it and reach out
+          by email if it&apos;s a good fit.
         </p>
       </Surface>
     );
@@ -60,13 +60,7 @@ export default function InternshipApplicationForm() {
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <Input label="Full Name" id="fullName" name="fullName" required />
-          <Input
-            label="Email"
-            id="email"
-            name="email"
-            type="email"
-            required
-          />
+          <Input label="Email" id="email" name="email" type="email" required />
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <Input label="Phone" id="phone" name="phone" type="tel" required />

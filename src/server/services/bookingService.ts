@@ -137,7 +137,9 @@ export async function createBooking(input: CreateBookingInput) {
     }
     const service = await tx.service.findUnique({
       where: { slug: input.serviceSlug },
-      include: { therapists: { where: { id: therapist.id }, select: { id: true } } },
+      include: {
+        therapists: { where: { id: therapist.id }, select: { id: true } },
+      },
     });
     if (!service || !service.isActive) throw notFound("Service not found");
     // The service-first flow only ever offers consultants who provide the
@@ -524,9 +526,7 @@ export async function scheduleAdminBooking(input: ScheduleAdminBookingInput) {
     });
     if (!therapist) throw notFound("Consultant not found");
     if (!therapist.isActive || therapist.status !== "APPROVED") {
-      throw conflict(
-        "This consultant is not currently accepting appointments",
-      );
+      throw conflict("This consultant is not currently accepting appointments");
     }
 
     const service = await resolveCounselingService(tx, input.counselingType);

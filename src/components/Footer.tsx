@@ -3,7 +3,9 @@
 import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { Instagram } from "lucide-react";
 import Logo from "./Logo";
+import { INSTAGRAM_URL } from "@/lib/site";
 
 export default function Footer() {
   const pathname = usePathname();
@@ -35,6 +37,15 @@ export default function Footer() {
           <p className="font-dmsans text-xs text-warm-sand/50">
             Licensed practitioner under RCI guidelines.
           </p>
+          <a
+            href={INSTAGRAM_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="The Brain Tea on Instagram"
+            className="inline-flex items-center justify-center w-9 h-9 rounded-full border border-warm-sand/30 text-warm-sand/80 hover:text-warm-sand hover:border-warm-sand/60 transition-colors"
+          >
+            <Instagram size={16} />
+          </a>
         </div>
 
         {/* Column 2: Quick Links */}

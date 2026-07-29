@@ -211,7 +211,10 @@ export async function retryCharge(
   const expiresAt = booking.expiresAt?.toISOString() ?? null;
   const record = await latestCharge(bookingId);
 
-  if (record && (record.status === "CREATED" || record.status === "PROCESSING")) {
+  if (
+    record &&
+    (record.status === "CREATED" || record.status === "PROCESSING")
+  ) {
     const provider = getPaymentProvider(record.provider);
     const polled = await provider.fetchPaymentStatus({
       kind: "CHARGE",
@@ -286,9 +289,9 @@ export interface ReconcileSummary {
  * (including CREATED records orphaned by a crash mid-initiation, which are
  * recoverable because their merchantRefundId was persisted up front).
  */
-export async function reconcilePayments(
-  { limit = 50 }: { limit?: number } = {},
-): Promise<ReconcileSummary> {
+export async function reconcilePayments({
+  limit = 50,
+}: { limit?: number } = {}): Promise<ReconcileSummary> {
   const summary: ReconcileSummary = {
     releasedReservations: 0,
     chargesChecked: 0,
