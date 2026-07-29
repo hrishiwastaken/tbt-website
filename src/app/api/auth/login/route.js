@@ -90,7 +90,8 @@ export async function POST(request) {
       role: user.role,
     });
 
-    const redirectUrl = requestedPortal === "therapist" ? "/therapist" : "/admin";
+    const redirectUrl =
+      requestedPortal === "therapist" ? "/therapist" : "/admin";
 
     const response = NextResponse.json({
       message: "Login successful",

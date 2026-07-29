@@ -58,7 +58,11 @@ export function chargeIdempotencyKey(bookingId: string, attempt = 1): string {
 function correlationId(prefix: string, idempotencyKey: string): string {
   return (
     prefix +
-    crypto.createHash("sha256").update(idempotencyKey).digest("hex").slice(0, 32)
+    crypto
+      .createHash("sha256")
+      .update(idempotencyKey)
+      .digest("hex")
+      .slice(0, 32)
   );
 }
 
@@ -628,8 +632,7 @@ export async function recordRefundSuccess(input: {
     const originalNetMinor =
       booking.amountMinor - booking.discountMinor - booking.taxMinor;
     const meta = parseRecordMetadata(record);
-    const reason =
-      typeof meta?.reason === "string" ? meta.reason : undefined;
+    const reason = typeof meta?.reason === "string" ? meta.reason : undefined;
 
     await insertPostings(
       tx,

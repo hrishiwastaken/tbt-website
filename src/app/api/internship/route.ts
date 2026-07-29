@@ -104,7 +104,9 @@ export async function POST(request: Request) {
       },
     });
 
-    return NextResponse.json({ message: "Application submitted successfully." });
+    return NextResponse.json({
+      message: "Application submitted successfully.",
+    });
   } catch (error) {
     console.error("Internship application API error:", error);
     return NextResponse.json(

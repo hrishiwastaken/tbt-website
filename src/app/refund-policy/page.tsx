@@ -72,10 +72,9 @@ export default function RefundPolicyPage() {
         </li>
         <li>
           If money is debited but your booking is not confirmed (for example,
-          due to a network or gateway error), the amount is either
-          auto-reversed by PhonePe or refunded by us once the transaction is
-          reconciled &mdash; you are not charged for a session you did not
-          receive.
+          due to a network or gateway error), the amount is either auto-reversed
+          by PhonePe or refunded by us once the transaction is reconciled
+          &mdash; you are not charged for a session you did not receive.
         </li>
       </ul>
 

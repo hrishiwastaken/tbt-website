@@ -43,7 +43,8 @@ interface PhonePeConfig {
 }
 
 function getConfig(): PhonePeConfig {
-  const env = process.env.PHONEPE_ENV === "production" ? "production" : "sandbox";
+  const env =
+    process.env.PHONEPE_ENV === "production" ? "production" : "sandbox";
   const defaults =
     env === "production"
       ? {
@@ -175,7 +176,11 @@ async function pgFetch(
 function derivedId(prefix: string, idempotencyKey: string): string {
   return (
     prefix +
-    crypto.createHash("sha256").update(idempotencyKey).digest("hex").slice(0, 32)
+    crypto
+      .createHash("sha256")
+      .update(idempotencyKey)
+      .digest("hex")
+      .slice(0, 32)
   );
 }
 

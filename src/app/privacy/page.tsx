@@ -23,8 +23,8 @@ export default function PrivacyPolicyPage() {
       intro="Your privacy is fundamental to the trust at the heart of our clinical relationship. This policy explains what information we collect, why we collect it, and how we keep it safe."
     >
       <p>
-        {SITE_LEGAL_NAME} (&ldquo;we&rdquo;, &ldquo;us&rdquo;, &ldquo;our&rdquo;,
-        or &ldquo;the Clinic&rdquo;) operates the website{" "}
+        {SITE_LEGAL_NAME} (&ldquo;we&rdquo;, &ldquo;us&rdquo;,
+        &ldquo;our&rdquo;, or &ldquo;the Clinic&rdquo;) operates the website{" "}
         <a href={SITE_URL}>{SITE_URL}</a> and provides mental health and
         psychotherapy services. We are committed to protecting the privacy of
         our clients and website visitors and to handling personal data in
@@ -53,9 +53,9 @@ export default function PrivacyPolicyPage() {
           therapist. This is treated as sensitive personal data.
         </li>
         <li>
-          <strong>Booking information:</strong> the service selected, appointment
-          date and time, chosen consultant, and mode of session (in-person or
-          online).
+          <strong>Booking information:</strong> the service selected,
+          appointment date and time, chosen consultant, and mode of session
+          (in-person or online).
         </li>
         <li>
           <strong>Payment information:</strong> the amount, currency, invoice
@@ -126,9 +126,9 @@ export default function PrivacyPolicyPage() {
           infrastructure &mdash; not by us;
         </li>
         <li>
-          we receive only a transaction reference, the amount, and the
-          success or failure status, which we use to confirm your booking and
-          for accounting.
+          we receive only a transaction reference, the amount, and the success
+          or failure status, which we use to confirm your booking and for
+          accounting.
         </li>
       </ul>
       <p>
@@ -199,9 +199,7 @@ export default function PrivacyPolicyPage() {
       <ul>
         <li>request access to the personal information we hold about you;</li>
         <li>ask us to correct inaccurate or incomplete information;</li>
-        <li>
-          withdraw consent for non-essential communications at any time;
-        </li>
+        <li>withdraw consent for non-essential communications at any time;</li>
         <li>
           request deletion of your information, where we are not required to
           retain it.

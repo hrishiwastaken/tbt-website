@@ -160,8 +160,8 @@ export default async function BookingConfirmedPage({ searchParams }) {
             <li>
               To cancel without penalty, please contact support at least{" "}
               <strong>48 hours</strong> in advance. To reschedule without
-              penalty, please contact support at least{" "}
-              <strong>24 hours</strong> in advance.
+              penalty, please contact support at least <strong>24 hours</strong>{" "}
+              in advance.
             </li>
             <li>
               WhatsApp reminders with session logs will be sent 24 hours and 1

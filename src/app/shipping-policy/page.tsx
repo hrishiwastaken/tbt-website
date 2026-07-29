@@ -19,10 +19,11 @@ export default function ShippingPolicyPage() {
       intro="We provide mental health services, not physical products. This policy explains how and when your sessions are delivered after booking."
     >
       <p>
-        {SITE_LEGAL_NAME} offers therapy and counselling <strong>services</strong>.
-        We do <strong>not sell or ship any physical goods</strong>, so no
-        courier, shipping charges, or delivery addresses are involved. This
-        policy describes how our services are delivered to you.
+        {SITE_LEGAL_NAME} offers therapy and counselling{" "}
+        <strong>services</strong>. We do{" "}
+        <strong>not sell or ship any physical goods</strong>, so no courier,
+        shipping charges, or delivery addresses are involved. This policy
+        describes how our services are delivered to you.
       </p>
 
       <h2>1. Booking Confirmation Delivery</h2>
@@ -37,9 +38,9 @@ export default function ShippingPolicyPage() {
       <h2>2. How Sessions Are Delivered</h2>
       <ul>
         <li>
-          <strong>In-person sessions</strong> are delivered at our clinic:{" "}
-          Flat No. 8, 5th Floor, Abhimanshree Society, Baner-Pashan Link Road,
-          above ICICI Direct, Pune - 411008, at the scheduled time.
+          <strong>In-person sessions</strong> are delivered at our clinic: Flat
+          No. 8, 5th Floor, Abhimanshree Society, Baner-Pashan Link Road, above
+          ICICI Direct, Pune - 411008, at the scheduled time.
         </li>
         <li>
           <strong>Online sessions</strong> are delivered over a secure video
