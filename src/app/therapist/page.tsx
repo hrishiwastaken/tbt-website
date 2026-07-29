@@ -2,13 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import {
-  ArrowRight,
-  IndianRupee,
-  CalendarCheck,
-  Wallet,
-  Hourglass,
-} from "lucide-react";
+import { ArrowRight, CalendarCheck, Wallet } from "lucide-react";
 import { formatINR, formatDateTime, titleCase } from "@/lib/format";
 import {
   BarChart,
@@ -132,7 +126,7 @@ export default function TherapistDashboardPage() {
 
       {kpis && (
         <>
-          <div className="grid grid-cols-2 gap-5 sm:grid-cols-3 lg:grid-cols-4">
+          <div className="grid grid-cols-2 gap-5 sm:grid-cols-3 lg:grid-cols-5">
             <KpiCard
               label="Today's Sessions"
               value={kpis.todaysSessions}
@@ -144,35 +138,10 @@ export default function TherapistDashboardPage() {
               hint="Confirmed, not yet held"
             />
             <KpiCard
-              label="Session Value"
-              value={formatINR(kpis.sessionValueMinor)}
-              hint="Gross fees in period"
-              icon={<IndianRupee size={16} />}
-            />
-            <KpiCard
               label="Commission Earned"
               value={formatINR(kpis.commissionEarnedMinor)}
               hint="Your share in period"
               icon={<Wallet size={16} />}
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-5 sm:grid-cols-3 lg:grid-cols-5">
-            <KpiCard
-              label="Payable Balance"
-              value={formatINR(kpis.payableMinor)}
-              hint="Unsettled"
-            />
-            <KpiCard
-              label="Reserved"
-              value={formatINR(kpis.reservedMinor)}
-              hint="In pending payouts"
-              icon={<Hourglass size={13} />}
-            />
-            <KpiCard
-              label="Lifetime Paid"
-              value={formatINR(kpis.commissionPaidMinor)}
-              hint="Settled to date"
             />
             <KpiCard
               label="Completed"
