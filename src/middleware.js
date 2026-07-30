@@ -40,15 +40,15 @@ export function middleware(request) {
   }
 
   // Reception desk: sub-admin scope (appointments, confirmations, payment
-  // visibility, client records). ADMIN is allowed through because it already
-  // outranks every capability the desk exposes; THERAPIST is not.
-  if (
-    pathname.startsWith("/reception") &&
-    !pathname.startsWith("/reception/login")
-  ) {
+  // visibility, client records). There is no /reception/login page — a
+  // receptionist signs in at /admin/login, the single shared portal that
+  // dispatches to /admin or /reception by the account's actual role. ADMIN
+  // is allowed through here too, since it already outranks every capability
+  // the desk exposes; THERAPIST is not.
+  if (pathname.startsWith("/reception")) {
     return guard(request, {
       prefix: "/reception",
-      loginPath: "/reception/login",
+      loginPath: "/admin/login",
       allowedRoles: ["RECEPTIONIST", "ADMIN"],
     });
   }

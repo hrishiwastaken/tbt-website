@@ -67,28 +67,38 @@ export async function POST(request) {
       );
     }
 
-    // Each portal accepts exactly one role — a consultant signing in on the
-    // admin console is rejected outright rather than being handed an admin
-    // session. Unknown/absent `portal` falls back to "admin" so a malformed
-    // request can never widen access. The response is identical to a wrong
-    // password (same message, same 401) so a cross-portal attempt can't be
-    // used to confirm which role an email belongs to.
-    const PORTALS = {
-      admin: { role: "ADMIN", redirectUrl: "/admin" },
-      reception: { role: "RECEPTIONIST", redirectUrl: "/reception" },
-      therapist: { role: "THERAPIST", redirectUrl: "/therapist" },
+    // The "admin" portal is a single shared sign-in for both ADMIN and
+    // RECEPTIONIST accounts — entering receptionist credentials here is the
+    // only way to reach the reception desk; there is no separate reception
+    // login page. Which dashboard you land on is decided by the account's
+    // actual role, not by anything the client claims. THERAPIST stays on its
+    // own portal and is rejected outright here. Unknown/absent `portal`
+    // falls back to "admin" so a malformed request can never widen access.
+    // The response is identical to a wrong password (same message, same
+    // 401) so a cross-portal attempt can't be used to confirm which role an
+    // email belongs to.
+    const PORTAL_ROLES = {
+      admin: ["ADMIN", "RECEPTIONIST"],
+      therapist: ["THERAPIST"],
     };
-    const requestedPortal = Object.hasOwn(PORTALS, portal ?? "")
+    const requestedPortal = Object.hasOwn(PORTAL_ROLES, portal ?? "")
       ? portal
       : "admin";
-    const { role: allowedRole, redirectUrl } = PORTALS[requestedPortal];
+    const allowedRoles = PORTAL_ROLES[requestedPortal];
 
-    if (user.role !== allowedRole) {
+    if (!allowedRoles.includes(user.role)) {
       return NextResponse.json(
         { error: "Invalid email or password" },
         { status: 401 },
       );
     }
+
+    const REDIRECTS = {
+      ADMIN: "/admin",
+      RECEPTIONIST: "/reception",
+      THERAPIST: "/therapist",
+    };
+    const redirectUrl = REDIRECTS[user.role];
 
     // Generate session JWT
     const token = signToken({

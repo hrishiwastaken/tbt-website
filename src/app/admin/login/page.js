@@ -59,7 +59,7 @@ export default function AdminLoginPage() {
           {SITE_NAME}
         </Link>
         <span className="text-xs font-bold tracking-widest text-ocean uppercase block mb-8">
-          Admin Portal
+          Admin &amp; Reception Portal
         </span>
 
         {errorMsg && (
@@ -112,20 +112,12 @@ export default function AdminLoginPage() {
           <Link href="/" className="hover:text-ocean transition-colors">
             ← Main Site
           </Link>
-          <span className="flex gap-3">
-            <Link
-              href="/reception/login"
-              className="hover:text-ocean transition-colors"
-            >
-              Reception
-            </Link>
-            <Link
-              href="/therapist/login"
-              className="hover:text-ocean transition-colors"
-            >
-              Therapist →
-            </Link>
-          </span>
+          <Link
+            href="/therapist/login"
+            className="hover:text-ocean transition-colors"
+          >
+            Therapist Login →
+          </Link>
         </div>
       </div>
     </main>

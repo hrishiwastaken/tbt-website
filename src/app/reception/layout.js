@@ -20,6 +20,10 @@ import Logo from "../../components/Logo";
 // Reception desk shell. Deliberately identical in structure and styling to
 // the admin console (src/app/admin/layout.js) — same tokens, same sidebar,
 // same behaviour — with a front-desk nav and badge.
+//
+// There is no /reception/login page: a receptionist signs in at
+// /admin/login, the single shared portal for ADMIN and RECEPTIONIST
+// accounts, and is redirected here by their account's actual role.
 
 export default function ReceptionLayout({ children }) {
   const router = useRouter();
@@ -27,28 +31,26 @@ export default function ReceptionLayout({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [menuOpen, setMenuOpen] = useState(false);
-  const isLoginPage = pathname === "/reception/login";
 
   useEffect(() => {
-    if (isLoginPage) return;
     const checkReceptionAuth = async () => {
       try {
         const res = await fetch("/api/reception/me");
         if (!res.ok) {
-          router.push("/reception/login");
+          router.push("/admin/login");
         } else {
           const data = await res.json();
           setUser(data.user);
         }
       } catch (err) {
         console.error(err);
-        router.push("/reception/login");
+        router.push("/admin/login");
       } finally {
         setLoading(false);
       }
     };
     checkReceptionAuth();
-  }, [isLoginPage, router]);
+  }, [router]);
 
   // Close the mobile sidebar when navigating to a new route. Done during
   // render (React-endorsed "reset state on change") rather than in an effect
@@ -59,13 +61,11 @@ export default function ReceptionLayout({ children }) {
     setMenuOpen(false);
   }
 
-  if (isLoginPage) return children;
-
   const handleLogout = async () => {
     try {
       const res = await fetch("/api/auth/logout", { method: "POST" });
       if (res.ok) {
-        router.push("/reception/login");
+        router.push("/admin/login");
         router.refresh();
       }
     } catch (err) {

@@ -103,7 +103,9 @@ To test the secure dashboards, log in using the following accounts:
 
 ### Reception Desk
 
-- **URL**: `/reception/login`
+There is no separate reception login page. Sign in at `/admin/login` with the receptionist credentials below — the same portal accepts both ADMIN and RECEPTIONIST accounts and redirects each to its own dashboard by role.
+
+- **URL**: `/admin/login`
 - **Email**: `reception@thebraintea.com`
 - **Password**: `ReceptionPass123!`
 
@@ -118,6 +120,8 @@ To test the secure dashboards, log in using the following accounts:
 ## 🧾 Reception Desk (`/reception`)
 
 A sub-admin panel for front-desk staff, themed identically to the admin console (same tokens and primitives from `src/components/admin/ui.tsx`). Role `RECEPTIONIST`, guarded by the middleware and by `requireReception` on every `/api/reception/*` route; an `ADMIN` session may also open it, since ADMIN already outranks everything behind that guard.
+
+There is no `/reception/login` page. `/admin/login` is the single entry point for both roles — `POST /api/auth/login` accepts either an ADMIN or a RECEPTIONIST account there and picks the redirect (`/admin` or `/reception`) from the account's actual role, never from anything the client sends. Visiting `/reception/*` unauthenticated redirects to `/admin/login` too, so entering the receptionist's email and password on the admin login form is the only way into the desk.
 
 | Screen | What the desk can do |
 | --- | --- |
