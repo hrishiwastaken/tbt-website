@@ -12,6 +12,23 @@ export const SITE_URL = "https://www.thebraintea.com";
 /** Effective / last-updated date shown on the legal pages. */
 export const LEGAL_EFFECTIVE_DATE = "24 July 2026";
 
+/**
+ * Route prefixes that render a signed-in dashboard rather than the public
+ * site. The shared public chrome (header, footer, WhatsApp button, phone
+ * preview) hides itself on these — kept in one place so adding a panel
+ * can't leave the marketing header bleeding into it.
+ */
+export const DASHBOARD_PREFIXES = [
+  "/admin",
+  "/reception",
+  "/therapist",
+  "/portal",
+] as const;
+
+export function isDashboardRoute(pathname: string): boolean {
+  return DASHBOARD_PREFIXES.some((prefix) => pathname.startsWith(prefix));
+}
+
 export const INSTAGRAM_URL = "https://www.instagram.com/thebraintea.community";
 
 export const WHATSAPP_NUMBER = "919309833817";

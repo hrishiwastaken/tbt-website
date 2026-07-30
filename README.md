@@ -10,8 +10,8 @@ A premium, modern, fully functional Next.js App Router website for a therapy and
 - **Styling**: Tailwind CSS with The Brain Tea design tokens (ocean/ivory palette, neumorphic surfaces)
 - **Database ORM**: Prisma ORM on PostgreSQL
 - **Financials**: append-only double-entry-style ledger (`LedgerEntry`), integer paise money, commission snapshots per booking, payout settlement records
-- **Payments**: provider-agnostic abstraction (`src/server/payments`) — a `manual` UPI-reference provider ships today; a real gateway (Razorpay/Stripe/…) plugs in later as one adapter without touching booking or revenue logic
-- **Authentication**: JWT & HTTP-Only Secure Cookies, role-based access (ADMIN / THERAPIST)
+- **Payments**: provider-agnostic abstraction (`src/server/payments`) — a `manual` UPI-reference provider for fees collected in person, plus a **PhonePe PG (v2 Standard Checkout)** adapter for online payments. Selected with `PAYMENT_PROVIDER`; further gateways plug in as one adapter without touching booking or revenue logic
+- **Authentication**: JWT & HTTP-Only Secure Cookies, role-based access (ADMIN / RECEPTIONIST / THERAPIST)
 - **Encryption**: AES-256-GCM encryption at rest for sensitive patient notes
 - **Testing**: Vitest — pure domain unit tests plus Postgres-backed integration tests (double-booking concurrency, payment idempotency, refund reversal, payout guards)
 
@@ -101,6 +101,12 @@ To test the secure dashboards, log in using the following accounts:
 - **Email**: `admin@thebraintea.com`
 - **Password**: `AdminPass123!`
 
+### Reception Desk
+
+- **URL**: `/reception/login`
+- **Email**: `reception@thebraintea.com`
+- **Password**: `ReceptionPass123!`
+
 ### Therapist Portal
 
 - **URL**: `/therapist/login`
@@ -109,15 +115,47 @@ To test the secure dashboards, log in using the following accounts:
 
 ---
 
-## 💸 Payment Gateway Integration (Future)
+## 🧾 Reception Desk (`/reception`)
 
-No gateway is integrated yet — payments run through the provider-agnostic layer in `src/server/payments` using the `manual` provider (staff-verified UPI references). To integrate a real gateway later:
+A sub-admin panel for front-desk staff, themed identically to the admin console (same tokens and primitives from `src/components/admin/ui.tsx`). Role `RECEPTIONIST`, guarded by the middleware and by `requireReception` on every `/api/reception/*` route; an `ADMIN` session may also open it, since ADMIN already outranks everything behind that guard.
 
-1. Implement the `PaymentProvider` interface (`src/server/payments/types.ts`): intent creation, verification, webhook parsing/signature validation, refunds, status reconciliation.
-2. Register the adapter in `src/server/payments/registry.ts` and set `PAYMENT_PROVIDER=<name>` in `.env`.
-3. Point the gateway's webhooks at `https://yourdomain.com/api/webhooks/<name>` — dedupe, idempotent financial posting and ledger entries are already handled by the payment service.
+| Screen | What the desk can do |
+| --- | --- |
+| Front Desk | Today's sheet, confirmations owed, live payment holds, collected today, fees outstanding |
+| Appointments | Schedule, search/filter, confirm, complete, no-show, cancel, reschedule |
+| Confirmations | Work queues (awaiting confirmation / payment holds / fees to collect / today / next 7 days) with inline confirm + mark-paid |
+| Payments | Read-only charge & refund record with collection totals |
+| Clients | Register, search, and correct client records; per-client history and balance |
 
-Booking, revenue, commission and payout logic require **no changes**.
+**Withheld from the desk by design**, and enforced server-side rather than only hidden in the UI:
+
+- **Refund execution** — the desk can raise a refund request (`→ REFUND_PENDING`); approving or rejecting it is an admin action. `src/server/domain/receptionScope.ts` narrows the booking state machine and is unit-tested to be a strict subset of it.
+- **Clinical notes** — never selected by any reception query, so encrypted notes cannot reach the desk.
+- **Client erasure** — a GDPR/IT-Act deletion destroys booking history; it stays in `/api/admin/clients`.
+- **Money internals** — commission rates, platform share, consultant payouts and settings are absent from every reception payload.
+
+Fees collected in person are posted through `recordManualPayment`, which routes them via the `manual` provider and the same CAS-gated `recordChargeSuccess` path as a gateway payment — so revenue, commission and invoice numbering stay correct and idempotent.
+
+---
+
+## 💸 Payment Gateway Integration
+
+Online payments run through the provider-agnostic layer in `src/server/payments`. Two adapters ship:
+
+- `manual` — fees collected out-of-band (cash/UPI at the clinic), verified by staff against a reference.
+- `phonepe` — PhonePe PG v2 Standard Checkout: OAuth token cache, hosted checkout, signed webhooks, order/refund status polling.
+
+Select one with `PAYMENT_PROVIDER=phonepe` (default `manual`). PhonePe additionally needs `PHONEPE_CLIENT_ID`, `PHONEPE_CLIENT_SECRET`, `PHONEPE_CLIENT_VERSION`, `PHONEPE_ENV`, `PHONEPE_WEBHOOK_USERNAME`, `PHONEPE_WEBHOOK_PASSWORD` and `APP_BASE_URL`.
+
+**How gateway state reaches the database.** A payment is confirmed by exactly one of three racing sources, all funnelling into the CAS-gated `recordChargeSuccess` / `recordRefundSuccess`:
+
+1. **Webhook** → `POST /api/webhooks/<provider>`; signature validated in the adapter, deduped on `WebhookEvent(provider, externalId)`.
+2. **Status poll** — the payer's redirect back from checkout triggers an authoritative server-to-server order-status check; the redirect itself is never trusted.
+3. **Reconciliation sweep** — `POST /api/cron/reconcile-payments` (Bearer `CRON_SECRET`) polls stale charges/refunds, closes anything unresolved for 48h, and releases expired reservations. This is what makes webhook delivery non-load-bearing.
+
+Amounts reported by the provider are compared against the stored record on both the webhook and poll paths; a mismatch is audited (`payment.amount_mismatch`) and refuses to confirm.
+
+To add another gateway: implement `PaymentProvider` (`src/server/payments/types.ts`), register it in `registry.ts`, set `PAYMENT_PROVIDER`, and point its webhooks at `/api/webhooks/<name>`. Booking, revenue, commission and payout logic require **no changes**.
 
 ---
 

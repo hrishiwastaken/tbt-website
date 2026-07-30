@@ -282,7 +282,7 @@ export async function transitionBooking(input: {
   bookingId: string;
   toStatus: BookingStatus;
   session?: Session | null;
-  actorType?: "ADMIN" | "THERAPIST" | "CLIENT" | "SYSTEM";
+  actorType?: "ADMIN" | "RECEPTIONIST" | "THERAPIST" | "CLIENT" | "SYSTEM";
   reason?: string;
   ip?: string;
 }) {
@@ -504,14 +504,16 @@ export interface ScheduleAdminBookingInput {
 }
 
 /**
- * Admin-only appointment scheduling. Captures the consultant, counselling
- * type, date/time and fee, attaching an existing or freshly-created client.
+ * Staff appointment scheduling (admin console and reception desk). Captures
+ * the consultant, counselling type, date/time and fee, attaching an existing
+ * or freshly-created client.
  * The booking is created CONFIRMED (staff-scheduled, no reservation TTL); the
  * DB slot-uniqueness guard prevents double-booking and leave blocks are
  * honoured. When the fee has already been collected the payment is recorded
  * through the manual provider so revenue/commission ledgers stay accurate.
  *
- * Deliberately not exposed to consultants — only /api/admin routes call this.
+ * Deliberately not exposed to consultants — only /api/admin and
+ * /api/reception routes call this.
  */
 export async function scheduleAdminBooking(input: ScheduleAdminBookingInput) {
   if (!Number.isInteger(input.feeMinor) || input.feeMinor <= 0) {
@@ -610,9 +612,12 @@ export async function scheduleAdminBooking(input: ScheduleAdminBookingInput) {
         bookingId: booking.id,
         fromStatus: null,
         toStatus: "CONFIRMED",
-        actorType: "ADMIN",
+        actorType: input.session.role,
         actorId: input.session.userId,
-        reason: "Appointment scheduled by admin",
+        reason:
+          input.session.role === "RECEPTIONIST"
+            ? "Appointment scheduled at the front desk"
+            : "Appointment scheduled by admin",
       },
     });
 

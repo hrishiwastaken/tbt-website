@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { Smartphone, X, RotateCw } from "lucide-react";
+import { isDashboardRoute } from "../lib/site";
 
 /**
  * Desktop-only helper: opens the current page inside a phone-sized
@@ -61,10 +62,7 @@ export default function PhonePreview() {
   }, [isOpen]);
 
   // Public-site helper only: keep the admin/therapist/portal dashboards untouched
-  const isDashboard =
-    pathname.startsWith("/admin") ||
-    pathname.startsWith("/therapist") ||
-    pathname.startsWith("/portal");
+  const isDashboard = isDashboardRoute(pathname);
 
   if (isFramed || isDashboard) return null;
 

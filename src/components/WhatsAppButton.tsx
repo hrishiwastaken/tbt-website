@@ -3,16 +3,13 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { usePathname } from "next/navigation";
-import { WHATSAPP_URL } from "../lib/site";
+import { WHATSAPP_URL, isDashboardRoute } from "../lib/site";
 
 export default function WhatsAppButton() {
   const pathname = usePathname();
   const [isHovered, setIsHovered] = useState(false);
 
-  const isDashboard =
-    pathname.startsWith("/admin") ||
-    pathname.startsWith("/therapist") ||
-    pathname.startsWith("/portal");
+  const isDashboard = isDashboardRoute(pathname);
   if (isDashboard) return null;
 
   return (

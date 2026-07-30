@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { SITE_NAME } from "../../../lib/site";
 
-export default function AdminLoginPage() {
+export default function ReceptionLoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -21,13 +21,13 @@ export default function AdminLoginPage() {
       const res = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password, portal: "admin" }),
+        body: JSON.stringify({ email, password, portal: "reception" }),
       });
 
       const data = await res.json();
 
       if (res.ok) {
-        router.push(data.redirectUrl || "/admin");
+        router.push(data.redirectUrl || "/reception");
         router.refresh();
       } else {
         setErrorMsg(data.error || "Authentication failed.");
@@ -59,7 +59,7 @@ export default function AdminLoginPage() {
           {SITE_NAME}
         </Link>
         <span className="text-xs font-bold tracking-widest text-ocean uppercase block mb-8">
-          Admin Portal
+          Reception Portal
         </span>
 
         {errorMsg && (
@@ -77,7 +77,7 @@ export default function AdminLoginPage() {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="admin@thebraintea.com"
+              placeholder="reception@thebraintea.com"
               className="w-full bg-panel-ivory/50 border-t-0 border-l-0 border-r-0 border-b border-panel-mist/60 focus:ring-0 focus:border-ocean text-ink py-2 px-0 transition-colors text-base"
               required
               disabled={loading}
@@ -112,20 +112,12 @@ export default function AdminLoginPage() {
           <Link href="/" className="hover:text-ocean transition-colors">
             ← Main Site
           </Link>
-          <span className="flex gap-3">
-            <Link
-              href="/reception/login"
-              className="hover:text-ocean transition-colors"
-            >
-              Reception
-            </Link>
-            <Link
-              href="/therapist/login"
-              className="hover:text-ocean transition-colors"
-            >
-              Therapist →
-            </Link>
-          </span>
+          <Link
+            href="/admin/login"
+            className="hover:text-ocean transition-colors"
+          >
+            Admin Login →
+          </Link>
         </div>
       </div>
     </main>

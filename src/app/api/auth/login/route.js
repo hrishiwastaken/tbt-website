@@ -73,8 +73,15 @@ export async function POST(request) {
     // request can never widen access. The response is identical to a wrong
     // password (same message, same 401) so a cross-portal attempt can't be
     // used to confirm which role an email belongs to.
-    const requestedPortal = portal === "therapist" ? "therapist" : "admin";
-    const allowedRole = requestedPortal === "therapist" ? "THERAPIST" : "ADMIN";
+    const PORTALS = {
+      admin: { role: "ADMIN", redirectUrl: "/admin" },
+      reception: { role: "RECEPTIONIST", redirectUrl: "/reception" },
+      therapist: { role: "THERAPIST", redirectUrl: "/therapist" },
+    };
+    const requestedPortal = Object.hasOwn(PORTALS, portal ?? "")
+      ? portal
+      : "admin";
+    const { role: allowedRole, redirectUrl } = PORTALS[requestedPortal];
 
     if (user.role !== allowedRole) {
       return NextResponse.json(
@@ -89,9 +96,6 @@ export async function POST(request) {
       email: user.email,
       role: user.role,
     });
-
-    const redirectUrl =
-      requestedPortal === "therapist" ? "/therapist" : "/admin";
 
     const response = NextResponse.json({
       message: "Login successful",

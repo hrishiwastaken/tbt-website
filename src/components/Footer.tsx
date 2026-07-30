@@ -5,14 +5,11 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Instagram } from "lucide-react";
 import Logo from "./Logo";
-import { INSTAGRAM_URL } from "@/lib/site";
+import { INSTAGRAM_URL, isDashboardRoute } from "@/lib/site";
 
 export default function Footer() {
   const pathname = usePathname();
-  const isDashboard =
-    pathname.startsWith("/admin") ||
-    pathname.startsWith("/therapist") ||
-    pathname.startsWith("/portal");
+  const isDashboard = isDashboardRoute(pathname);
   if (isDashboard) return null;
 
   const currentYear = new Date().getFullYear();

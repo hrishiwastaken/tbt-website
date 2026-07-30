@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X } from "lucide-react";
 import Logo from "./Logo";
 import { NavLink } from "./ui/NavLink";
+import { isDashboardRoute } from "../lib/site";
 
 export default function Header() {
   const pathname = usePathname();
@@ -42,10 +43,7 @@ export default function Header() {
     };
   }, [isMobileMenuOpen]);
 
-  const isDashboard =
-    pathname.startsWith("/admin") ||
-    pathname.startsWith("/therapist") ||
-    pathname.startsWith("/portal");
+  const isDashboard = isDashboardRoute(pathname);
   if (isDashboard) return null;
 
   const navLinks = [

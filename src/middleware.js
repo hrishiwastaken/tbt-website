@@ -39,6 +39,20 @@ export function middleware(request) {
     });
   }
 
+  // Reception desk: sub-admin scope (appointments, confirmations, payment
+  // visibility, client records). ADMIN is allowed through because it already
+  // outranks every capability the desk exposes; THERAPIST is not.
+  if (
+    pathname.startsWith("/reception") &&
+    !pathname.startsWith("/reception/login")
+  ) {
+    return guard(request, {
+      prefix: "/reception",
+      loginPath: "/reception/login",
+      allowedRoles: ["RECEPTIONIST", "ADMIN"],
+    });
+  }
+
   // Consultant portal: scoped to the therapist's own data, THERAPIST only
   if (
     pathname.startsWith("/therapist") &&
@@ -55,5 +69,5 @@ export function middleware(request) {
 }
 
 export const config = {
-  matcher: ["/admin/:path*", "/therapist/:path*"],
+  matcher: ["/admin/:path*", "/reception/:path*", "/therapist/:path*"],
 };
