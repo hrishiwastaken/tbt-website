@@ -59,7 +59,7 @@ export default function AdminLoginPage() {
           {SITE_NAME}
         </Link>
         <span className="text-xs font-bold tracking-widest text-ocean uppercase block mb-8">
-          Admin Portal
+          Admin &amp; Reception Portal
         </span>
 
         {errorMsg && (

@@ -1,6 +1,22 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { comparePasswords, signToken } from "@/lib/auth";
+import { rateLimiter } from "@/lib/rateLimit";
+
+// Per-IP throttle on credential submission. Combined with the uniform
+// "Invalid email or password" response (which never reveals whether an
+// email exists or which role it holds), this blunts online password
+// brute-forcing. Note: the limiter is in-memory and per-instance — it stops
+// single-source guessing but a distributed attacker rotating IPs needs an
+// edge/WAF rate limit or account lockout, which is out of this layer's reach.
+const LOGIN_MAX_ATTEMPTS = 10;
+const LOGIN_WINDOW_MS = 5 * 60 * 1000;
+
+function requestIp(request) {
+  return (
+    request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown"
+  );
+}
 
 const NETLIFY_CONFIG_MESSAGE =
   "Database connection is not configured. Set DATABASE_URL, DIRECT_URL, NEXTAUTH_SECRET, and ENCRYPTION_KEY in Netlify, then seed the database.";
@@ -36,6 +52,18 @@ export async function POST(request) {
       );
     }
 
+    const { isBlocked } = rateLimiter(
+      `login:${requestIp(request)}`,
+      LOGIN_MAX_ATTEMPTS,
+      LOGIN_WINDOW_MS,
+    );
+    if (isBlocked) {
+      return NextResponse.json(
+        { error: "Too many login attempts. Please wait a few minutes and try again." },
+        { status: 429 },
+      );
+    }
+
     const { email, password, portal } = await request.json();
 
     if (!email || !password) {
@@ -67,21 +95,38 @@ export async function POST(request) {
       );
     }
 
-    // Each portal accepts exactly one role — a consultant signing in on the
-    // admin console is rejected outright rather than being handed an admin
-    // session. Unknown/absent `portal` falls back to "admin" so a malformed
-    // request can never widen access. The response is identical to a wrong
-    // password (same message, same 401) so a cross-portal attempt can't be
-    // used to confirm which role an email belongs to.
-    const requestedPortal = portal === "therapist" ? "therapist" : "admin";
-    const allowedRole = requestedPortal === "therapist" ? "THERAPIST" : "ADMIN";
+    // The "admin" portal is a single shared sign-in for both ADMIN and
+    // RECEPTIONIST accounts — entering receptionist credentials here is the
+    // only way to reach the reception desk; there is no separate reception
+    // login page. Which dashboard you land on is decided by the account's
+    // actual role, not by anything the client claims. THERAPIST stays on its
+    // own portal and is rejected outright here. Unknown/absent `portal`
+    // falls back to "admin" so a malformed request can never widen access.
+    // The response is identical to a wrong password (same message, same
+    // 401) so a cross-portal attempt can't be used to confirm which role an
+    // email belongs to.
+    const PORTAL_ROLES = {
+      admin: ["ADMIN", "RECEPTIONIST"],
+      therapist: ["THERAPIST"],
+    };
+    const requestedPortal = Object.hasOwn(PORTAL_ROLES, portal ?? "")
+      ? portal
+      : "admin";
+    const allowedRoles = PORTAL_ROLES[requestedPortal];
 
-    if (user.role !== allowedRole) {
+    if (!allowedRoles.includes(user.role)) {
       return NextResponse.json(
         { error: "Invalid email or password" },
         { status: 401 },
       );
     }
+
+    const REDIRECTS = {
+      ADMIN: "/admin",
+      RECEPTIONIST: "/reception",
+      THERAPIST: "/therapist",
+    };
+    const redirectUrl = REDIRECTS[user.role];
 
     // Generate session JWT
     const token = signToken({
@@ -89,9 +134,6 @@ export async function POST(request) {
       email: user.email,
       role: user.role,
     });
-
-    const redirectUrl =
-      requestedPortal === "therapist" ? "/therapist" : "/admin";
 
     const response = NextResponse.json({
       message: "Login successful",

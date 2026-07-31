@@ -8,6 +8,7 @@ import {
   requireTherapist,
 } from "@/server/http";
 import { BOOKING_STATUSES } from "@/server/domain/bookingStatus";
+import { stripNotes } from "@/server/serializers/publicBooking";
 
 // Own-scoped appointment register — identical filter/search/sort surface to
 // the admin list, but therapistId is fixed to the caller and never a filter
@@ -68,5 +69,7 @@ export const GET = handleApi(async (request: Request) => {
     prisma.booking.count({ where }),
   ]);
 
-  return NextResponse.json(paginated(bookings, total, pagination));
+  // The encrypted clinical-notes blob is read (and decrypted) only through
+  // the single-booking detail route, never surfaced in a list payload.
+  return NextResponse.json(paginated(stripNotes(bookings), total, pagination));
 });

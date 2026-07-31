@@ -10,8 +10,8 @@ A premium, modern, fully functional Next.js App Router website for a therapy and
 - **Styling**: Tailwind CSS with The Brain Tea design tokens (ocean/ivory palette, neumorphic surfaces)
 - **Database ORM**: Prisma ORM on PostgreSQL
 - **Financials**: append-only double-entry-style ledger (`LedgerEntry`), integer paise money, commission snapshots per booking, payout settlement records
-- **Payments**: provider-agnostic abstraction (`src/server/payments`) — a `manual` UPI-reference provider ships today; a real gateway (Razorpay/Stripe/…) plugs in later as one adapter without touching booking or revenue logic
-- **Authentication**: JWT & HTTP-Only Secure Cookies, role-based access (ADMIN / THERAPIST)
+- **Payments**: provider-agnostic abstraction (`src/server/payments`) — a `manual` UPI-reference provider for fees collected in person, plus a **PhonePe PG (v2 Standard Checkout)** adapter for online payments. Selected with `PAYMENT_PROVIDER`; further gateways plug in as one adapter without touching booking or revenue logic
+- **Authentication**: JWT & HTTP-Only Secure Cookies, role-based access (ADMIN / RECEPTIONIST / THERAPIST)
 - **Encryption**: AES-256-GCM encryption at rest for sensitive patient notes
 - **Testing**: Vitest — pure domain unit tests plus Postgres-backed integration tests (double-booking concurrency, payment idempotency, refund reversal, payout guards)
 
@@ -32,6 +32,54 @@ Booking → PaymentRecord → Charge success → LedgerEntry postings
 - **Commission**: platform default (30–35% policy bounds, append-only history) with per-consultant overrides; every booking freezes its rate at creation.
 
 ---
+
+## 🔐 Security Posture
+
+Access control and data minimisation are enforced server-side; the UI only
+mirrors what the API already guarantees.
+
+- **Authentication** — JWT in an HttpOnly, `SameSite=Strict`, `Secure`
+  (prod) cookie. `verifyToken` pins `HS256` (rejects `alg:none` / algorithm
+  confusion) and both signing and verification **fail closed in
+  production**: if `NEXTAUTH_SECRET` is unset the app refuses to mint or
+  trust tokens rather than falling back to the in-source dev secret (which
+  would otherwise let anyone forge an admin session). `ENCRYPTION_KEY` is
+  handled the same way — patient notes are never encrypted under the public
+  dev key in production, and the key length is validated.
+- **Authorisation** — every `/api/admin/*`, `/api/reception/*` and
+  `/api/therapist/*` route calls a role guard (`requireAdmin` /
+  `requireReception` / `requireTherapist`); consultant routes are scoped to
+  the caller's own `therapistId` and re-check row ownership before any
+  mutation (no IDOR across consultants). The reception desk is a verified
+  strict subset of admin (`src/server/domain/receptionScope.ts`).
+- **Data minimisation** — responses to unauthenticated callers go through an
+  allow-list serialiser (`src/server/serializers/publicBooking.ts`); the
+  public booking and cancellation endpoints never echo internal fields
+  (`commissionBps`, encrypted `notes`, linked account ids, raw foreign
+  keys). The encrypted notes blob is stripped from every list payload and
+  decrypted only in single-record detail routes.
+- **Abuse resistance** — booking, payment-status/retry, internship and
+  **login** endpoints are rate-limited per IP; login also returns a uniform
+  "invalid email or password" (no user/role enumeration). The webhook sink
+  validates the provider signature and deduplicates on `(provider,
+  externalId)`. All SQL goes through Prisma's parameterised client (the two
+  `FOR UPDATE` row locks use tagged-template parameters, not string
+  interpolation).
+- **Transport & browser hardening** — every response carries CSP
+  (`frame-ancestors 'self'`, `object-src 'none'`, `base-uri 'self'`,
+  `form-action 'self'`), `X-Frame-Options: SAMEORIGIN`,
+  `X-Content-Type-Options: nosniff`, `Referrer-Policy`, `Permissions-Policy`
+  and HSTS (see `next.config.mjs`). Uploaded resumes are served
+  `Content-Disposition: attachment` with `nosniff` so an attacker-controlled
+  MIME type can't be rendered as active content.
+
+**Operational requirements.** In production you **must** set
+`NEXTAUTH_SECRET` and `ENCRYPTION_KEY` (32-byte hex) — the app fails closed
+without them. The per-IP rate limiter is in-memory and per-instance: it
+stops single-source brute-forcing but distributed attacks still warrant an
+edge/WAF rate limit or account lockout, and the middleware performs an
+edge-safe token *decode* for redirects while the API layer remains the
+authoritative signature check.
 
 ## ⚙️ Local Setup Instructions
 
@@ -101,6 +149,14 @@ To test the secure dashboards, log in using the following accounts:
 - **Email**: `admin@thebraintea.com`
 - **Password**: `AdminPass123!`
 
+### Reception Desk
+
+There is no separate reception login page. Sign in at `/admin/login` with the receptionist credentials below — the same portal accepts both ADMIN and RECEPTIONIST accounts and redirects each to its own dashboard by role.
+
+- **URL**: `/admin/login`
+- **Email**: `reception@thebraintea.com`
+- **Password**: `ReceptionPass123!`
+
 ### Therapist Portal
 
 - **URL**: `/therapist/login`
@@ -109,15 +165,49 @@ To test the secure dashboards, log in using the following accounts:
 
 ---
 
-## 💸 Payment Gateway Integration (Future)
+## 🧾 Reception Desk (`/reception`)
 
-No gateway is integrated yet — payments run through the provider-agnostic layer in `src/server/payments` using the `manual` provider (staff-verified UPI references). To integrate a real gateway later:
+A sub-admin panel for front-desk staff, themed identically to the admin console (same tokens and primitives from `src/components/admin/ui.tsx`). Role `RECEPTIONIST`, guarded by the middleware and by `requireReception` on every `/api/reception/*` route; an `ADMIN` session may also open it, since ADMIN already outranks everything behind that guard.
 
-1. Implement the `PaymentProvider` interface (`src/server/payments/types.ts`): intent creation, verification, webhook parsing/signature validation, refunds, status reconciliation.
-2. Register the adapter in `src/server/payments/registry.ts` and set `PAYMENT_PROVIDER=<name>` in `.env`.
-3. Point the gateway's webhooks at `https://yourdomain.com/api/webhooks/<name>` — dedupe, idempotent financial posting and ledger entries are already handled by the payment service.
+There is no `/reception/login` page. `/admin/login` is the single entry point for both roles — `POST /api/auth/login` accepts either an ADMIN or a RECEPTIONIST account there and picks the redirect (`/admin` or `/reception`) from the account's actual role, never from anything the client sends. Visiting `/reception/*` unauthenticated redirects to `/admin/login` too, so entering the receptionist's email and password on the admin login form is the only way into the desk.
 
-Booking, revenue, commission and payout logic require **no changes**.
+| Screen | What the desk can do |
+| --- | --- |
+| Front Desk | Today's sheet, confirmations owed, live payment holds, collected today, fees outstanding |
+| Appointments | Schedule, search/filter, confirm, complete, no-show, cancel, reschedule |
+| Confirmations | Work queues (awaiting confirmation / payment holds / fees to collect / today / next 7 days) with inline confirm + mark-paid |
+| Payments | Read-only charge & refund record with collection totals |
+| Clients | Register, search, and correct client records; per-client history and balance |
+
+**Withheld from the desk by design**, and enforced server-side rather than only hidden in the UI:
+
+- **Refund execution** — the desk can raise a refund request (`→ REFUND_PENDING`); approving or rejecting it is an admin action. `src/server/domain/receptionScope.ts` narrows the booking state machine and is unit-tested to be a strict subset of it.
+- **Clinical notes** — never selected by any reception query, so encrypted notes cannot reach the desk.
+- **Client erasure** — a GDPR/IT-Act deletion destroys booking history; it stays in `/api/admin/clients`.
+- **Money internals** — commission rates, platform share, consultant payouts and settings are absent from every reception payload.
+
+Fees collected in person are posted through `recordManualPayment`, which routes them via the `manual` provider and the same CAS-gated `recordChargeSuccess` path as a gateway payment — so revenue, commission and invoice numbering stay correct and idempotent.
+
+---
+
+## 💸 Payment Gateway Integration
+
+Online payments run through the provider-agnostic layer in `src/server/payments`. Two adapters ship:
+
+- `manual` — fees collected out-of-band (cash/UPI at the clinic), verified by staff against a reference.
+- `phonepe` — PhonePe PG v2 Standard Checkout: OAuth token cache, hosted checkout, signed webhooks, order/refund status polling.
+
+Select one with `PAYMENT_PROVIDER=phonepe` (default `manual`). PhonePe additionally needs `PHONEPE_CLIENT_ID`, `PHONEPE_CLIENT_SECRET`, `PHONEPE_CLIENT_VERSION`, `PHONEPE_ENV`, `PHONEPE_WEBHOOK_USERNAME`, `PHONEPE_WEBHOOK_PASSWORD` and `APP_BASE_URL`.
+
+**How gateway state reaches the database.** A payment is confirmed by exactly one of three racing sources, all funnelling into the CAS-gated `recordChargeSuccess` / `recordRefundSuccess`:
+
+1. **Webhook** → `POST /api/webhooks/<provider>`; signature validated in the adapter, deduped on `WebhookEvent(provider, externalId)`.
+2. **Status poll** — the payer's redirect back from checkout triggers an authoritative server-to-server order-status check; the redirect itself is never trusted.
+3. **Reconciliation sweep** — `POST /api/cron/reconcile-payments` (Bearer `CRON_SECRET`) polls stale charges/refunds, closes anything unresolved for 48h, and releases expired reservations. This is what makes webhook delivery non-load-bearing.
+
+Amounts reported by the provider are compared against the stored record on both the webhook and poll paths; a mismatch is audited (`payment.amount_mismatch`) and refuses to confirm.
+
+To add another gateway: implement `PaymentProvider` (`src/server/payments/types.ts`), register it in `registry.ts`, set `PAYMENT_PROVIDER`, and point its webhooks at `/api/webhooks/<name>`. Booking, revenue, commission and payout logic require **no changes**.
 
 ---
 

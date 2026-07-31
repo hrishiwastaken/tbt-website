@@ -9,25 +9,80 @@ import {
   paginated,
   parseBody,
   parsePagination,
-  requireAdmin,
+  requireReception,
 } from "@/server/http";
 import { BOOKING_STATUSES } from "@/server/domain/bookingStatus";
 import { COUNSELING_TYPES } from "@/server/domain/counselingType";
-import { scheduleAdminBooking } from "@/server/services/bookingService";
-import { stripNotes } from "@/server/serializers/publicBooking";
+import {
+  releaseExpiredReservations,
+  scheduleAdminBooking,
+} from "@/server/services/bookingService";
 import { rupeesToMinor } from "@/server/money";
 
-// Admin booking list: pagination + status/payment/consultant filters,
-// free-text search over client and invoice fields, date windowing, sorting.
+// Front-desk appointment register. Same filtering surface as the admin
+// booking list, plus the desk-specific `queue` presets that drive the
+// confirmations screen. The projection omits clinical notes entirely.
 
 const SORTABLE = new Set(["dateTime", "createdAt", "amountMinor", "status"]);
 
+/**
+ * Desk work queues, expressed as SQL rather than post-filtering in the UI so
+ * paging and counts stay correct.
+ *   unconfirmed — upcoming sessions the client has not confirmed yet
+ *   holds       — live pay-now reservations still inside their TTL
+ *   unpaid      — booked sessions whose fee has not been collected
+ *   today       — everything on today's sheet
+ *   upcoming    — the next seven days, excluding dead bookings
+ */
+function queueFilter(
+  queue: string | null,
+  now: Date,
+): Prisma.BookingWhereInput | null {
+  const dayStart = new Date(now);
+  dayStart.setHours(0, 0, 0, 0);
+  const dayEnd = new Date(now);
+  dayEnd.setHours(23, 59, 59, 999);
+
+  switch (queue) {
+    case "unconfirmed":
+      return { status: "PENDING", dateTime: { gte: now } };
+    case "holds":
+      return { status: "AWAITING_PAYMENT", dateTime: { gte: now } };
+    case "unpaid":
+      return {
+        paymentStatus: "UNPAID",
+        status: { in: ["CONFIRMED", "COMPLETED", "NO_SHOW"] },
+      };
+    case "today":
+      return { dateTime: { gte: dayStart, lte: dayEnd } };
+    case "upcoming": {
+      const weekAhead = new Date(dayStart);
+      weekAhead.setDate(weekAhead.getDate() + 7);
+      return {
+        dateTime: { gte: now, lt: weekAhead },
+        status: { notIn: ["CANCELLED", "REFUNDED"] },
+      };
+    }
+    default:
+      return null;
+  }
+}
+
 export const GET = handleApi(async (request: Request) => {
-  await requireAdmin(request);
+  await requireReception(request);
   const { searchParams } = new URL(request.url);
   const pagination = parsePagination(searchParams);
 
+  // Expired holds are released before the read so the desk never sees (or
+  // chases) a reservation the system has already let go.
+  await releaseExpiredReservations();
+
+  const now = new Date();
   const where: Prisma.BookingWhereInput = {};
+  const and: Prisma.BookingWhereInput[] = [];
+
+  const queue = queueFilter(searchParams.get("queue"), now);
+  if (queue) and.push(queue);
 
   const status = searchParams.get("status");
   if (status && (BOOKING_STATUSES as readonly string[]).includes(status)) {
@@ -60,6 +115,8 @@ export const GET = handleApi(async (request: Request) => {
     ];
   }
 
+  if (and.length > 0) where.AND = and;
+
   const sortParam = searchParams.get("sort") || "dateTime";
   const sort = SORTABLE.has(sortParam) ? sortParam : "dateTime";
   const order = searchParams.get("order") === "asc" ? "asc" : "desc";
@@ -67,8 +124,20 @@ export const GET = handleApi(async (request: Request) => {
   const [bookings, total] = await Promise.all([
     prisma.booking.findMany({
       where,
-      include: {
-        client: { select: { id: true, name: true, email: true, phone: true } },
+      select: {
+        id: true,
+        dateTime: true,
+        durationMinutes: true,
+        amountMinor: true,
+        discountMinor: true,
+        status: true,
+        paymentStatus: true,
+        invoiceNumber: true,
+        counselingType: true,
+        createdAt: true,
+        client: {
+          select: { id: true, name: true, email: true, phone: true },
+        },
         therapist: { select: { id: true, name: true, slug: true } },
         service: { select: { id: true, name: true, durationMinutes: true } },
       },
@@ -79,15 +148,13 @@ export const GET = handleApi(async (request: Request) => {
     prisma.booking.count({ where }),
   ]);
 
-  // Encrypted clinical notes are read (and decrypted) only via the
-  // single-booking detail route, never surfaced in a list payload.
-  return NextResponse.json(paginated(stripNotes(bookings), total, pagination));
+  return NextResponse.json(paginated(bookings, total, pagination));
 });
 
-// Admin-only appointment scheduling. Captures consultant, counselling type,
-// date/time, fee and (existing or new) client, plus whether the fee has
-// already been collected. Consultants have no equivalent create route — only
-// the admin can schedule appointments.
+// Desk scheduling — the same service the admin console calls, so slot
+// uniqueness, leave blocks, commission snapshotting and (when the fee is
+// collected up front) the ledger postings are identical. The status history
+// records RECEPTIONIST as the actor.
 
 const newClientSchema = z.object({
   name: z.string().min(2).max(120),
@@ -115,7 +182,7 @@ const scheduleSchema = z
   });
 
 export const POST = handleApi(async (request: Request) => {
-  const session = await requireAdmin(request);
+  const session = await requireReception(request);
   const body = parseBody(scheduleSchema, await request.json());
 
   const dateTime = new Date(`${body.date}T${body.time}:00`);

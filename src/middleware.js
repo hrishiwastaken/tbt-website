@@ -39,6 +39,20 @@ export function middleware(request) {
     });
   }
 
+  // Reception desk: sub-admin scope (appointments, confirmations, payment
+  // visibility, client records). There is no /reception/login page — a
+  // receptionist signs in at /admin/login, the single shared portal that
+  // dispatches to /admin or /reception by the account's actual role. ADMIN
+  // is allowed through here too, since it already outranks every capability
+  // the desk exposes; THERAPIST is not.
+  if (pathname.startsWith("/reception")) {
+    return guard(request, {
+      prefix: "/reception",
+      loginPath: "/admin/login",
+      allowedRoles: ["RECEPTIONIST", "ADMIN"],
+    });
+  }
+
   // Consultant portal: scoped to the therapist's own data, THERAPIST only
   if (
     pathname.startsWith("/therapist") &&
@@ -55,5 +69,5 @@ export function middleware(request) {
 }
 
 export const config = {
-  matcher: ["/admin/:path*", "/therapist/:path*"],
+  matcher: ["/admin/:path*", "/reception/:path*", "/therapist/:path*"],
 };

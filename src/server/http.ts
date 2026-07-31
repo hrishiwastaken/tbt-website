@@ -32,7 +32,7 @@ export const conflict = (msg: string, code?: string) =>
 export interface Session {
   userId: string;
   email: string;
-  role: "ADMIN" | "THERAPIST";
+  role: "ADMIN" | "THERAPIST" | "RECEPTIONIST";
 }
 
 export async function requireSession(
@@ -47,6 +47,17 @@ export async function requireSession(
 
 export const requireAdmin = (request: Request) =>
   requireSession(request, ["ADMIN"]);
+
+/**
+ * Front-desk guard for every /api/reception/* route. RECEPTIONIST is a
+ * strict subset of ADMIN — a receptionist runs the appointment book, records
+ * desk-collected fees and maintains client records, but never touches money
+ * leaving the platform (refund execution), consultant commission/payout
+ * settings, or clinical notes. ADMIN is admitted because it already outranks
+ * every capability behind this guard.
+ */
+export const requireReception = (request: Request) =>
+  requireSession(request, ["RECEPTIONIST", "ADMIN"]);
 
 export interface TherapistContext {
   session: Session;

@@ -212,6 +212,16 @@ async function main() {
     },
   });
 
+  // Front-desk login for the reception panel (/reception). Sub-admin scope:
+  // appointments, confirmations, desk payments and client records.
+  await prisma.user.create({
+    data: {
+      email: "reception@thebraintea.com",
+      passwordHash: await bcrypt.hash("ReceptionPass123!", 10),
+      role: "RECEPTIONIST",
+    },
+  });
+
   const PHOTO = (seed) =>
     `https://images.unsplash.com/photo-${seed}?auto=format&fit=crop&w=800&q=80`;
 

@@ -8,6 +8,7 @@ import {
   therapistOverviewKpis,
 } from "@/server/services/analyticsService";
 import { badRequest, handleApi, requireTherapist } from "@/server/http";
+import { stripNotes } from "@/server/serializers/publicBooking";
 
 // Own-scoped dashboard: identical shape/approach to the admin analytics
 // endpoint, but every query is filtered to this consultant's therapistId.
@@ -53,6 +54,7 @@ export const GET = handleApi(async (request: Request) => {
     kpis,
     series: { revenue, bookings },
     statusDistribution: statuses,
-    upcomingAppointments: upcoming,
+    // Keep the encrypted notes blob out of the dashboard payload.
+    upcomingAppointments: stripNotes(upcoming),
   });
 });

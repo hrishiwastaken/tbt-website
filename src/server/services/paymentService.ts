@@ -421,6 +421,74 @@ export async function recordChargeFailure(input: {
 }
 
 /**
+ * Record a fee collected off-platform (cash / UPI / card machine at the
+ * clinic) against an existing unpaid booking — the front desk's counterpart
+ * to the `paymentReceived` flag on staff scheduling.
+ *
+ * The payment is booked through the `manual` provider, pinned explicitly so
+ * an in-person collection never opens an order at the real gateway, and
+ * finalised through recordChargeSuccess — so GROSS_REVENUE / commission /
+ * platform postings, the invoice number and the paymentStatus rollup all
+ * follow the exact same, idempotent path as a gateway payment.
+ *
+ * Concurrency: the attempt number is derived from the existing charge count,
+ * so two desks recording the same fee simultaneously either converge on one
+ * idempotency key (no duplicate record) or land in recordChargeSuccess's
+ * duplicate-payment branch, which posts nothing twice and audits the anomaly.
+ */
+export async function recordManualPayment(input: {
+  bookingId: string;
+  reference?: string;
+  session: Session;
+  ip?: string;
+}) {
+  const booking = await prisma.booking.findUnique({
+    where: { id: input.bookingId },
+    select: { id: true, status: true, paymentStatus: true },
+  });
+  if (!booking) throw notFound("Booking not found");
+  if (booking.paymentStatus === "PAID") {
+    throw conflict("This appointment is already marked paid");
+  }
+  if (booking.paymentStatus === "REFUNDED") {
+    throw conflict("This appointment has been refunded");
+  }
+  if (["CANCELLED", "REFUND_PENDING", "REFUNDED"].includes(booking.status)) {
+    throw conflict(
+      `A ${booking.status.toLowerCase().replace(/_/g, " ")} appointment cannot take a desk payment`,
+    );
+  }
+
+  const attempts = await prisma.paymentRecord.count({
+    where: { bookingId: booking.id, kind: "CHARGE" },
+  });
+  const { record } = await createCharge({
+    bookingId: booking.id,
+    idempotencyKey: chargeIdempotencyKey(booking.id, attempts + 1),
+    providerName: "manual",
+  });
+
+  const providerRef = input.reference?.trim() || undefined;
+  const settled = await recordChargeSuccess({
+    paymentRecordId: record.id,
+    providerPaymentId: providerRef ?? `manual-${booking.id.slice(0, 12)}`,
+    providerRef,
+    actor: input.session,
+  });
+
+  await recordAudit({
+    session: input.session,
+    action: "payment.recorded_at_desk",
+    entityType: "Booking",
+    entityId: booking.id,
+    detail: { paymentRecordId: record.id, reference: providerRef ?? null },
+    ip: input.ip,
+  });
+
+  return settled;
+}
+
+/**
  * Initiate a refund for a booking sitting in REFUND_PENDING.
  *
  * Two-phase, async-gateway-correct:
