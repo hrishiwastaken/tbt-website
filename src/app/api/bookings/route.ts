@@ -3,6 +3,7 @@ import { z } from "zod";
 import { rateLimiter } from "@/lib/rateLimit";
 import { createBooking } from "@/server/services/bookingService";
 import { badRequest, clientIp, handleApi, parseBody } from "@/server/http";
+import { publicBookingView } from "@/server/serializers/publicBooking";
 
 const bookingSchema = z.object({
   therapistSlug: z.string().min(1),
@@ -52,7 +53,9 @@ export const POST = handleApi(async (request: Request) => {
   });
 
   return NextResponse.json({
-    booking,
+    // Whitelisted view — never the raw row. Keeps commissionBps, the
+    // encrypted notes blob and internal ids out of an anonymous response.
+    booking: publicBookingView(booking),
     // PAY_NOW: the client must complete checkout at this URL; confirmation
     // arrives server-side (webhook / status poll), never from the client.
     payment,

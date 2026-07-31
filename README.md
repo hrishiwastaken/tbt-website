@@ -33,6 +33,54 @@ Booking → PaymentRecord → Charge success → LedgerEntry postings
 
 ---
 
+## 🔐 Security Posture
+
+Access control and data minimisation are enforced server-side; the UI only
+mirrors what the API already guarantees.
+
+- **Authentication** — JWT in an HttpOnly, `SameSite=Strict`, `Secure`
+  (prod) cookie. `verifyToken` pins `HS256` (rejects `alg:none` / algorithm
+  confusion) and both signing and verification **fail closed in
+  production**: if `NEXTAUTH_SECRET` is unset the app refuses to mint or
+  trust tokens rather than falling back to the in-source dev secret (which
+  would otherwise let anyone forge an admin session). `ENCRYPTION_KEY` is
+  handled the same way — patient notes are never encrypted under the public
+  dev key in production, and the key length is validated.
+- **Authorisation** — every `/api/admin/*`, `/api/reception/*` and
+  `/api/therapist/*` route calls a role guard (`requireAdmin` /
+  `requireReception` / `requireTherapist`); consultant routes are scoped to
+  the caller's own `therapistId` and re-check row ownership before any
+  mutation (no IDOR across consultants). The reception desk is a verified
+  strict subset of admin (`src/server/domain/receptionScope.ts`).
+- **Data minimisation** — responses to unauthenticated callers go through an
+  allow-list serialiser (`src/server/serializers/publicBooking.ts`); the
+  public booking and cancellation endpoints never echo internal fields
+  (`commissionBps`, encrypted `notes`, linked account ids, raw foreign
+  keys). The encrypted notes blob is stripped from every list payload and
+  decrypted only in single-record detail routes.
+- **Abuse resistance** — booking, payment-status/retry, internship and
+  **login** endpoints are rate-limited per IP; login also returns a uniform
+  "invalid email or password" (no user/role enumeration). The webhook sink
+  validates the provider signature and deduplicates on `(provider,
+  externalId)`. All SQL goes through Prisma's parameterised client (the two
+  `FOR UPDATE` row locks use tagged-template parameters, not string
+  interpolation).
+- **Transport & browser hardening** — every response carries CSP
+  (`frame-ancestors 'self'`, `object-src 'none'`, `base-uri 'self'`,
+  `form-action 'self'`), `X-Frame-Options: SAMEORIGIN`,
+  `X-Content-Type-Options: nosniff`, `Referrer-Policy`, `Permissions-Policy`
+  and HSTS (see `next.config.mjs`). Uploaded resumes are served
+  `Content-Disposition: attachment` with `nosniff` so an attacker-controlled
+  MIME type can't be rendered as active content.
+
+**Operational requirements.** In production you **must** set
+`NEXTAUTH_SECRET` and `ENCRYPTION_KEY` (32-byte hex) — the app fails closed
+without them. The per-IP rate limiter is in-memory and per-instance: it
+stops single-source brute-forcing but distributed attacks still warrant an
+edge/WAF rate limit or account lockout, and the middleware performs an
+edge-safe token *decode* for redirects while the API layer remains the
+authoritative signature check.
+
 ## ⚙️ Local Setup Instructions
 
 Follow these steps to run the clinic platform locally:

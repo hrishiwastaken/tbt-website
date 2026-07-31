@@ -1,6 +1,22 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { comparePasswords, signToken } from "@/lib/auth";
+import { rateLimiter } from "@/lib/rateLimit";
+
+// Per-IP throttle on credential submission. Combined with the uniform
+// "Invalid email or password" response (which never reveals whether an
+// email exists or which role it holds), this blunts online password
+// brute-forcing. Note: the limiter is in-memory and per-instance — it stops
+// single-source guessing but a distributed attacker rotating IPs needs an
+// edge/WAF rate limit or account lockout, which is out of this layer's reach.
+const LOGIN_MAX_ATTEMPTS = 10;
+const LOGIN_WINDOW_MS = 5 * 60 * 1000;
+
+function requestIp(request) {
+  return (
+    request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown"
+  );
+}
 
 const NETLIFY_CONFIG_MESSAGE =
   "Database connection is not configured. Set DATABASE_URL, DIRECT_URL, NEXTAUTH_SECRET, and ENCRYPTION_KEY in Netlify, then seed the database.";
@@ -33,6 +49,18 @@ export async function POST(request) {
       return NextResponse.json(
         { error: NETLIFY_CONFIG_MESSAGE },
         { status: 500 },
+      );
+    }
+
+    const { isBlocked } = rateLimiter(
+      `login:${requestIp(request)}`,
+      LOGIN_MAX_ATTEMPTS,
+      LOGIN_WINDOW_MS,
+    );
+    if (isBlocked) {
+      return NextResponse.json(
+        { error: "Too many login attempts. Please wait a few minutes and try again." },
+        { status: 429 },
       );
     }
 

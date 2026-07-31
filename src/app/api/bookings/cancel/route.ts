@@ -61,6 +61,13 @@ export const POST = handleApi(async (request: Request) => {
       booking.paymentStatus === "PAID"
         ? "Appointment cancelled. Your refund is being processed."
         : "Appointment successfully cancelled.",
-    booking: finalBooking,
+    // State-only — this endpoint is unauthenticated (the booking UUID is the
+    // capability), so it must not echo the internal row (commissionBps,
+    // encrypted notes, foreign keys). The caller only needs the new state.
+    booking: {
+      id: finalBooking.id,
+      status: finalBooking.status,
+      paymentStatus: finalBooking.paymentStatus,
+    },
   });
 });

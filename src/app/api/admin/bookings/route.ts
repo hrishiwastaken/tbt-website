@@ -14,6 +14,7 @@ import {
 import { BOOKING_STATUSES } from "@/server/domain/bookingStatus";
 import { COUNSELING_TYPES } from "@/server/domain/counselingType";
 import { scheduleAdminBooking } from "@/server/services/bookingService";
+import { stripNotes } from "@/server/serializers/publicBooking";
 import { rupeesToMinor } from "@/server/money";
 
 // Admin booking list: pagination + status/payment/consultant filters,
@@ -78,7 +79,9 @@ export const GET = handleApi(async (request: Request) => {
     prisma.booking.count({ where }),
   ]);
 
-  return NextResponse.json(paginated(bookings, total, pagination));
+  // Encrypted clinical notes are read (and decrypted) only via the
+  // single-booking detail route, never surfaced in a list payload.
+  return NextResponse.json(paginated(stripNotes(bookings), total, pagination));
 });
 
 // Admin-only appointment scheduling. Captures consultant, counselling type,
