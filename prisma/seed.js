@@ -125,7 +125,7 @@ async function main() {
       description:
         "A focused, one-on-one session designed to explore personal narratives, address psychological blocks, and cultivate self-awareness.",
       tagline: "A steady space to understand yourself.",
-      image: IMG("1527689368864-3a821dbccc34"),
+      image: "/team/office1.jpg",
       suitableFor: [
         "Anxiety",
         "Depression",
@@ -145,7 +145,7 @@ async function main() {
       description:
         "Structured mediation to enhance relational dynamics, dismantle communication barriers, and restore intimacy — for couples and families at any stage.",
       tagline: "Reconnect through structured, guided conversation.",
-      image: IMG("1516589178581-6cd7833ae3b2"),
+      image: "/team/office2.jpg",
       suitableFor: [
         "Relationship conflict",
         "Marital concerns",
@@ -165,7 +165,7 @@ async function main() {
       description:
         "Structured guidance for career transitions, academic stress, and decision-making clarity.",
       tagline: "Direction when the path feels unclear.",
-      image: IMG("1454165804606-c3d57bc86b40"),
+      image: "/team/office6.jpg",
       suitableFor: [
         "Career transitions",
         "Academic stress",
@@ -220,7 +220,8 @@ async function main() {
       feeMinor: 150000,
       commissionBps: null, // platform default
       status: "APPROVED",
-      photo: PHOTO("1573496359142-b8d87734a5a2"),
+      // Real clinic portrait served from /public, not a stock photo.
+      photo: "/team/madhumati-dhumak.jpg",
       weight: 3,
       activeFromDay: -HISTORY_DAYS,
       activeToDay: FUTURE_DAYS,

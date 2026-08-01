@@ -150,13 +150,17 @@ export default function Home() {
                 className="relative w-full max-w-[390px] aspect-[4/5] overflow-hidden bg-forest-slate shadow-2xl border-t border-r border-b border-muted-sage/20 flex items-end"
                 style={{ borderRadius: "0 280px 280px 0" }}
               >
+                {/* The portrait is 1066x1280 (~5:6) inside a 4:5 frame, so only
+                    a sliver of each side is trimmed and her face stays centred.
+                    A very light grade keeps it sitting with the warm palette
+                    without dulling the skin tones. */}
                 <Image
-                  src="/team/madhumati.jpg"
+                  src="/team/madhumati-dhumak.jpg"
                   alt="Dr. Madhumati Dhumak - Clinical Psychologist"
                   fill
                   priority
                   sizes="(max-width: 1024px) 100vw, 35vw"
-                  className="object-cover object-top filter brightness-[0.93] contrast-[1.02]"
+                  className="object-cover object-center filter brightness-[0.98] contrast-[1.02]"
                 />
               </div>
             </div>
@@ -251,8 +255,8 @@ export default function Home() {
               {/* Bare arched image — no white wrapper */}
               <div className="relative aspect-[3/4] w-full rounded-t-full overflow-hidden shadow-lg">
                 <Image
-                  src="https://images.unsplash.com/photo-1527689368864-3a821dbccc34?auto=format&fit=crop&w=800&q=80"
-                  alt="Individual therapy session"
+                  src="/team/office1.jpg"
+                  alt="The individual therapy room at The Brain Tea — a single armchair beside a warm lamp"
                   fill
                   sizes="(max-width: 768px) 100vw, 30vw"
                   className="object-cover"
@@ -281,8 +285,8 @@ export default function Home() {
             <div className="flex flex-col items-center">
               <div className="relative aspect-[3/4] w-full rounded-t-full overflow-hidden shadow-lg">
                 <Image
-                  src="https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?auto=format&fit=crop&w=800&q=80"
-                  alt="Couples and family therapy session"
+                  src="/team/office2.jpg"
+                  alt="The couples and family therapy room at The Brain Tea — a sofa and armchair arranged for conversation"
                   fill
                   sizes="(max-width: 768px) 100vw, 40vw"
                   className="object-cover"
@@ -392,11 +396,11 @@ export default function Home() {
             <div className="lg:col-span-5 relative p-4 w-full max-w-sm mx-auto">
               <div className="relative aspect-[4/5] rounded-t-full overflow-hidden shadow-warm-soft bg-warm-tan border border-muted-sage/35">
                 <Image
-                  src="/team/madhumati.jpg"
+                  src="/team/madhumati-dhumak.jpg"
                   alt="Dr. Madhumati Dhumak - Warm smiling therapist looking professional in a cozy setting"
                   fill
                   sizes="(max-width: 768px) 100vw, 40vw"
-                  className="object-cover"
+                  className="object-cover object-center"
                 />
               </div>
             </div>

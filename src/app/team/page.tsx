@@ -51,12 +51,15 @@ export default function TeamPage() {
                 className="overflow-hidden flex flex-col"
               >
                 <div className="relative h-72 w-full bg-warm-tan">
+                  {/* Seated portraits put the face around the middle of the
+                      frame, so centring keeps it in the visible band — with
+                      object-top the card fills with wall above the head. */}
                   <Image
                     src={member.photo}
                     alt={`${member.name} - ${member.role}`}
                     fill
                     sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                    className="object-cover object-top"
+                    className="object-cover object-center"
                   />
                 </div>
 

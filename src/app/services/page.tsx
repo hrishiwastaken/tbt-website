@@ -7,8 +7,9 @@ import { formatServiceDuration } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
 
-const FALLBACK_IMAGE =
-  "https://images.unsplash.com/photo-1527689368864-3a821dbccc34?auto=format&fit=crop&w=800&q=80";
+// A real photo of the clinic, so a service with no image of its own still
+// shows the actual space rather than a stock photo of strangers.
+const FALLBACK_IMAGE = "/team/office.jpg";
 
 function formatLabel(availability: string[]): string {
   if (!availability.length) return "In-Person or Online";

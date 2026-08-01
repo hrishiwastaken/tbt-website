@@ -17,8 +17,7 @@ export const TEAM: TeamMember[] = [
     slug: "madhumati-dhumak",
     name: "Dr. Madhumati Dhumak",
     role: "Founding Director & Clinical Psychologist",
-    photo:
-      "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=800&q=80",
+    photo: "/team/madhumati-dhumak.jpg",
     qualification: "M.Phil Clinical Psychology · RCI Licensed",
     experience: "12+ years in clinical practice",
     approaches: [
