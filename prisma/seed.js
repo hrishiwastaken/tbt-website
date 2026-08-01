@@ -158,26 +158,6 @@ async function main() {
       process: null,
     },
     {
-      name: "Mental Health Assessment",
-      slug: "mental-health-assessment",
-      durationMinutes: 75,
-      priceMinor: 250000,
-      description:
-        "Comprehensive diagnostic evaluations using standardized psychometric tools to guide customized treatment plans.",
-      tagline: "Clear, evidence-based answers.",
-      image: IMG("1516534775068-ba3e7458af70"),
-      suitableFor: [
-        "Personality assessment",
-        "Cognitive assessment",
-        "Learning difficulty screening",
-        "ADHD screening",
-        "Diagnostic evaluation",
-      ],
-      availability: ["Offline"],
-      process:
-        "Each assessment includes a clear purpose, session duration, testing process, and a defined report timeline.",
-    },
-    {
       name: "Career & Academic Counselling",
       slug: "career-academic-counselling",
       durationMinutes: 50,
@@ -245,11 +225,7 @@ async function main() {
       activeFromDay: -HISTORY_DAYS,
       activeToDay: FUTURE_DAYS,
       schedule: { days: [1, 2, 3, 4, 5], hours: [9, 10, 11, 13, 14, 15, 16] },
-      serviceSlugs: [
-        "individual-therapy",
-        "couples-counseling",
-        "mental-health-assessment",
-      ],
+      serviceSlugs: ["individual-therapy", "couples-counseling"],
     },
     {
       email: "rohan@thebraintea.com",
@@ -329,7 +305,7 @@ async function main() {
       activeFromDay: 0,
       activeToDay: 0,
       schedule: { days: [], hours: [] },
-      serviceSlugs: ["mental-health-assessment", "individual-therapy"],
+      serviceSlugs: ["individual-therapy"],
     },
   ];
 
