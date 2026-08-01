@@ -345,9 +345,6 @@ export default function Home() {
 
           {/* Steps Row */}
           <div className="relative">
-            {/* Desktop Connecting Line */}
-            <div className="hidden lg:block absolute top-[60px] left-[15%] right-[15%] h-[1px] bg-teal-sage/20 z-0" />
-
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 relative z-10">
               {steps.map((step) => (
                 <div
