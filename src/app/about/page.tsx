@@ -130,7 +130,7 @@ export default function About() {
           {/* Story Image in Arch frame */}
           <div className="lg:col-span-5 relative aspect-[4/5] rounded-t-full overflow-hidden shadow-warm-soft w-full max-w-md mx-auto border border-muted-sage/25 bg-warm-tan">
             <Image
-              src="https://images.unsplash.com/photo-1518241353330-0f7941c2d9b5?auto=format&fit=crop&w=800&q=80"
+              src="/team/office.jpg"
               alt="Soft natural sunlight filtering through leaves near a quiet reading space"
               fill
               sizes="(max-width: 1024px) 100vw, 35vw"

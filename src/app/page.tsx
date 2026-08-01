@@ -151,7 +151,7 @@ export default function Home() {
                 style={{ borderRadius: "0 280px 280px 0" }}
               >
                 <Image
-                  src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=1200&q=80"
+                  src="/team/madhumati.jpg"
                   alt="Dr. Madhumati Dhumak - Clinical Psychologist"
                   fill
                   priority
@@ -392,7 +392,7 @@ export default function Home() {
             <div className="lg:col-span-5 relative p-4 w-full max-w-sm mx-auto">
               <div className="relative aspect-[4/5] rounded-t-full overflow-hidden shadow-warm-soft bg-warm-tan border border-muted-sage/35">
                 <Image
-                  src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=800&q=80"
+                  src="/team/madhumati.jpg"
                   alt="Dr. Madhumati Dhumak - Warm smiling therapist looking professional in a cozy setting"
                   fill
                   sizes="(max-width: 768px) 100vw, 40vw"
