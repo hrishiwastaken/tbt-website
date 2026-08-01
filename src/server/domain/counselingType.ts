@@ -43,7 +43,10 @@ export const COUNSELING_SERVICE_DEFAULTS: Record<
     name: "Couple / Family Counselling",
     description:
       "Structured counselling session for couples or families, guided by a consultant.",
-    durationMinutes: 60,
+    // Every session the clinic runs is a 45–50 minute slot; keep this in step
+    // with the public catalogue rather than letting admin-scheduled couple
+    // sessions book a longer block.
+    durationMinutes: 50,
     priceMinor: 220000,
   },
 };

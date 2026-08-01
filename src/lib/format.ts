@@ -49,15 +49,14 @@ export function formatDateTime(value: string | Date): string {
   return `${formatDate(value)}, ${formatTime(value)}`;
 }
 
-// Mental Health Assessment sessions vary in length by design (the intake
-// determines how much testing is needed), so the public services pages show
-// this instead of the DB's durationMinutes — which still drives real slot
-// scheduling and stays a normal number there.
+// Every service the clinic offers runs as a standard 45–50 minute session,
+// so the duration shown is always just the row's own durationMinutes. The
+// `slug` parameter is retained so callers don't all need changing if a
+// service ever needs a bespoke label again.
 export function formatServiceDuration(
   slug: string,
   durationMinutes: number,
 ): string {
-  if (slug === "mental-health-assessment") return "Depending on Assessment";
   return `${durationMinutes} Minutes`;
 }
 
