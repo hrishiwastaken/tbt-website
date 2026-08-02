@@ -8,6 +8,7 @@ import { getDefaultCommissionBps } from "@/server/services/commissionService";
 import { isValidCommissionBps } from "@/server/domain/commission";
 import { rupeesToMinor } from "@/server/money";
 import { recordAudit } from "@/server/audit";
+import { httpUrl } from "@/server/validation";
 
 // Consultant roster with live financial balances derived from the ledger.
 
@@ -67,7 +68,7 @@ const createSchema = z.object({
     .max(80)
     .regex(/^[a-z0-9-]+$/, "Lowercase letters, digits and hyphens only"),
   bio: z.string().min(1).max(5000),
-  photo: z.string().url().optional(),
+  photo: httpUrl.optional(),
   feeRupees: z.number().positive(),
   commissionBps: z.number().int().nullable().optional(),
   email: z.string().email().optional(),

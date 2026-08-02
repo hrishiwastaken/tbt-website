@@ -60,7 +60,7 @@ function splitPayment({
 const invoiceNumberFor = (bookingId, year) =>
   `INV-${year}-${bookingId.slice(0, 6).toUpperCase()}`;
 
-// ── Commission rate history ───────────────────────────────────────────
+// ── Commission rate history ────────────────────────────────────────
 // Bookings snapshot whichever rate was in effect at their creation time
 // (unless the consultant carries a personal override). Platform default
 // has been a flat 30% throughout; Dr. Rohan Gupta (35%) and Dr. Kavita Rao
@@ -100,7 +100,7 @@ async function main() {
   await prisma.service.deleteMany({});
   await prisma.testimonial.deleteMany({});
 
-  // ── Commission default history (append-only) ──────────────────────────
+  // ── Commission default history (append-only) ──────────────────────
   for (const era of COMMISSION_ERAS) {
     await prisma.commissionSetting.create({
       data: {
@@ -111,7 +111,7 @@ async function main() {
     });
   }
 
-  // ── Services (prices in paise) ────────────────────────────────────────
+  // ── Services (prices in paise) ──────────────────────────────────
   // The DB is the single source of truth for the public services catalogue —
   // each row carries the presentation content the /services pages render.
   const IMG = (id) =>
@@ -183,7 +183,7 @@ async function main() {
   }
   const serviceBySlug = (slug) => services.find((s) => s.slug === slug);
 
-  // ── Users & consultants ───────────────────────────────────────────────
+  // ── Users & consultants ───────────────────────────────────────
   const adminUser = await prisma.user.create({
     data: {
       email: "admin@thebraintea.com",
@@ -359,7 +359,7 @@ async function main() {
   // Bookable roster: those with a real schedule (excludes the pending applicant).
   const bookableTherapists = therapists.filter((t) => t.weight > 0);
 
-  // ── Weekly availability per consultant's own schedule ─────────────────
+  // ── Weekly availability per consultant's own schedule ───────────────
   for (const therapist of therapists) {
     for (const day of therapist.schedule.days) {
       for (const hour of therapist.schedule.hours) {
@@ -395,7 +395,7 @@ async function main() {
     },
   });
 
-  // ── Clients registered over the operating history ────────────────────
+  // ── Clients registered over the operating history ────────────────
   const firstNames = [
     "Amit",
     "Neha",
@@ -506,7 +506,7 @@ async function main() {
           name,
           email,
           phone: `+9198${String(10000000 + Math.floor(rand() * 89999999))}`,
-          dob: `19${70 + Math.floor(rand() * 30)}-${String(1 + Math.floor(rand() * 12)).padStart(2, "0")}-${String(1 + Math.floor(rand() * 27)).padStart(2, "0")}`,
+          age: 18 + Math.floor(rand() * 50),
           emergencyContact: `Family contact (+9199${String(10000000 + Math.floor(rand() * 89999999))})`,
           gdprConsent: true,
           createdAt,
@@ -515,7 +515,7 @@ async function main() {
     );
   }
 
-  // ── Bookings across the full operating history ────────────────────────
+  // ── Bookings across the full operating history ──────────────────
   const year = new Date().getFullYear();
   const usedSlots = new Set(); // therapistId|iso
   const counters = {
@@ -865,7 +865,7 @@ async function main() {
     }
   }
 
-  // ── Payouts: multi-cycle settlement per consultant ────────────────────
+  // ── Payouts: multi-cycle settlement per consultant ────────────────
   // Walks ~30-day cutoffs from each consultant's first earning up to
   // (today - 30 days), settling whatever had accrued by each cutoff, then
   // leaves half of the remaining unsettled balance as a queued PENDING
@@ -943,7 +943,7 @@ async function main() {
     }
   }
 
-  // ── Testimonials ──────────────────────────────────────────────────────
+  // ── Testimonials ──────────────────────────────────────
   await prisma.testimonial.createMany({
     data: [
       {

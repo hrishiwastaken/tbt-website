@@ -8,7 +8,7 @@ export const SITE_TAGLINE = "A space to unwind and heal";
  * details registered on the PhonePe merchant dashboard.
  */
 export const SITE_LEGAL_NAME = "The Brain Tea Mental Health Clinic";
-export const SITE_URL = "https://www.thebraintea.com";
+export const SITE_URL = "https://www.thebraintea.co.in";
 /** Effective / last-updated date shown on the legal pages. */
 export const LEGAL_EFFECTIVE_DATE = "24 July 2026";
 

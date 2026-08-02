@@ -17,7 +17,7 @@ interface ClientRow {
   name: string;
   email: string;
   phone: string;
-  dob: string;
+  age: number;
   emergencyContact: string;
   createdAt: string;
   _count: { bookings: number };
@@ -147,7 +147,7 @@ export default function AdminClientsPage() {
                         {row.name}
                       </div>
                       <div className="text-xs text-ink-muted">
-                        DOB {row.dob}
+                        Age {row.age}
                       </div>
                     </td>
                     <td className="px-3 py-3.5 text-xs text-ink-muted">

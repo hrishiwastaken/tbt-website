@@ -116,7 +116,8 @@ model Client {
   name             String
   email            String    @unique
   phone            String
-  dob              String // YYYY-MM-DD
+  age              Int?
+  dob              String? // YYYY-MM-DD — deprecated, retained only for records created before the age migration; run prisma/backfill-client-age.js to populate age from it
   emergencyContact String
   gdprConsent      Boolean   @default(false)
   bookings         Booking[]

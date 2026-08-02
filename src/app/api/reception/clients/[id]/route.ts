@@ -28,7 +28,7 @@ export const GET = handleApi(
         name: true,
         email: true,
         phone: true,
-        dob: true,
+        age: true,
         emergencyContact: true,
         gdprConsent: true,
         createdAt: true,
@@ -91,10 +91,7 @@ const updateSchema = z
     name: z.string().min(2).max(120).optional(),
     email: z.string().email().optional(),
     phone: z.string().min(8).max(20).optional(),
-    dob: z
-      .string()
-      .regex(/^\d{4}-\d{2}-\d{2}$/, "Expected YYYY-MM-DD")
-      .optional(),
+    age: z.coerce.number().int().min(1).max(120).optional(),
     emergencyContact: z.string().min(3).max(200).optional(),
     gdprConsent: z.boolean().optional(),
   })
@@ -115,7 +112,7 @@ export const PATCH = handleApi(
     if (body.name !== undefined) data.name = body.name;
     if (body.email !== undefined) data.email = body.email.toLowerCase();
     if (body.phone !== undefined) data.phone = body.phone;
-    if (body.dob !== undefined) data.dob = body.dob;
+    if (body.age !== undefined) data.age = body.age;
     if (body.emergencyContact !== undefined) {
       data.emergencyContact = body.emergencyContact;
     }

@@ -6,7 +6,6 @@ import {
   MapPin,
   Clock,
   Instagram,
-  Linkedin,
   MessageCircle,
 } from "lucide-react";
 import { INSTAGRAM_URL, WHATSAPP_URL } from "@/lib/site";
@@ -123,15 +122,23 @@ export default function Contact() {
               >
                 <Instagram className="w-5 h-5" />
               </a>
-              <a
-                href="https://linkedin.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="p-3 bg-sand hover:bg-mist/30 hover:text-forest rounded-full text-sage transition-all"
-                aria-label="LinkedIn Link"
-              >
-                <Linkedin className="w-5 h-5" />
-              </a>
+            </div>
+
+            {/* A look at the room before you arrive — first visits are easier
+                when the space is already familiar. */}
+            <div className="mb-6 rounded-2xl overflow-hidden shadow-warm-soft border border-mist/20 relative aspect-[4/3] bg-warm-tan">
+              <Image
+                src="/team/office.jpg"
+                alt="The consultation room at The Brain Tea — soft seating, plants and natural light"
+                fill
+                sizes="(max-width: 1024px) 100vw, 40vw"
+                className="object-cover"
+              />
+              <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-forest-slate/70 to-transparent px-5 pb-4 pt-10">
+                <span className="font-dmsans text-[11px] font-semibold uppercase tracking-[0.18em] text-warm-white">
+                  Our space in Baner, Pune
+                </span>
+              </div>
             </div>
 
             {/* A look at the room before you arrive — first visits are easier

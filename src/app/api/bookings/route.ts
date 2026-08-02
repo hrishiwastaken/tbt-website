@@ -1,8 +1,12 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { rateLimiter } from "@/lib/rateLimit";
 import { createBooking } from "@/server/services/bookingService";
-import { badRequest, clientIp, handleApi, parseBody } from "@/server/http";
+import {
+  badRequest,
+  enforceRateLimit,
+  handleApi,
+  parseBody,
+} from "@/server/http";
 import { publicBookingView } from "@/server/serializers/publicBooking";
 
 const bookingSchema = z.object({
@@ -13,7 +17,7 @@ const bookingSchema = z.object({
   name: z.string().min(2).max(120),
   email: z.string().email(),
   phone: z.string().min(8).max(20),
-  dob: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Expected YYYY-MM-DD"),
+  age: z.coerce.number().int().min(1).max(120),
   emergencyContact: z.string().min(3).max(200),
   gdprConsent: z.literal(true, {
     message: "Consent is mandatory to book a session",
@@ -22,15 +26,15 @@ const bookingSchema = z.object({
 });
 
 export const POST = handleApi(async (request: Request) => {
-  const { isBlocked } = rateLimiter(clientIp(request), 5, 60000);
-  if (isBlocked) {
-    return NextResponse.json(
-      {
-        error: "Too many booking requests. Please wait a minute and try again.",
-      },
-      { status: 429 },
-    );
-  }
+  // Namespaced bucket: previously this used a bare IP key, which meant
+  // internship submissions and booking creation drained the same budget.
+  enforceRateLimit(
+    request,
+    "booking",
+    5,
+    60000,
+    "Too many booking requests. Please wait a minute and try again.",
+  );
 
   const body = parseBody(bookingSchema, await request.json());
 
@@ -45,7 +49,7 @@ export const POST = handleApi(async (request: Request) => {
       name: body.name,
       email: body.email,
       phone: body.phone,
-      dob: body.dob,
+      age: body.age,
       emergencyContact: body.emergencyContact,
       gdprConsent: body.gdprConsent,
     },

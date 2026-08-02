@@ -135,7 +135,7 @@ suite("public API data minimisation", () => {
           name: `Sec Client ${hour}`,
           email: `sec.client.${STAMP}.${hour}@test.local`,
           phone: "+919812345678",
-          dob: "1990-01-01",
+          age: 35,
           emergencyContact: "EC (+919812345679)",
           gdprConsent: true,
           paymentOption: "PAY_LATER",

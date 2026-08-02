@@ -288,7 +288,7 @@ export default function About() {
             to your needs.
           </p>
           <Link
-            href="/contact"
+            href="/book"
             className="inline-block font-dmsans text-sm font-semibold bg-teal-sage hover:bg-forest-slate text-warm-sand px-8 py-3.5 rounded-full transition-all hover:shadow-lg btn-shimmer"
           >
             Schedule a Consultation

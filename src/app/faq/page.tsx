@@ -3,7 +3,6 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronDown, HelpCircle } from "lucide-react";
-import Link from "next/link";
 
 interface FAQItemProps {
   question: string;
@@ -188,12 +187,6 @@ export default function FAQ() {
             connect via WhatsApp. We are happy to help.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Link
-              href="/contact"
-              className="bg-teal-sage hover:bg-forest-slate text-warm-sand font-semibold px-8 py-3.5 rounded-full text-sm transition-all shadow-sm hover:shadow-md btn-shimmer"
-            >
-              Contact Us Form
-            </Link>
             <a
               href="https://wa.me/919309833817?text=Hi!%20I%20have%20a%20few%20questions%20about%20your%20services."
               target="_blank"

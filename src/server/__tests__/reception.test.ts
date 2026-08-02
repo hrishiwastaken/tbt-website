@@ -174,7 +174,7 @@ suite("reception desk", () => {
                   name: `Desk Client ${slot.getTime()}`,
                   email: `desk.${STAMP}.${slot.getTime()}@test.local`,
                   phone: "+919812345678",
-                  dob: "1992-05-04",
+                  age: 33,
                   emergencyContact: "Next of kin (+919812345679)",
                 },
               }),
@@ -184,7 +184,7 @@ suite("reception desk", () => {
     return { status: res.status, body: await json(res) };
   }
 
-  // ── Access control ──────────────────────────────────────────────────────
+  // ── Access control ───────────────────────────────────────────
 
   it("refuses anonymous and consultant sessions", async () => {
     const anon = await bookingsGet(
@@ -203,7 +203,7 @@ suite("reception desk", () => {
     expect(anonDash.status).toBe(401);
   });
 
-  // ── Scheduling + prepaid ledger ─────────────────────────────────────────
+  // ── Scheduling + prepaid ledger ──────────────────────────────
 
   it("schedules a prepaid appointment: confirmed, invoiced and fully ledgered", async () => {
     const slot = futureSlot(5, 9);
@@ -256,7 +256,7 @@ suite("reception desk", () => {
     expect(second.status).toBe(409);
   });
 
-  // ── Desk payment collection ─────────────────────────────────────────────
+  // ── Desk payment collection ───────────────────────────────
 
   it("records a desk payment exactly once and refuses a second collection", async () => {
     const slot = futureSlot(7, 12);
@@ -317,7 +317,7 @@ suite("reception desk", () => {
     expect(payload.summary.collectedMinor).toBeGreaterThan(0);
   });
 
-  // ── Lifecycle + permission boundary ─────────────────────────────────────
+  // ── Lifecycle + permission boundary ───────────────────────
 
   it("confirms, completes, and refuses transitions reserved for admins", async () => {
     const slot = futureSlot(8, 13);
@@ -423,7 +423,7 @@ suite("reception desk", () => {
     expect(JSON.stringify(body)).not.toContain("encrypted-clinical-note");
   });
 
-  // ── Queues and dashboard ────────────────────────────────────────────────
+  // ── Queues and dashboard ──────────────────────────────
 
   it("filters the register by desk queue", async () => {
     const unpaid = await bookingsGet(
@@ -499,7 +499,7 @@ suite("reception desk", () => {
     expect(mine).not.toHaveProperty("earnedMinor");
   });
 
-  // ── Client records ──────────────────────────────────────────────────────
+  // ── Client records ──────────────────────────────────────
 
   it("registers, searches and corrects client records", async () => {
     const email = `walkin.${STAMP}@test.local`;
@@ -510,7 +510,7 @@ suite("reception desk", () => {
           name: "Walk In Client",
           email,
           phone: "+919800000001",
-          dob: "1988-03-12",
+          age: 37,
           emergencyContact: "Sibling (+919800000002)",
         },
       }),
@@ -528,7 +528,7 @@ suite("reception desk", () => {
           name: "Walk In Again",
           email: email.toUpperCase(),
           phone: "+919800000003",
-          dob: "1988-03-12",
+          age: 37,
           emergencyContact: "Sibling (+919800000002)",
         },
       }),
@@ -584,7 +584,7 @@ suite("reception desk", () => {
           name: "Other Client",
           email: otherEmail,
           phone: "+919800000004",
-          dob: "1990-01-01",
+          age: 35,
           emergencyContact: "Parent (+919800000005)",
         },
       }),
@@ -676,7 +676,7 @@ suite("reception desk", () => {
             name: "Both At Once",
             email: `both.${STAMP}@test.local`,
             phone: "+919800000006",
-            dob: "1990-01-01",
+            age: 35,
             emergencyContact: "EC (+919800000007)",
           },
         },

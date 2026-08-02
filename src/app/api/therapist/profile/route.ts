@@ -9,6 +9,7 @@ import {
   requireTherapist,
 } from "@/server/http";
 import { recordAudit } from "@/server/audit";
+import { httpUrl } from "@/server/validation";
 
 // A consultant may edit their own bio/photo and change their password.
 // Fee and commission are financial terms set by admin only (see
@@ -16,7 +17,7 @@ import { recordAudit } from "@/server/audit";
 
 const patchSchema = z.object({
   bio: z.string().min(1).max(5000).optional(),
-  photo: z.string().url().nullable().optional(),
+  photo: httpUrl.nullable().optional(),
   currentPassword: z.string().optional(),
   newPassword: z.string().min(10).max(100).optional(),
 });

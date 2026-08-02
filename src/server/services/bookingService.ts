@@ -35,7 +35,7 @@ export interface CreateBookingInput {
     name: string;
     email: string;
     phone: string;
-    dob: string;
+    age: number;
     emergencyContact: string;
     gdprConsent: boolean;
   };
@@ -161,7 +161,7 @@ export async function createBooking(input: CreateBookingInput) {
       update: {
         name: input.client.name,
         phone: input.client.phone,
-        dob: input.client.dob,
+        age: input.client.age,
         emergencyContact: input.client.emergencyContact,
       },
       create: { ...input.client },
@@ -486,7 +486,7 @@ export type ScheduleClientInput =
         name: string;
         email: string;
         phone: string;
-        dob: string;
+        age: number;
         emergencyContact: string;
       };
     };
@@ -549,14 +549,14 @@ export async function scheduleAdminBooking(input: ScheduleAdminBookingInput) {
         update: {
           name: c.name,
           phone: c.phone,
-          dob: c.dob,
+          age: c.age,
           emergencyContact: c.emergencyContact,
         },
         create: {
           name: c.name,
           email: c.email.toLowerCase(),
           phone: c.phone,
-          dob: c.dob,
+          age: c.age,
           emergencyContact: c.emergencyContact,
           gdprConsent: true,
         },
