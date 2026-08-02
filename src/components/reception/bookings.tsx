@@ -53,7 +53,7 @@ export interface BookingDetail extends BookingRow {
     name: string;
     email: string;
     phone: string;
-    dob: string;
+    age: number;
     emergencyContact: string;
   };
   payments: {
@@ -605,7 +605,7 @@ export function ScheduleModal({
     name: "",
     email: "",
     phone: "",
-    dob: "",
+    age: "",
     emergencyContact: "",
   });
 
@@ -654,7 +654,7 @@ export function ScheduleModal({
       (!newClient.name ||
         !newClient.email ||
         !newClient.phone ||
-        !newClient.dob ||
+        !newClient.age ||
         !newClient.emergencyContact)
     )
       return setError("Complete all new client fields");
@@ -881,13 +881,14 @@ export function ScheduleModal({
                   className={inputClass}
                 />
               </Field>
-              <Field label="Date of birth">
+              <Field label="Age">
                 <input
-                  type="date"
-                  max={today}
-                  value={newClient.dob}
+                  type="number"
+                  min={1}
+                  max={120}
+                  value={newClient.age}
                   onChange={(e) =>
-                    setNewClient({ ...newClient, dob: e.target.value })
+                    setNewClient({ ...newClient, age: e.target.value })
                   }
                   className={inputClass}
                 />
