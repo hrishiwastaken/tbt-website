@@ -20,7 +20,7 @@ interface ClientRow {
   name: string;
   email: string;
   phone: string;
-  dob: string;
+  age: number;
   emergencyContact: string;
   gdprConsent: boolean;
   createdAt: string;
@@ -46,7 +46,7 @@ const EMPTY_FORM = {
   name: "",
   email: "",
   phone: "",
-  dob: "",
+  age: "",
   emergencyContact: "",
 };
 
@@ -188,7 +188,7 @@ export default function ReceptionClientsPage() {
                         {row.name}
                       </div>
                       <div className="text-xs text-ink-muted">
-                        DOB {row.dob}
+                        Age {row.age}
                       </div>
                     </td>
                     <td className="px-3 py-3.5 text-xs text-ink-muted">
@@ -256,7 +256,7 @@ export default function ReceptionClientsPage() {
             name: editing.name,
             email: editing.email,
             phone: editing.phone,
-            dob: editing.dob,
+            age: String(editing.age),
             emergencyContact: editing.emergencyContact,
           }}
           onClose={() => setEditing(null)}
@@ -311,7 +311,7 @@ function ClientFormModal({
       !form.name ||
       !form.email ||
       !form.phone ||
-      !form.dob ||
+      !form.age ||
       !form.emergencyContact
     ) {
       setError("All fields are required");
@@ -326,8 +326,6 @@ function ClientFormModal({
       setBusy(false);
     }
   };
-
-  const today = new Date().toISOString().slice(0, 10);
 
   return (
     <Modal title={title} onClose={onClose}>
@@ -356,12 +354,13 @@ function ClientFormModal({
               className={inputClass}
             />
           </Field>
-          <Field label="Date of birth">
+          <Field label="Age">
             <input
-              type="date"
-              max={today}
-              value={form.dob}
-              onChange={(e) => set("dob", e.target.value)}
+              type="number"
+              min={1}
+              max={120}
+              value={form.age}
+              onChange={(e) => set("age", e.target.value)}
               className={inputClass}
             />
           </Field>
@@ -455,8 +454,8 @@ function ClientDetailModal({
                 <div className="text-xs text-ink-muted">{client.email}</div>
                 <div className="text-xs text-ink-muted">{client.phone}</div>
                 <div className="mt-2 grid grid-cols-2 gap-x-3 gap-y-1 text-xs text-ink-muted">
-                  <span className="font-semibold">Date of birth</span>
-                  <span>{client.dob}</span>
+                  <span className="font-semibold">Age</span>
+                  <span>{client.age}</span>
                   <span className="font-semibold">Emergency</span>
                   <span>{client.emergencyContact}</span>
                   <span className="font-semibold">Registered</span>
