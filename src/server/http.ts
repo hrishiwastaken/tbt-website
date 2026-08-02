@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { ZodError, ZodSchema } from "zod";
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { rateLimiter } from "@/lib/rateLimit";
 import { InvalidTransitionError } from "./domain/bookingStatus";
 
 // Shared route-handler plumbing: typed errors, RBAC guards, pagination and
@@ -28,6 +29,8 @@ export const forbidden = (msg = "Insufficient permissions") =>
 export const notFound = (msg = "Not found") => new ApiError(404, msg);
 export const conflict = (msg: string, code?: string) =>
   new ApiError(409, msg, code);
+export const tooManyRequests = (msg = "Too many requests. Please slow down.") =>
+  new ApiError(429, msg, "RATE_LIMITED");
 
 export interface Session {
   userId: string;
@@ -176,4 +179,31 @@ export function clientIp(request: Request): string {
   return (
     request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown"
   );
+}
+
+/**
+ * Per-IP throttle for a route, keyed by `bucket` so one endpoint's traffic
+ * can never exhaust another's budget (a status page polled every few seconds
+ * must not lock a client out of booking).
+ *
+ * Throws a 429 ApiError so handleApi renders it in the same shape as every
+ * other error, instead of each route hand-rolling its own response.
+ *
+ * Note: the underlying store is in-memory and therefore per-instance. This
+ * stops single-source hammering, which is what it is for; a distributed
+ * attacker rotating IPs still needs an edge/WAF rule.
+ */
+export function enforceRateLimit(
+  request: Request,
+  bucket: string,
+  limit: number,
+  windowMs: number,
+  message?: string,
+): void {
+  const { isBlocked } = rateLimiter(
+    `${bucket}:${clientIp(request)}`,
+    limit,
+    windowMs,
+  );
+  if (isBlocked) throw tooManyRequests(message);
 }
