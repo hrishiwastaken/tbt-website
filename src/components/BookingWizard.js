@@ -44,7 +44,7 @@ export default function BookingWizard({ services = [], initialService = "" }) {
     name: "",
     email: "",
     phone: "",
-    dob: "",
+    age: "",
     emergencyContact: "",
     gdprConsent: false,
   });
@@ -154,9 +154,9 @@ export default function BookingWizard({ services = [], initialService = "" }) {
       if (!selectedDate || !selectedSlot)
         return setErrorMsg("Please select an available date and time slot.");
     } else if (step === 4) {
-      const { name, email, phone, dob, emergencyContact, gdprConsent } =
+      const { name, email, phone, age, emergencyContact, gdprConsent } =
         clientDetails;
-      if (!name || !email || !phone || !dob || !emergencyContact)
+      if (!name || !email || !phone || !age || !emergencyContact)
         return setErrorMsg("Please fill out all client information fields.");
       if (!gdprConsent)
         return setErrorMsg(
@@ -554,14 +554,18 @@ export default function BookingWizard({ services = [], initialService = "" }) {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div>
                   <label className="text-xs font-bold tracking-wider uppercase text-sage block mb-1">
-                    Date of Birth
+                    Age
                   </label>
                   <input
-                    type="date"
-                    name="dob"
-                    value={clientDetails.dob}
+                    type="number"
+                    name="age"
+                    inputMode="numeric"
+                    min="1"
+                    max="120"
+                    value={clientDetails.age}
                     onChange={handleClientDetailChange}
-                    className="w-full bg-warm-white/50 border-t-0 border-l-0 border-r-0 border-b border-mist/60 focus:ring-0 focus:border-forest text-sage py-2 px-0 transition-colors text-base"
+                    placeholder="e.g. 32"
+                    className="w-full bg-warm-white/50 border-t-0 border-l-0 border-r-0 border-b border-mist/60 focus:ring-0 focus:border-forest text-charcoal py-2 px-0 transition-colors text-base"
                     required
                   />
                 </div>
