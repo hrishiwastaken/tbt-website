@@ -69,8 +69,8 @@ export default function PrivacyPolicyPage() {
         </li>
         <li>
           <strong>Technical information:</strong> IP address, browser type,
-          device information, and cookies collected automatically when you use
-          the website.
+          and device information collected automatically when you use the
+          website.
         </li>
       </ul>
 
@@ -168,15 +168,7 @@ export default function PrivacyPolicyPage() {
         </li>
       </ul>
 
-      <h2>6. Cookies</h2>
-      <p>
-        Our website uses cookies and similar technologies to keep you signed in,
-        remember your preferences, and understand how the site is used. You can
-        control or disable cookies through your browser settings, though some
-        features may not function correctly without them.
-      </p>
-
-      <h2>7. Data Security</h2>
+      <h2>6. Data Security</h2>
       <p>
         We apply reasonable technical and organisational safeguards to protect
         your information, including encryption of sensitive clinical notes at
@@ -186,7 +178,7 @@ export default function PrivacyPolicyPage() {
         guarantee absolute security.
       </p>
 
-      <h2>8. Data Retention</h2>
+      <h2>7. Data Retention</h2>
       <p>
         We retain personal and clinical records for as long as necessary to
         provide our services and to meet our legal, professional, and accounting
@@ -194,7 +186,7 @@ export default function PrivacyPolicyPage() {
         deleted or anonymised.
       </p>
 
-      <h2>9. Your Rights</h2>
+      <h2>8. Your Rights</h2>
       <p>You may, subject to applicable law:</p>
       <ul>
         <li>request access to the personal information we hold about you;</li>
@@ -211,14 +203,14 @@ export default function PrivacyPolicyPage() {
         {CONTACT_PHONE}.
       </p>
 
-      <h2>10. Children&rsquo;s Privacy</h2>
+      <h2>9. Children&rsquo;s Privacy</h2>
       <p>
         Services for minors (under 18) are arranged and consented to by a parent
         or legal guardian. We collect a minor&rsquo;s information only with such
         consent and use it solely to provide the agreed care.
       </p>
 
-      <h2>11. Changes to This Policy</h2>
+      <h2>10. Changes to This Policy</h2>
       <p>
         We may update this Privacy Policy from time to time. The revised version
         will be posted on this page with an updated &ldquo;Last updated&rdquo;

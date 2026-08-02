@@ -37,8 +37,7 @@ export default function About() {
         "Life Transitions",
       ],
       bio: "With over 12 years of clinical experience, Dr. Dhumak founded The Brain Tea to create a sanctuary where scientific insight meets deep, non-judgmental human empathy. She specializes in guiding clients through trauma recovery and stress management at their own pace.",
-      image:
-        "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=600&q=80",
+      image: "/team/madhumati-dhumak.jpg",
     },
   ];
 
@@ -127,15 +126,29 @@ export default function About() {
             </div>
           </div>
 
-          {/* Story Image in Arch frame */}
-          <div className="lg:col-span-5 relative aspect-[4/5] rounded-t-full overflow-hidden shadow-warm-soft w-full max-w-md mx-auto border border-muted-sage/25 bg-warm-tan">
-            <Image
-              src="https://images.unsplash.com/photo-1518241353330-0f7941c2d9b5?auto=format&fit=crop&w=800&q=80"
-              alt="Soft natural sunlight filtering through leaves near a quiet reading space"
-              fill
-              sizes="(max-width: 1024px) 100vw, 35vw"
-              className="object-cover transition-transform duration-700 hover:scale-105"
-            />
+          {/* Story image in an arch frame, with a small detail from the same
+              room tucked into the lower corner — an editorial pairing rather
+              than a gallery, so the space reads as lived-in without turning
+              the section into a photo grid. */}
+          <div className="lg:col-span-5 relative w-full max-w-md mx-auto">
+            <div className="relative aspect-[4/5] rounded-t-full overflow-hidden shadow-warm-soft border border-muted-sage/25 bg-warm-tan">
+              <Image
+                src="/team/office.jpg"
+                alt="The therapy room at The Brain Tea — soft seating and natural light through sheer curtains"
+                fill
+                sizes="(max-width: 1024px) 100vw, 35vw"
+                className="object-cover transition-transform duration-700 hover:scale-105"
+              />
+            </div>
+            <div className="hidden sm:block absolute -bottom-8 -left-6 lg:-left-10 w-32 lg:w-40 aspect-square rounded-2xl overflow-hidden shadow-warm-soft border-4 border-ivory bg-warm-tan">
+              <Image
+                src="/team/office5.jpg"
+                alt="A small brass Buddha resting on a wooden stool in the corner of the room"
+                fill
+                sizes="160px"
+                className="object-cover"
+              />
+            </div>
           </div>
         </div>
       </section>
@@ -216,12 +229,14 @@ export default function About() {
 
                 {/* Photo */}
                 <div className="relative h-72 w-full bg-warm-tan">
+                  {/* Centred rather than top-aligned so a seated portrait's
+                      face lands in the visible band of this short card. */}
                   <Image
                     src={t.image}
                     alt={`${t.name} - ${t.role}`}
                     fill
                     sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 30vw"
-                    className="object-cover object-top"
+                    className="object-cover object-center"
                   />
                 </div>
 
@@ -273,7 +288,7 @@ export default function About() {
             to your needs.
           </p>
           <Link
-            href="/contact"
+            href="/book"
             className="inline-block font-dmsans text-sm font-semibold bg-teal-sage hover:bg-forest-slate text-warm-sand px-8 py-3.5 rounded-full transition-all hover:shadow-lg btn-shimmer"
           >
             Schedule a Consultation
