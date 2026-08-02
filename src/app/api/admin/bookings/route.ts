@@ -93,7 +93,7 @@ const newClientSchema = z.object({
   name: z.string().min(2).max(120),
   email: z.string().email(),
   phone: z.string().min(8).max(20),
-  dob: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Expected YYYY-MM-DD"),
+  age: z.coerce.number().int().min(1).max(120),
   emergencyContact: z.string().min(3).max(200),
 });
 

@@ -59,7 +59,7 @@ export const GET = handleApi(
             name: true,
             email: true,
             phone: true,
-            dob: true,
+            age: true,
             emergencyContact: true,
           },
         },
