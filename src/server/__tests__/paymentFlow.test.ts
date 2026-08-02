@@ -98,7 +98,7 @@ const clientInput = (n: number) => ({
   name: `PF Client ${n}`,
   email: `pf.client.${STAMP}.${n}@example.com`,
   phone: "+919812345678",
-  dob: "1990-01-01",
+  age: 35,
   emergencyContact: "Test EC (+919812345679)",
   gdprConsent: true as const,
 });
