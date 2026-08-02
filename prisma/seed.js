@@ -60,7 +60,7 @@ function splitPayment({
 const invoiceNumberFor = (bookingId, year) =>
   `INV-${year}-${bookingId.slice(0, 6).toUpperCase()}`;
 
-// ── Commission rate history ───────────────────────────────────────────
+// ── Commission rate history ────────────────────────────────────────
 // Bookings snapshot whichever rate was in effect at their creation time
 // (unless the consultant carries a personal override). Platform default
 // has been a flat 30% throughout; Dr. Rohan Gupta (35%) and Dr. Kavita Rao
@@ -100,7 +100,7 @@ async function main() {
   await prisma.service.deleteMany({});
   await prisma.testimonial.deleteMany({});
 
-  // ── Commission default history (append-only) ──────────────────────────
+  // ── Commission default history (append-only) ──────────────────────
   for (const era of COMMISSION_ERAS) {
     await prisma.commissionSetting.create({
       data: {
@@ -111,7 +111,7 @@ async function main() {
     });
   }
 
-  // ── Services (prices in paise) ────────────────────────────────────────
+  // ── Services (prices in paise) ──────────────────────────────────
   // The DB is the single source of truth for the public services catalogue —
   // each row carries the presentation content the /services pages render.
   const IMG = (id) =>
@@ -125,7 +125,7 @@ async function main() {
       description:
         "A focused, one-on-one session designed to explore personal narratives, address psychological blocks, and cultivate self-awareness.",
       tagline: "A steady space to understand yourself.",
-      image: IMG("1527689368864-3a821dbccc34"),
+      image: "/team/office1.jpg",
       suitableFor: [
         "Anxiety",
         "Depression",
@@ -145,7 +145,7 @@ async function main() {
       description:
         "Structured mediation to enhance relational dynamics, dismantle communication barriers, and restore intimacy — for couples and families at any stage.",
       tagline: "Reconnect through structured, guided conversation.",
-      image: IMG("1516589178581-6cd7833ae3b2"),
+      image: "/team/office2.jpg",
       suitableFor: [
         "Relationship conflict",
         "Marital concerns",
@@ -158,26 +158,6 @@ async function main() {
       process: null,
     },
     {
-      name: "Mental Health Assessment",
-      slug: "mental-health-assessment",
-      durationMinutes: 75,
-      priceMinor: 250000,
-      description:
-        "Comprehensive diagnostic evaluations using standardized psychometric tools to guide customized treatment plans.",
-      tagline: "Clear, evidence-based answers.",
-      image: IMG("1516534775068-ba3e7458af70"),
-      suitableFor: [
-        "Personality assessment",
-        "Cognitive assessment",
-        "Learning difficulty screening",
-        "ADHD screening",
-        "Diagnostic evaluation",
-      ],
-      availability: ["Offline"],
-      process:
-        "Each assessment includes a clear purpose, session duration, testing process, and a defined report timeline.",
-    },
-    {
       name: "Career & Academic Counselling",
       slug: "career-academic-counselling",
       durationMinutes: 50,
@@ -185,7 +165,7 @@ async function main() {
       description:
         "Structured guidance for career transitions, academic stress, and decision-making clarity.",
       tagline: "Direction when the path feels unclear.",
-      image: IMG("1454165804606-c3d57bc86b40"),
+      image: "/team/office6.jpg",
       suitableFor: [
         "Career transitions",
         "Academic stress",
@@ -203,7 +183,7 @@ async function main() {
   }
   const serviceBySlug = (slug) => services.find((s) => s.slug === slug);
 
-  // ── Users & consultants ───────────────────────────────────────────────
+  // ── Users & consultants ───────────────────────────────────────
   const adminUser = await prisma.user.create({
     data: {
       email: "admin@thebraintea.com",
@@ -240,16 +220,13 @@ async function main() {
       feeMinor: 150000,
       commissionBps: null, // platform default
       status: "APPROVED",
-      photo: PHOTO("1573496359142-b8d87734a5a2"),
+      // Real clinic portrait served from /public, not a stock photo.
+      photo: "/team/madhumati-dhumak.jpg",
       weight: 3,
       activeFromDay: -HISTORY_DAYS,
       activeToDay: FUTURE_DAYS,
       schedule: { days: [1, 2, 3, 4, 5], hours: [9, 10, 11, 13, 14, 15, 16] },
-      serviceSlugs: [
-        "individual-therapy",
-        "couples-counseling",
-        "mental-health-assessment",
-      ],
+      serviceSlugs: ["individual-therapy", "couples-counseling"],
     },
     {
       email: "rohan@thebraintea.com",
@@ -329,7 +306,7 @@ async function main() {
       activeFromDay: 0,
       activeToDay: 0,
       schedule: { days: [], hours: [] },
-      serviceSlugs: ["mental-health-assessment", "individual-therapy"],
+      serviceSlugs: ["individual-therapy"],
     },
   ];
 
@@ -382,7 +359,7 @@ async function main() {
   // Bookable roster: those with a real schedule (excludes the pending applicant).
   const bookableTherapists = therapists.filter((t) => t.weight > 0);
 
-  // ── Weekly availability per consultant's own schedule ─────────────────
+  // ── Weekly availability per consultant's own schedule ───────────────
   for (const therapist of therapists) {
     for (const day of therapist.schedule.days) {
       for (const hour of therapist.schedule.hours) {
@@ -418,7 +395,7 @@ async function main() {
     },
   });
 
-  // ── Clients registered over the operating history ────────────────────
+  // ── Clients registered over the operating history ────────────────
   const firstNames = [
     "Amit",
     "Neha",
@@ -529,7 +506,7 @@ async function main() {
           name,
           email,
           phone: `+9198${String(10000000 + Math.floor(rand() * 89999999))}`,
-          dob: `19${70 + Math.floor(rand() * 30)}-${String(1 + Math.floor(rand() * 12)).padStart(2, "0")}-${String(1 + Math.floor(rand() * 27)).padStart(2, "0")}`,
+          age: 18 + Math.floor(rand() * 50),
           emergencyContact: `Family contact (+9199${String(10000000 + Math.floor(rand() * 89999999))})`,
           gdprConsent: true,
           createdAt,
@@ -538,7 +515,7 @@ async function main() {
     );
   }
 
-  // ── Bookings across the full operating history ────────────────────────
+  // ── Bookings across the full operating history ──────────────────
   const year = new Date().getFullYear();
   const usedSlots = new Set(); // therapistId|iso
   const counters = {
@@ -888,7 +865,7 @@ async function main() {
     }
   }
 
-  // ── Payouts: multi-cycle settlement per consultant ────────────────────
+  // ── Payouts: multi-cycle settlement per consultant ────────────────
   // Walks ~30-day cutoffs from each consultant's first earning up to
   // (today - 30 days), settling whatever had accrued by each cutoff, then
   // leaves half of the remaining unsettled balance as a queued PENDING
@@ -966,7 +943,7 @@ async function main() {
     }
   }
 
-  // ── Testimonials ──────────────────────────────────────────────────────
+  // ── Testimonials ──────────────────────────────────────
   await prisma.testimonial.createMany({
     data: [
       {
