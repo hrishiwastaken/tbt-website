@@ -28,8 +28,10 @@ function hasAllowedExtension(fileName: string): boolean {
 
 export async function POST(request: Request) {
   try {
+    // Namespaced bucket — a bare IP key here shared its budget with booking
+    // creation, so applicants and clients throttled each other.
     const ip = clientIp(request);
-    const { isBlocked } = rateLimiter(ip, 5, 60000);
+    const { isBlocked } = rateLimiter(`internship:${ip}`, 5, 60000);
     if (isBlocked) {
       return NextResponse.json(
         {

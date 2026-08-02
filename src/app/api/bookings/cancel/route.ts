@@ -4,6 +4,7 @@ import { prisma } from "@/lib/db";
 import { transitionBooking } from "@/server/services/bookingService";
 import {
   badRequest,
+  enforceRateLimit,
   forbidden,
   handleApi,
   notFound,
@@ -21,6 +22,16 @@ const cancelSchema = z.object({
 });
 
 export const POST = handleApi(async (request: Request) => {
+  // Unauthenticated and state-changing — the booking UUID is its only
+  // "credential" — so it gets the same per-IP throttle as booking creation.
+  enforceRateLimit(
+    request,
+    "cancel",
+    10,
+    60000,
+    "Too many cancellation requests. Please wait a minute and try again.",
+  );
+
   const { bookingId, reason } = parseBody(cancelSchema, await request.json());
 
   const booking = await prisma.booking.findUnique({ where: { id: bookingId } });

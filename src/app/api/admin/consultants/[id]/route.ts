@@ -9,6 +9,7 @@ import {
 } from "@/server/services/commissionService";
 import { rupeesToMinor } from "@/server/money";
 import { recordAudit } from "@/server/audit";
+import { httpUrl } from "@/server/validation";
 
 // Consultant detail: profile, schedule, earnings breakdown (from the
 // ledger), payout history and recent appointments.
@@ -99,7 +100,7 @@ export const GET = handleApi(
 const patchSchema = z.object({
   name: z.string().min(2).max(120).optional(),
   bio: z.string().min(1).max(5000).optional(),
-  photo: z.string().url().nullable().optional(),
+  photo: httpUrl.nullable().optional(),
   feeRupees: z.number().positive().optional(),
   status: z.enum(["PENDING", "APPROVED", "SUSPENDED"]).optional(),
   // null clears the override back to the platform default
