@@ -2,6 +2,7 @@ import React from "react";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
+import { CONTACT_PHONE } from "@/lib/site";
 
 export const dynamic = "force-dynamic";
 
@@ -153,6 +154,13 @@ export default async function BookingConfirmedPage({ searchParams }) {
             Important Session Guidelines:
           </h4>
           <ul className="list-disc pl-5 space-y-1">
+            {booking.paymentStatus !== "PAID" && (
+              <li>
+                To settle your session fee, please contact our admin at{" "}
+                <strong className="text-charcoal">{CONTACT_PHONE}</strong>. We
+                will soon be available for online payments and bookings.
+              </li>
+            )}
             <li>
               Please arrive 10 minutes prior to your scheduled time to settle
               into the clinical sanctuary.

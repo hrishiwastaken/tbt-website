@@ -85,7 +85,21 @@ export const GET = handleApi(async (request: Request) => {
   if (queue) and.push(queue);
 
   const status = searchParams.get("status");
-  if (status && (BOOKING_STATUSES as readonly string[]).includes(status)) {
+  if (status === "AWAITING_PAYMENT") {
+    // "Awaiting Payment" reads to front-desk staff as "money still owed",
+    // not just the transient online-checkout hold — so it also catches
+    // confirmed/completed/no-show sessions billed at the clinic that
+    // haven't been paid yet (same definition as the `unpaid` desk queue).
+    and.push({
+      OR: [
+        { status: "AWAITING_PAYMENT" },
+        {
+          paymentStatus: "UNPAID",
+          status: { in: ["CONFIRMED", "COMPLETED", "NO_SHOW"] },
+        },
+      ],
+    });
+  } else if (status && (BOOKING_STATUSES as readonly string[]).includes(status)) {
     where.status = status;
   }
   const paymentStatus = searchParams.get("paymentStatus");
