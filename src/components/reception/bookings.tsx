@@ -22,6 +22,16 @@ import {
   counselingTypeLabel,
 } from "@/server/domain/counselingType";
 import { RECEPTION_TRANSITIONS } from "@/server/domain/receptionScope";
+import {
+  PAYMENT_REF_MAX_LENGTH,
+  PHONE_MAX_LENGTH,
+  PHONE_PATTERN,
+  PHONE_TITLE,
+  REFERENCE_PATTERN,
+  REFERENCE_TITLE,
+  sanitizePhone,
+  sanitizeReference,
+} from "@/lib/inputFormats";
 
 // Shared front-desk booking pieces: the appointment table, the detail modal
 // with the desk's action set, and the scheduling modal. Built entirely from
@@ -429,8 +439,12 @@ export function BookingDetailModal({
               <div className="min-w-[240px] flex-1">
                 <Field label="Payment reference (UPI UTR, receipt no.) — optional">
                   <input
+                    inputMode="text"
+                    maxLength={PAYMENT_REF_MAX_LENGTH}
+                    pattern={REFERENCE_PATTERN}
+                    title={REFERENCE_TITLE}
                     value={paymentRef}
-                    onChange={(e) => setPaymentRef(e.target.value)}
+                    onChange={(e) => setPaymentRef(sanitizeReference(e.target.value))}
                     className={inputClass}
                     placeholder="e.g. 402311223344"
                   />
@@ -765,8 +779,12 @@ export function ScheduleModal({
             </label>
             {paymentReceived && (
               <input
+                inputMode="text"
+                maxLength={PAYMENT_REF_MAX_LENGTH}
+                pattern={REFERENCE_PATTERN}
+                title={REFERENCE_TITLE}
                 value={paymentRef}
-                onChange={(e) => setPaymentRef(e.target.value)}
+                onChange={(e) => setPaymentRef(sanitizeReference(e.target.value))}
                 className={`${inputClass} !py-2 !text-xs`}
                 placeholder="Payment reference / UPI UTR (optional)"
               />
@@ -874,9 +892,17 @@ export function ScheduleModal({
               </Field>
               <Field label="Phone">
                 <input
+                  type="tel"
+                  inputMode="tel"
+                  maxLength={PHONE_MAX_LENGTH}
+                  pattern={PHONE_PATTERN}
+                  title={PHONE_TITLE}
                   value={newClient.phone}
                   onChange={(e) =>
-                    setNewClient({ ...newClient, phone: e.target.value })
+                    setNewClient({
+                      ...newClient,
+                      phone: sanitizePhone(e.target.value),
+                    })
                   }
                   className={inputClass}
                 />

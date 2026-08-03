@@ -12,6 +12,12 @@ import {
   Panel,
   StatusPill,
 } from "@/components/admin/ui";
+import {
+  REFERENCE_PATTERN,
+  REFERENCE_TITLE,
+  sanitizeReference,
+  TRANSFER_REF_MAX_LENGTH,
+} from "@/lib/inputFormats";
 
 interface Balance {
   therapistId: string;
@@ -454,8 +460,14 @@ function MarkPaidModal({
         </p>
         <Field label="Transfer reference">
           <input
+            inputMode="text"
+            maxLength={TRANSFER_REF_MAX_LENGTH}
+            pattern={REFERENCE_PATTERN}
+            title={REFERENCE_TITLE}
             value={reference}
-            onChange={(e) => setReference(e.target.value)}
+            onChange={(e) =>
+              setReference(sanitizeReference(e.target.value, TRANSFER_REF_MAX_LENGTH))
+            }
             className={inputClass}
             placeholder="e.g. NEFT123456"
           />

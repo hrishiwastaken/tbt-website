@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { phoneSchema } from "@/server/validation";
 import { prisma } from "@/lib/db";
 import { rateLimiter } from "@/lib/rateLimit";
 import { clientIp } from "@/server/http";
@@ -10,7 +11,7 @@ const ALLOWED_RESUME_EXTENSIONS = [".pdf", ".doc", ".docx"];
 const fieldsSchema = z.object({
   fullName: z.string().trim().min(2).max(120),
   email: z.string().trim().email(),
-  phone: z.string().trim().min(8).max(20),
+  phone: phoneSchema,
   college: z.string().trim().min(2).max(200),
   course: z.string().trim().min(2).max(200),
   yearOrSemester: z.string().trim().min(1).max(50),

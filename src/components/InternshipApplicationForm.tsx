@@ -2,6 +2,12 @@
 
 import React, { useState } from "react";
 import { Input, Textarea } from "./ui/Input";
+import {
+  PHONE_MAX_LENGTH,
+  PHONE_PATTERN,
+  PHONE_TITLE,
+  sanitizePhone,
+} from "@/lib/inputFormats";
 import Button from "./ui/Button";
 import Surface from "./ui/Surface";
 
@@ -63,7 +69,25 @@ export default function InternshipApplicationForm() {
           <Input label="Email" id="email" name="email" type="email" required />
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Input label="Phone" id="phone" name="phone" type="tel" required />
+          <Input
+            label="Phone"
+            id="phone"
+            name="phone"
+            type="tel"
+            inputMode="tel"
+            autoComplete="tel"
+            maxLength={PHONE_MAX_LENGTH}
+            pattern={PHONE_PATTERN}
+            title={PHONE_TITLE}
+            // Uncontrolled field (the form reads FormData), so filter in
+            // place on input rather than through React state.
+            onInput={(e) => {
+              const el = e.currentTarget;
+              const cleaned = sanitizePhone(el.value);
+              if (cleaned !== el.value) el.value = cleaned;
+            }}
+            required
+          />
           <Input
             label="College / University"
             id="college"

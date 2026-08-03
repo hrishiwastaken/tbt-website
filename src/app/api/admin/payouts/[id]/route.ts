@@ -1,11 +1,12 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { transferReferenceSchema } from "@/server/validation";
 import { handleApi, parseBody, requireAdmin } from "@/server/http";
 import { transitionPayout } from "@/server/services/payoutService";
 
 const patchSchema = z.object({
   toStatus: z.enum(["PROCESSING", "PAID", "FAILED", "CANCELLED"]),
-  reference: z.string().max(120).optional(),
+  reference: transferReferenceSchema.optional(),
 });
 
 export const PATCH = handleApi(

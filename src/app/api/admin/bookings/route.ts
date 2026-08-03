@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
 import { z } from "zod";
+import { paymentReferenceSchema, phoneSchema } from "@/server/validation";
 import { prisma } from "@/lib/db";
 import {
   badRequest,
@@ -116,7 +117,7 @@ export const GET = handleApi(async (request: Request) => {
 const newClientSchema = z.object({
   name: z.string().min(2).max(120),
   email: z.string().email(),
-  phone: z.string().min(8).max(20),
+  phone: phoneSchema,
   age: z.coerce.number().int().min(1).max(120),
   emergencyContact: z.string().min(3).max(200),
 });
@@ -129,7 +130,7 @@ const scheduleSchema = z
     time: z.string().regex(/^\d{2}:\d{2}$/, "Expected HH:MM"),
     feeRupees: z.number().positive(),
     paymentReceived: z.boolean().default(false),
-    paymentRef: z.string().max(64).optional(),
+    paymentRef: paymentReferenceSchema.optional(),
     clientId: z.string().min(1).optional(),
     newClient: newClientSchema.optional(),
   })

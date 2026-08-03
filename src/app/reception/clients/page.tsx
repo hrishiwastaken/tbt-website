@@ -14,6 +14,12 @@ import {
   StatusPill,
 } from "@/components/admin/ui";
 import { BookingDetailModal } from "@/components/reception/bookings";
+import {
+  PHONE_MAX_LENGTH,
+  PHONE_PATTERN,
+  PHONE_TITLE,
+  sanitizePhone,
+} from "@/lib/inputFormats";
 
 interface ClientRow {
   id: string;
@@ -349,8 +355,13 @@ function ClientFormModal({
           </Field>
           <Field label="Phone">
             <input
+              type="tel"
+              inputMode="tel"
+              maxLength={PHONE_MAX_LENGTH}
+              pattern={PHONE_PATTERN}
+              title={PHONE_TITLE}
               value={form.phone}
-              onChange={(e) => set("phone", e.target.value)}
+              onChange={(e) => set("phone", sanitizePhone(e.target.value))}
               className={inputClass}
             />
           </Field>

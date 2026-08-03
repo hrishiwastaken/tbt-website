@@ -4,6 +4,12 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { CONTACT_PHONE } from "@/lib/site";
+import {
+  PHONE_MAX_LENGTH,
+  PHONE_PATTERN,
+  PHONE_TITLE,
+  sanitizePhone,
+} from "@/lib/inputFormats";
 
 // Service-first booking flow:
 //   1. Service   → what kind of session
@@ -148,10 +154,16 @@ export default function BookingWizard({ services = [], initialService = "" }) {
 
   const handleClientDetailChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setClientDetails((prev) => ({
-      ...prev,
-      [name]: type === "checkbox" ? checked : value,
-    }));
+    // Phone is filtered as it is typed rather than rejected on submit, so a
+    // stray character never survives to the server (which re-validates it
+    // with the same character classes — see server/validation.ts).
+    const next =
+      type === "checkbox"
+        ? checked
+        : name === "phone"
+          ? sanitizePhone(value)
+          : value;
+    setClientDetails((prev) => ({ ...prev, [name]: next }));
   };
 
   const handleNextStep = () => {
@@ -555,9 +567,14 @@ export default function BookingWizard({ services = [], initialService = "" }) {
                   <input
                     type="tel"
                     name="phone"
+                    inputMode="tel"
+                    autoComplete="tel"
+                    maxLength={PHONE_MAX_LENGTH}
+                    pattern={PHONE_PATTERN}
+                    title={PHONE_TITLE}
                     value={clientDetails.phone}
                     onChange={handleClientDetailChange}
-                    placeholder="+919876543210"
+                    placeholder="+91 98765 43210"
                     className="w-full bg-warm-white/50 border-t-0 border-l-0 border-r-0 border-b border-mist/60 focus:ring-0 focus:border-forest text-charcoal py-2 px-0 transition-colors text-base"
                     required
                   />

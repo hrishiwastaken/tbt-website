@@ -27,6 +27,16 @@ import {
 // Shared with the front desk so the two consoles cannot drift on when a fee
 // may still be collected in person.
 import { canTakeDeskPayment } from "@/components/reception/bookings";
+import {
+  PAYMENT_REF_MAX_LENGTH,
+  PHONE_MAX_LENGTH,
+  PHONE_PATTERN,
+  PHONE_TITLE,
+  REFERENCE_PATTERN,
+  REFERENCE_TITLE,
+  sanitizePhone,
+  sanitizeReference,
+} from "@/lib/inputFormats";
 
 // Client-side mirror of the booking state machine for action menus; the
 // server re-validates every transition.
@@ -619,8 +629,12 @@ function ScheduleModal({
             </label>
             {paymentReceived && (
               <input
+                inputMode="text"
+                maxLength={PAYMENT_REF_MAX_LENGTH}
+                pattern={REFERENCE_PATTERN}
+                title={REFERENCE_TITLE}
                 value={paymentRef}
-                onChange={(e) => setPaymentRef(e.target.value)}
+                onChange={(e) => setPaymentRef(sanitizeReference(e.target.value))}
                 className={`${inputClass} !py-2 !text-xs`}
                 placeholder="Payment reference / UPI UTR (optional)"
               />
@@ -728,9 +742,17 @@ function ScheduleModal({
               </Field>
               <Field label="Phone">
                 <input
+                  type="tel"
+                  inputMode="tel"
+                  maxLength={PHONE_MAX_LENGTH}
+                  pattern={PHONE_PATTERN}
+                  title={PHONE_TITLE}
                   value={newClient.phone}
                   onChange={(e) =>
-                    setNewClient({ ...newClient, phone: e.target.value })
+                    setNewClient({
+                      ...newClient,
+                      phone: sanitizePhone(e.target.value),
+                    })
                   }
                   className={inputClass}
                 />
@@ -1032,8 +1054,14 @@ function BookingDetailModal({
               <div className="min-w-[240px] flex-1">
                 <Field label="Payment reference (UPI UTR, receipt no.) — optional">
                   <input
+                    inputMode="text"
+                    maxLength={PAYMENT_REF_MAX_LENGTH}
+                    pattern={REFERENCE_PATTERN}
+                    title={REFERENCE_TITLE}
                     value={paymentRefDetail}
-                    onChange={(e) => setPaymentRefDetail(e.target.value)}
+                    onChange={(e) =>
+                      setPaymentRefDetail(sanitizeReference(e.target.value))
+                    }
                     className={inputClass}
                     placeholder="e.g. 402311223344"
                   />

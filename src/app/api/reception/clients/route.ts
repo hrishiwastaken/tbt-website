@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
 import { z } from "zod";
+import { phoneSchema } from "@/server/validation";
 import { prisma } from "@/lib/db";
 import {
   clientIp,
@@ -64,7 +65,7 @@ export const GET = handleApi(async (request: Request) => {
 const createSchema = z.object({
   name: z.string().min(2).max(120),
   email: z.string().email(),
-  phone: z.string().min(8).max(20),
+  phone: phoneSchema,
   age: z.coerce.number().int().min(1).max(120),
   emergencyContact: z.string().min(3).max(200),
   gdprConsent: z.boolean().default(true),

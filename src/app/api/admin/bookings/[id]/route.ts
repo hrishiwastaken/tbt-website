@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { paymentReferenceSchema } from "@/server/validation";
 import { prisma } from "@/lib/db";
 import { decryptText, encryptText } from "@/lib/encryption";
 import {
@@ -70,7 +71,7 @@ const patchSchema = z.discriminatedUnion("action", [
   }),
   z.object({
     action: z.literal("record-payment"),
-    reference: z.string().max(64).optional(),
+    reference: paymentReferenceSchema.optional(),
   }),
   z.object({
     action: z.literal("refund"),

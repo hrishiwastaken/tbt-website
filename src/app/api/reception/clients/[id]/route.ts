@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
 import { z } from "zod";
+import { phoneSchema } from "@/server/validation";
 import { prisma } from "@/lib/db";
 import {
   badRequest,
@@ -90,7 +91,7 @@ const updateSchema = z
   .object({
     name: z.string().min(2).max(120).optional(),
     email: z.string().email().optional(),
-    phone: z.string().min(8).max(20).optional(),
+    phone: phoneSchema.optional(),
     age: z.coerce.number().int().min(1).max(120).optional(),
     emergencyContact: z.string().min(3).max(200).optional(),
     gdprConsent: z.boolean().optional(),
