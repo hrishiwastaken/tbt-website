@@ -385,7 +385,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* SECTION 5: MEET THE THERAPIST */}
+      {/* SECTION 5: FOUNDER'S NOTE */}
       <section className="py-16 md:py-24 bg-warm-sand relative">
         <div className="max-w-7xl mx-auto px-6 md:px-12 relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
@@ -405,7 +405,7 @@ export default function Home() {
             {/* Right Column: Bio Content */}
             <div className="lg:col-span-7 flex flex-col justify-center">
               <span className="text-[11px] font-bold tracking-[0.25em] text-teal-sage uppercase mb-3 block">
-                Your Therapist
+                Founder, The Brain Tea
               </span>
               <h2 className="font-cormorant text-4xl md:text-[54px] font-semibold text-forest-slate mb-3 leading-tight">
                 Dr. Madhumati Dhumak
@@ -416,18 +416,34 @@ export default function Home() {
 
               <div className="space-y-4 font-dmsans text-base text-forest-slate/90 leading-relaxed mb-6 text-pretty">
                 <p>
-                  I believe that therapy is a collaborative partnership. My
-                  approach is centered on creating a warm, non-judgmental
-                  atmosphere where you can safely explore your vulnerabilities,
-                  challenge deep-seated patterns, and build genuine
-                  self-compassion.
+                  The Brain Tea was created with one simple belief: therapy
+                  should feel human before it feels clinical.
                 </p>
                 <p>
-                  At The Brain Tea, therapy is entirely self-paced. We
-                  prioritize your emotional safety, personal boundaries, and
-                  absolute privacy. Our space is designed to be a sanctuary
-                  where you can catch your breath and begin your healing journey
-                  without any pressure or judgment.
+                  Our vision has always been to build a space where people
+                  don&apos;t have to perform, explain away their emotions, or
+                  fear being judged. A space where conversations are held with
+                  curiosity, compassion, and genuine presence.
+                </p>
+                <p>
+                  The Brain Tea isn&apos;t just a clinic, it&apos;s a
+                  community that values authenticity, ethical practice, and
+                  individualized care. Every therapist here is encouraged to
+                  move beyond rigid frameworks and meet clients where they
+                  are, creating an experience that feels collaborative, safe,
+                  and deeply personal.
+                </p>
+                <p>
+                  Whether someone walks in feeling overwhelmed, uncertain, or
+                  simply looking for a place to understand themselves better,
+                  my hope is that they leave feeling lighter, more connected,
+                  and reminded that healing doesn&apos;t require perfection,
+                  it requires a space where they can simply be.
+                </p>
+                <p>
+                  At The Brain Tea, we&apos;re committed to making mental
+                  healthcare approachable, evidence-based, and rooted in
+                  meaningful human connection.
                 </p>
               </div>
 
