@@ -24,6 +24,9 @@ import {
   COUNSELING_TYPE_LABELS,
   counselingTypeLabel,
 } from "@/server/domain/counselingType";
+// Shared with the front desk so the two consoles cannot drift on when a fee
+// may still be collected in person.
+import { canTakeDeskPayment } from "@/components/reception/bookings";
 
 // Client-side mirror of the booking state machine for action menus; the
 // server re-validates every transition.
@@ -801,6 +804,8 @@ function BookingDetailModal({
   const [reasonFor, setReasonFor] = useState<string | null>(null);
   const [reason, setReason] = useState("");
   const [rescheduling, setRescheduling] = useState(false);
+  const [collecting, setCollecting] = useState(false);
+  const [paymentRefDetail, setPaymentRefDetail] = useState("");
   const [newDate, setNewDate] = useState("");
   const [newTime, setNewTime] = useState("");
   const [notes, setNotes] = useState("");
@@ -841,6 +846,8 @@ function BookingDetailModal({
       setReasonFor(null);
       setReason("");
       setRescheduling(false);
+      setCollecting(false);
+      setPaymentRefDetail("");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Action failed");
     } finally {
@@ -860,6 +867,13 @@ function BookingDetailModal({
   const refundInFlight = detail?.payments.some(
     (p) => p.kind === "REFUND" && ["CREATED", "PROCESSING"].includes(p.status),
   );
+  // What has actually landed against this booking, so the button quotes the
+  // outstanding balance rather than the full fee on a part-paid session.
+  const collectedMinor = detail
+    ? detail.payments
+        .filter((p) => p.kind === "CHARGE" && p.status === "SUCCEEDED")
+        .reduce((sum, p) => sum + p.amountMinor, 0)
+    : 0;
 
   return (
     <Modal title="Appointment Detail" onClose={onClose} wide>
@@ -990,6 +1004,17 @@ function BookingDetailModal({
                   Execute refund ({formatINR(netMinor)})
                 </button>
               ))}
+            {detail && canTakeDeskPayment(detail) && (
+              <button
+                type="button"
+                disabled={busy}
+                onClick={() => setCollecting((c) => !c)}
+                className="rounded-full bg-ocean-deep px-4 py-2 text-xs font-bold uppercase tracking-wider text-white shadow-surface-raised-sm transition-all hover:-translate-y-0.5 disabled:opacity-40"
+              >
+                Mark fee collected (
+                {formatINR(Math.max(0, netMinor - collectedMinor))})
+              </button>
+            )}
             {canReschedule && (
               <button
                 type="button"
@@ -1001,6 +1026,36 @@ function BookingDetailModal({
               </button>
             )}
           </div>
+
+          {collecting && (
+            <div className="surface-inset flex flex-wrap items-end gap-3 rounded-soft p-4">
+              <div className="min-w-[240px] flex-1">
+                <Field label="Payment reference (UPI UTR, receipt no.) — optional">
+                  <input
+                    value={paymentRefDetail}
+                    onChange={(e) => setPaymentRefDetail(e.target.value)}
+                    className={inputClass}
+                    placeholder="e.g. 402311223344"
+                  />
+                </Field>
+              </div>
+              <button
+                type="button"
+                disabled={busy}
+                onClick={() =>
+                  patch({
+                    action: "record-payment",
+                    ...(paymentRefDetail.trim()
+                      ? { reference: paymentRefDetail.trim() }
+                      : {}),
+                  })
+                }
+                className="rounded-full bg-ocean px-5 py-2.5 text-xs font-bold uppercase tracking-wider text-white disabled:opacity-40"
+              >
+                {busy ? "Recording…" : "Mark fee collected"}
+              </button>
+            </div>
+          )}
 
           {reasonFor && (
             <div className="flex flex-wrap items-end gap-3">

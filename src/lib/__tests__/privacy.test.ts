@@ -43,7 +43,7 @@ describe("maskEmail", () => {
     expect(maskEmail("@leading.com")).toBe("•••");
     expect(maskEmail("trailing@")).toBe("•••");
     expect(maskEmail("")).toBe("•••");
-    // @ts-expect-error — guarding the runtime path, not the type path
-    expect(maskEmail(null)).toBe("•••");
+    // Guarding the runtime path, not the type path.
+    expect(maskEmail(null as unknown as string)).toBe("•••");
   });
 });

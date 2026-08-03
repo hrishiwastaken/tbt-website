@@ -15,12 +15,16 @@ import {
   rescheduleBooking,
   transitionBooking,
 } from "@/server/services/bookingService";
-import { executeRefund } from "@/server/services/paymentService";
+import {
+  executeRefund,
+  recordManualPayment,
+} from "@/server/services/paymentService";
 import { recordAudit } from "@/server/audit";
 
 // Booking detail + admin actions. PATCH carries a discriminated action:
 //   { action: "transition", toStatus, reason? }
 //   { action: "reschedule", dateTime }
+//   { action: "record-payment", reference? }      (fee collected in person)
 //   { action: "refund", amountMinor?, reason? }   (executes a REFUND_PENDING refund)
 //   { action: "notes", notes }
 
@@ -65,6 +69,10 @@ const patchSchema = z.discriminatedUnion("action", [
     reason: z.string().max(500).optional(),
   }),
   z.object({
+    action: z.literal("record-payment"),
+    reference: z.string().max(64).optional(),
+  }),
+  z.object({
     action: z.literal("refund"),
     amountMinor: z.number().int().positive().optional(),
     reason: z.string().max(500).optional(),
@@ -102,6 +110,29 @@ export const PATCH = handleApi(
           session,
           reason: body.reason,
           ip,
+        });
+        return NextResponse.json({ booking });
+      }
+      case "record-payment": {
+        // Cash / UPI / card collected in person. Identical service call to
+        // the front desk's "Mark fee collected", so an admin recording a fee
+        // produces the same ledger postings, invoice number and idempotency
+        // guarantees — only the audited actor differs.
+        const session = await requireAdmin(request);
+        await recordManualPayment({
+          bookingId: id,
+          reference: body.reference,
+          session,
+          ip,
+        });
+        const booking = await prisma.booking.findUnique({
+          where: { id },
+          select: {
+            id: true,
+            status: true,
+            paymentStatus: true,
+            invoiceNumber: true,
+          },
         });
         return NextResponse.json({ booking });
       }
