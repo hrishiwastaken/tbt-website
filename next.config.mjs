@@ -34,6 +34,21 @@ const securityHeaders = [
   },
 ];
 
+// Routes addressed by booking id alone. There are no client accounts, so the
+// unguessable UUID in the URL is the only thing standing between a visitor
+// and one customer's booking record — which makes the URL itself sensitive.
+//
+// Two leaks are closed here that the page-level robots metadata cannot:
+//   - X-Robots-Tag covers API JSON responses too (no HTML head to put a
+//     <meta> tag in), and applies even when a crawler never parses the body.
+//   - no-store keeps booking data out of shared caches and CDN edges, which
+//     otherwise happily retain an authenticated-looking-but-anonymous 200.
+const privateBookingHeaders = [
+  { key: "X-Robots-Tag", value: "noindex, nofollow, noarchive, nosnippet" },
+  { key: "Cache-Control", value: "no-store, max-age=0, must-revalidate" },
+  { key: "Pragma", value: "no-cache" },
+];
+
 const nextConfig = {
   images: {
     remotePatterns: [
@@ -50,6 +65,18 @@ const nextConfig = {
       {
         source: "/:path*",
         headers: securityHeaders,
+      },
+      {
+        source: "/booking-confirmed",
+        headers: privateBookingHeaders,
+      },
+      {
+        source: "/booking/payment-status",
+        headers: privateBookingHeaders,
+      },
+      {
+        source: "/api/bookings/:path*",
+        headers: privateBookingHeaders,
       },
     ];
   },

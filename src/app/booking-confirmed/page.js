@@ -3,8 +3,17 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { CONTACT_PHONE } from "@/lib/site";
+import { maskEmail } from "@/lib/privacy";
 
 export const dynamic = "force-dynamic";
+
+// This page renders one client's booking to anyone holding the booking UUID
+// — there is no client login to check it against. Keep it out of search
+// indexes and archives so a link that escapes (shared screenshot, chat
+// preview, mail scanner) can never become a permanently crawlable record.
+export const metadata = {
+  robots: { index: false, follow: false, nocache: true },
+};
 
 export default async function BookingConfirmedPage({ searchParams }) {
   const sParams = await searchParams;
@@ -78,8 +87,8 @@ export default async function BookingConfirmedPage({ searchParams }) {
         </h1>
         <p className="font-dmsans text-sm text-sage mb-8 max-w-md">
           A confirmation receipt has been sent to{" "}
-          <strong>{booking.client.email}</strong>. Please review the details
-          below.
+          <strong>{maskEmail(booking.client.email)}</strong>. Please review the
+          details below.
         </p>
 
         {/* Details Table */}
