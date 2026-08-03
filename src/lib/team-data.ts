@@ -16,10 +16,11 @@ export const TEAM: TeamMember[] = [
   {
     slug: "madhumati-dhumak",
     name: "Dr. Madhumati Dhumak",
-    role: "Founding Director & Clinical Psychologist",
+    role: "Lead Counseling Psychologist · Couple & Family Therapist · Flower Remedist · Music Therapist",
     photo: "/team/madhumati-dhumak.jpg",
-    qualification: "M.Phil Clinical Psychology · RCI Licensed",
-    experience: "12+ years in clinical practice",
+    qualification:
+      "PGDP Counseling Psychology · MSc Clinical Psychology · BSc Clinical Psychology",
+    experience: "3+ years in clinical practice",
     approaches: [
       "Integrative & Evidence-Based Therapy",
       "Trauma-Informed Care",
@@ -27,9 +28,9 @@ export const TEAM: TeamMember[] = [
     ],
     specialisations: ["Anxiety & Stress", "Trauma & PTSD", "Life Transitions"],
     languages: ["English", "Hindi", "Marathi"],
-    fee: "₹1,500 / session",
+    fee: "₹1,800 / session · Sliding scale available",
     intro:
-      "I believe therapy is a collaborative partnership. My approach centers on creating a warm, non-judgmental atmosphere where you can safely explore your vulnerabilities, challenge deep-seated patterns, and build genuine self-compassion, entirely at your own pace.",
+      "As a therapist, I believe that meaningful healing begins when people feel genuinely seen, heard, and understood. My approach is warm, collaborative, and deeply individualized because no two people experience life in the same way. Rather than following a one-size-fits-all model, I integrate evidence-based therapeutic approaches to create a space that adapts to each client's unique needs, pace, and goals. I work with adolescents, adults, couples, and families navigating anxiety, depression, relationship challenges, trauma, emotional regulation, life transitions, self-esteem, grief, burnout, attachment concerns, and interpersonal difficulties. I also have experience working with neurodivergent individuals and tailor therapy to ensure it remains accessible, practical, and empowering. My work combines insight with action, helping clients not only understand the patterns that keep them stuck but also develop healthier ways of relating to themselves and the people around them. Above all, I strive to create a therapeutic relationship built on trust, authenticity, and compassion - where clients can safely explore, heal, and grow.",
   },
 ];
 

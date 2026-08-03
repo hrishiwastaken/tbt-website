@@ -3,15 +3,27 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { CONTACT_PHONE } from "@/lib/site";
 
 // Service-first booking flow:
 //   1. Service   → what kind of session
 //   2. Consultant→ who (only those offering the chosen service)
 //   3. Schedule  → the chosen consultant's real availability
 //   4. Details   → client information
-//   5. Confirm   → summary + payment (redirects to the UPI gateway checkout)
+//   5. Confirm   → summary + how the fee is settled
 //
 // The client is charged the chosen consultant's own rate.
+
+// Online payment is not live yet. The PhonePe gateway integration is fully
+// built and kept intact server-side (createBooking still honours PAY_NOW,
+// mints a checkout and holds the slot as AWAITING_PAYMENT) — it is simply
+// not offered to clients from this wizard for now. Every booking is taken
+// as PAY_LATER and the fee is settled with the clinic directly.
+//
+// To re-enable online payments: restore the PAY_NOW / PAY_LATER radio group
+// on the Confirm step and let the user drive this value again. Nothing on
+// the server needs to change.
+const PAYMENT_OPTION = "PAY_LATER";
 
 const STEPS = [
   { stepNum: 1, label: "Service" },
@@ -49,7 +61,6 @@ export default function BookingWizard({ services = [], initialService = "" }) {
     gdprConsent: false,
   });
 
-  const [paymentOption, setPaymentOption] = useState("PAY_NOW");
   const [errorMsg, setErrorMsg] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -189,7 +200,7 @@ export default function BookingWizard({ services = [], initialService = "" }) {
           date: selectedDate,
           time: selectedSlot.startTime,
           ...clientDetails,
-          paymentOption,
+          paymentOption: PAYMENT_OPTION,
         }),
       });
       const data = await res.json();
@@ -199,13 +210,15 @@ export default function BookingWizard({ services = [], initialService = "" }) {
         return;
       }
       const booking = data.booking;
-      // PAY_NOW: hand off to the gateway's secure checkout — confirmation
+      // Dormant gateway path, kept wired for when online payments go live:
+      // PAY_NOW hands off to the gateway's secure checkout and confirmation
       // happens server-side (webhook / status poll), never in this client.
+      // Unreachable while PAYMENT_OPTION is pinned to PAY_LATER.
       if (data.payment?.checkoutUrl) {
         window.location.assign(data.payment.checkoutUrl);
         return;
       }
-      if (paymentOption === "PAY_NOW") {
+      if (PAYMENT_OPTION === "PAY_NOW") {
         router.push(`/booking/payment-status?bookingId=${booking.id}`);
         return;
       }
@@ -676,66 +689,33 @@ export default function BookingWizard({ services = [], initialService = "" }) {
               </div>
             </div>
 
-            {/* Payment options */}
-            <div className="space-y-4 mb-8">
-              <label className="flex items-start gap-4 p-6 border rounded-xl cursor-pointer transition-colors bg-warm-white/40 border-mist/40 hover:border-forest">
-                <input
-                  type="radio"
-                  name="payment"
-                  checked={paymentOption === "PAY_NOW"}
-                  onChange={() => setPaymentOption("PAY_NOW")}
-                  className="mt-1 text-forest focus:ring-forest"
-                />
-                <div>
-                  <h4 className="text-sm font-bold text-charcoal">
-                    Pay Online via UPI Now
-                  </h4>
-                  <p className="text-xs text-sage mt-1">
-                    You&apos;ll be redirected to a secure checkout — pay with
-                    any UPI app (GPay, PhonePe, Paytm, BHIM...) with the amount
-                    pre-filled. Your session is confirmed the moment the payment
-                    succeeds.
-                  </p>
-                </div>
-              </label>
+            {/* Settling the fee — online payments are not live yet, so the
+                desk takes it from here. */}
+            <div className="mb-8 p-7 rounded-xl border border-mist/40 bg-warm-white/50">
+              <h4 className="font-cormorant text-2xl font-semibold text-charcoal mb-2">
+                Completing your booking
+              </h4>
+              <p className="text-sm text-sage leading-relaxed mb-5">
+                To confirm this slot and settle the session fee, please contact
+                our admin. We&apos;ll walk you through the rest personally.
+              </p>
 
-              {paymentOption === "PAY_NOW" && (
-                <div className="p-5 bg-mist/10 rounded-xl border border-mist/30">
-                  <div className="flex flex-wrap items-center justify-between gap-3">
-                    <div className="text-xs text-charcoal">
-                      Amount payable:{" "}
-                      <strong className="text-terracotta">{rupees(fee)}</strong>
-                    </div>
-                    <span className="text-[10px] font-bold tracking-wider uppercase text-sage">
-                      Secured by PhonePe Payment Gateway
-                    </span>
-                  </div>
-                  <p className="mt-2 text-[11px] leading-relaxed text-sage">
-                    Your slot is reserved for 30 minutes while you pay. If the
-                    payment fails or is cancelled, nothing is charged and you
-                    can retry or pick another slot.
-                  </p>
-                </div>
-              )}
+              <a
+                href={`tel:${CONTACT_PHONE.replace(/\s/g, "")}`}
+                className="inline-flex items-center gap-2.5 text-forest hover:text-terracotta transition-colors group"
+              >
+                <span className="text-[10px] font-bold tracking-[0.18em] uppercase text-sage group-hover:text-terracotta transition-colors">
+                  Contact our admin
+                </span>
+                <span className="font-cormorant text-2xl font-semibold tracking-wide">
+                  {CONTACT_PHONE}
+                </span>
+              </a>
 
-              <label className="flex items-start gap-4 p-6 border rounded-xl cursor-pointer transition-colors bg-warm-white/40 border-mist/40 hover:border-forest">
-                <input
-                  type="radio"
-                  name="payment"
-                  checked={paymentOption === "PAY_LATER"}
-                  onChange={() => setPaymentOption("PAY_LATER")}
-                  className="mt-1 text-forest focus:ring-forest"
-                />
-                <div>
-                  <h4 className="text-sm font-bold text-charcoal">
-                    Pay Post-Session
-                  </h4>
-                  <p className="text-xs text-sage mt-1">
-                    Hold booking with verification. Session fee is paid after
-                    completion at the clinic or via UPI link.
-                  </p>
-                </div>
-              </label>
+              <p className="mt-5 pt-4 border-t border-mist/25 text-xs text-sage leading-relaxed italic">
+                Note: We will soon be available for online payments and
+                bookings.
+              </p>
             </div>
 
             <div className="flex flex-col sm:flex-row justify-between gap-4 pt-6 border-t border-mist/20">
@@ -749,11 +729,7 @@ export default function BookingWizard({ services = [], initialService = "" }) {
                 disabled={isSubmitting}
                 className="bg-forest hover:bg-terracotta text-warm-white font-medium px-8 py-4 rounded-full transition-colors disabled:opacity-50 min-w-[200px] shadow-sm hover:shadow-md"
               >
-                {isSubmitting
-                  ? "Processing..."
-                  : paymentOption === "PAY_NOW"
-                    ? "Proceed to Payment"
-                    : "Complete Booking"}
+                {isSubmitting ? "Processing..." : "Complete Booking"}
               </button>
             </div>
           </div>

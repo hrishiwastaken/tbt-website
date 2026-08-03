@@ -13,7 +13,10 @@ import {
 } from "@/server/http";
 import { BOOKING_STATUSES } from "@/server/domain/bookingStatus";
 import { COUNSELING_TYPES } from "@/server/domain/counselingType";
-import { scheduleAdminBooking } from "@/server/services/bookingService";
+import {
+  releaseExpiredReservations,
+  scheduleAdminBooking,
+} from "@/server/services/bookingService";
 import { stripNotes } from "@/server/serializers/publicBooking";
 import { rupeesToMinor } from "@/server/money";
 
@@ -27,10 +30,29 @@ export const GET = handleApi(async (request: Request) => {
   const { searchParams } = new URL(request.url);
   const pagination = parsePagination(searchParams);
 
+  // Expired holds are released before the read so a lapsed AWAITING_PAYMENT
+  // reservation never lingers in the admin view after its TTL has passed.
+  await releaseExpiredReservations();
+
   const where: Prisma.BookingWhereInput = {};
+  const and: Prisma.BookingWhereInput[] = [];
 
   const status = searchParams.get("status");
-  if (status && (BOOKING_STATUSES as readonly string[]).includes(status)) {
+  if (status === "AWAITING_PAYMENT") {
+    // "Awaiting Payment" reads as "money still owed", not just the transient
+    // online-checkout hold — so it also catches confirmed/completed/no-show
+    // sessions billed at the clinic that haven't been paid yet (same
+    // definition as the reception desk's `unpaid` queue).
+    and.push({
+      OR: [
+        { status: "AWAITING_PAYMENT" },
+        {
+          paymentStatus: "UNPAID",
+          status: { in: ["CONFIRMED", "COMPLETED", "NO_SHOW"] },
+        },
+      ],
+    });
+  } else if (status && (BOOKING_STATUSES as readonly string[]).includes(status)) {
     where.status = status;
   }
   const paymentStatus = searchParams.get("paymentStatus");
@@ -59,6 +81,8 @@ export const GET = handleApi(async (request: Request) => {
       { id: { equals: q } },
     ];
   }
+
+  if (and.length > 0) where.AND = and;
 
   const sortParam = searchParams.get("sort") || "dateTime";
   const sort = SORTABLE.has(sortParam) ? sortParam : "dateTime";

@@ -29,14 +29,15 @@ export default function About() {
   const team = [
     {
       name: "Dr. Madhumati Dhumak",
-      role: "Founding Director & Clinical Psychologist",
-      credentials: "M.Phil Clinical Psychology · RCI Licensed",
+      role: "Lead Counseling Psychologist · Couple & Family Therapist · Flower Remedist · Music Therapist",
+      credentials:
+        "PGDP Counseling Psychology · MSc Clinical Psychology · BSc Clinical Psychology",
       specialisations: [
         "Anxiety & Stress",
         "Trauma & PTSD",
         "Life Transitions",
       ],
-      bio: "With over 12 years of clinical experience, Dr. Dhumak founded The Brain Tea to create a sanctuary where scientific insight meets deep, non-judgmental human empathy. She specializes in guiding clients through trauma recovery and stress management at their own pace.",
+      bio: "As a therapist, I believe that meaningful healing begins when people feel genuinely seen, heard, and understood. My approach is warm, collaborative, and deeply individualized because no two people experience life in the same way. I integrate evidence-based therapeutic approaches to create a space that adapts to each client's unique needs, pace, and goals, working with adolescents, adults, couples, and families across anxiety, trauma, grief, life transitions, and interpersonal difficulties.",
       image: "/team/madhumati-dhumak.jpg",
     },
   ];
