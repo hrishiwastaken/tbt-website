@@ -31,9 +31,6 @@ export default function Footer() {
             dedicated to supporting individuals, couples, and families through
             evidence-based psychotherapy.
           </p>
-          <p className="font-dmsans text-xs text-warm-sand/50">
-            Licensed practitioner under RCI guidelines.
-          </p>
           <a
             href={INSTAGRAM_URL}
             target="_blank"
@@ -109,7 +106,7 @@ export default function Footer() {
               Baner-Pashan Link Road, above ICICI Direct, Pune - 411008
               <br />
               <span className="text-warm-sand/60 text-xs">
-                Near Ramnagar Metro Station
+                Near Sakal Nagar Metro station
               </span>
             </p>
             <p>
@@ -120,13 +117,13 @@ export default function Footer() {
             </p>
             <p>
               <span className="block font-medium text-warm-sand">Email:</span>
-              contact@thebraintea.com
+              admin@thebraintea.co.in
             </p>
             <p>
               <span className="block font-medium text-warm-sand">Hours:</span>
-              Mon – Fri: 9:00 AM – 7:00 PM
+              Monday – Saturday: 9:00 AM – 8:00 PM
               <br />
-              Saturday: 10:00 AM – 4:00 PM
+              Sunday: 10:00 AM – 4:00 PM
             </p>
           </div>
         </div>
@@ -139,7 +136,6 @@ export default function Footer() {
             { name: "Terms & Conditions", href: "/terms" },
             { name: "Privacy Policy", href: "/privacy" },
             { name: "Refund & Cancellation Policy", href: "/refund-policy" },
-            { name: "Shipping & Delivery Policy", href: "/shipping-policy" },
             { name: "Contact Us", href: "/contact" },
           ].map((link) => (
             <Link

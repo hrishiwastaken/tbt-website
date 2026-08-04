@@ -8,7 +8,7 @@ import {
   Instagram,
   MessageCircle,
 } from "lucide-react";
-import { INSTAGRAM_URL, WHATSAPP_URL } from "@/lib/site";
+import { CONTACT_MAP_URL, INSTAGRAM_URL, WHATSAPP_URL } from "@/lib/site";
 
 export default function Contact() {
   return (
@@ -61,7 +61,7 @@ export default function Contact() {
                     Baner-Pashan Link Road, above ICICI Direct, Pune - 411008
                   </p>
                   <p className="font-dmsans text-xs text-sage/70 mt-1">
-                    Near Ramnagar Metro Station
+                    Near Sakal Nagar Metro station
                   </p>
                 </div>
               </div>
@@ -89,7 +89,7 @@ export default function Contact() {
                     Email Communication
                   </h4>
                   <p className="font-dmsans text-sm text-sage leading-relaxed mt-1">
-                    contact@thebraintea.com
+                    admin@thebraintea.co.in
                   </p>
                 </div>
               </div>
@@ -103,9 +103,9 @@ export default function Contact() {
                     Operating Hours
                   </h4>
                   <p className="font-dmsans text-sm text-sage leading-relaxed mt-1">
-                    Monday – Friday: 9:00 AM – 7:00 PM
+                    Monday – Saturday: 9:00 AM – 8:00 PM
                     <br />
-                    Saturday: 10:00 AM – 4:00 PM
+                    Sunday: 10:00 AM – 4:00 PM
                   </p>
                 </div>
               </div>
@@ -141,23 +141,6 @@ export default function Contact() {
               </div>
             </div>
 
-            {/* A look at the room before you arrive — first visits are easier
-                when the space is already familiar. */}
-            <div className="mb-6 rounded-2xl overflow-hidden shadow-warm-soft border border-mist/20 relative aspect-[4/3] bg-warm-tan">
-              <Image
-                src="/team/office.jpg"
-                alt="The consultation room at The Brain Tea — soft seating, plants and natural light"
-                fill
-                sizes="(max-width: 1024px) 100vw, 40vw"
-                className="object-cover"
-              />
-              <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-forest-slate/70 to-transparent px-5 pb-4 pt-10">
-                <span className="font-dmsans text-[11px] font-semibold uppercase tracking-[0.18em] text-warm-white">
-                  Our space in Baner, Pune
-                </span>
-              </div>
-            </div>
-
             {/* Google Map Mockup / Iframe */}
             <div className="rounded-2xl overflow-hidden shadow-warm-soft border border-mist/20 relative aspect-video bg-sand">
               {/* Using a clean filter on standard iframe embed to keep aesthetics matching the ivory/sand look */}
@@ -174,6 +157,15 @@ export default function Contact() {
                 loading="lazy"
                 referrerPolicy="no-referrer-when-downgrade"
               />
+              <a
+                href={CONTACT_MAP_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Open The Brain Tea location in Google Maps"
+                className="absolute inset-0 z-10"
+              >
+                <span className="sr-only">Open location in Google Maps</span>
+              </a>
             </div>
           </div>
 

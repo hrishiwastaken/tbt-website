@@ -11,7 +11,7 @@ export type CounselingType = (typeof COUNSELING_TYPES)[number];
 
 /** Human labels for admin UI / audit trails. */
 export const COUNSELING_TYPE_LABELS: Record<CounselingType, string> = {
-  INDIVIDUAL: "Individual Counselling",
+  INDIVIDUAL: "Assessment",
   COUPLE_FAMILY: "Couple / Family Counselling",
 };
 
@@ -32,7 +32,7 @@ export const COUNSELING_SERVICE_DEFAULTS: Record<
 > = {
   INDIVIDUAL: {
     slug: "individual-counselling",
-    name: "Individual Counselling",
+    name: "Assessment",
     description:
       "One-on-one counselling session tailored to a single client's goals and concerns.",
     durationMinutes: 50,

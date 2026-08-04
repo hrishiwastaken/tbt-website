@@ -19,7 +19,6 @@ const OTHER_POLICIES = [
   { name: "Terms & Conditions", href: "/terms" },
   { name: "Privacy Policy", href: "/privacy" },
   { name: "Refund & Cancellation Policy", href: "/refund-policy" },
-  { name: "Shipping & Delivery Policy", href: "/shipping-policy" },
   { name: "Contact Us", href: "/contact" },
 ];
 

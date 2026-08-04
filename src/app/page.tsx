@@ -150,13 +150,11 @@ export default function Home() {
                 className="relative w-full max-w-[390px] aspect-[4/5] overflow-hidden bg-forest-slate shadow-2xl border-t border-r border-b border-muted-sage/20 flex items-end"
                 style={{ borderRadius: "0 280px 280px 0" }}
               >
-                {/* The portrait is 1066x1280 (~5:6) inside a 4:5 frame, so only
-                    a sliver of each side is trimmed and her face stays centred.
-                    A very light grade keeps it sitting with the warm palette
-                    without dulling the skin tones. */}
+                {/* The hero uses its own portrait so the Founder’s Note image
+                    remains independent. */}
                 <Image
-                  src="/team/madhumati-dhumak.jpg"
-                  alt="Dr. Madhumati Dhumak - Clinical Psychologist"
+                  src="/team/madhumati-hero.png"
+                  alt="Madhumati Dhumak - Lead Counseling Psychologist"
                   fill
                   priority
                   sizes="(max-width: 1024px) 100vw, 35vw"
@@ -394,7 +392,7 @@ export default function Home() {
               <div className="relative aspect-[4/5] rounded-t-full overflow-hidden shadow-warm-soft bg-warm-tan border border-muted-sage/35">
                 <Image
                   src="/team/madhumati-dhumak.jpg"
-                  alt="Dr. Madhumati Dhumak - Warm smiling therapist looking professional in a cozy setting"
+                  alt="Madhumati Dhumak - Warm smiling therapist looking professional in a cozy setting"
                   fill
                   sizes="(max-width: 768px) 100vw, 40vw"
                   className="object-cover object-center"
@@ -408,10 +406,10 @@ export default function Home() {
                 Founder, The Brain Tea
               </span>
               <h2 className="font-cormorant text-4xl md:text-[54px] font-semibold text-forest-slate mb-3 leading-tight">
-                Dr. Madhumati Dhumak
+                Madhumati Dhumak
               </h2>
               <span className="inline-block font-dmsans text-[11px] font-semibold tracking-wider text-teal-sage bg-muted-sage/15 border border-teal-sage/10 px-4 py-2 rounded-full mb-6 max-w-max">
-                M.Phil Clinical Psychology · RCI Licensed
+                Lead Counseling Psychologist
               </span>
 
               <div className="space-y-4 font-dmsans text-base text-forest-slate/90 leading-relaxed mb-6 text-pretty">

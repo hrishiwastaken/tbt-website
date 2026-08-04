@@ -104,8 +104,8 @@ export default function PrivacyPolicyPage() {
         consent, except in the rare circumstances mandated by law &mdash; for
         example, where there is an imminent risk of serious harm to you or
         others, or where disclosure is required by a court or statutory
-        authority. Our practitioners work within the ethical guidelines of the
-        Rehabilitation Council of India (RCI).
+        authority. Our practitioners work within applicable professional and
+        ethical guidelines.
       </p>
 
       <h2>4. Payments and PhonePe</h2>

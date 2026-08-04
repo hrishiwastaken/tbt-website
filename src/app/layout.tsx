@@ -21,7 +21,7 @@ const dmsans = DM_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "The Brain Tea | Mental Health Clinic | Dr. Madhumati Dhumak",
+  title: "The Brain Tea | Mental Health Clinic | Madhumati Dhumak",
   description:
     "Compassionate, evidence-based therapy for individuals, couples, and families. A warm, human-centered space to begin your journey back to yourself.",
   metadataBase: new URL("http://localhost:3000"),

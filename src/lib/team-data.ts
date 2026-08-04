@@ -15,8 +15,8 @@ export interface TeamMember {
 export const TEAM: TeamMember[] = [
   {
     slug: "madhumati-dhumak",
-    name: "Dr. Madhumati Dhumak",
-    role: "Lead Counseling Psychologist · Couple & Family Therapist · Flower Remedist · Music Therapist",
+    name: "Madhumati Dhumak",
+    role: "Lead Counseling Psychologist",
     photo: "/team/madhumati-dhumak.jpg",
     qualification:
       "PGDP Counseling Psychology · MSc Clinical Psychology · BSc Clinical Psychology",
@@ -30,7 +30,7 @@ export const TEAM: TeamMember[] = [
     languages: ["English", "Hindi", "Marathi"],
     fee: "₹1,800 / session · Sliding scale available",
     intro:
-      "As a therapist, I believe that meaningful healing begins when people feel genuinely seen, heard, and understood. My approach is warm, collaborative, and deeply individualized because no two people experience life in the same way. Rather than following a one-size-fits-all model, I integrate evidence-based therapeutic approaches to create a space that adapts to each client's unique needs, pace, and goals. I work with adolescents, adults, couples, and families navigating anxiety, depression, relationship challenges, trauma, emotional regulation, life transitions, self-esteem, grief, burnout, attachment concerns, and interpersonal difficulties. I also have experience working with neurodivergent individuals and tailor therapy to ensure it remains accessible, practical, and empowering. My work combines insight with action, helping clients not only understand the patterns that keep them stuck but also develop healthier ways of relating to themselves and the people around them. Above all, I strive to create a therapeutic relationship built on trust, authenticity, and compassion - where clients can safely explore, heal, and grow.",
+      "As a therapist, I believe that meaningful healing begins when people feel genuinely seen, heard, and understood. My approach is warm, collaborative, and deeply individualized because no two people experience life in the same way. Rather than following a one-size-fits-all model, I integrate evidence-based therapeutic approaches to create a space that adapts to each client's unique needs, pace, and goals. I specialise in adults, adolescents, anxiety, depression, relationship challenges, trauma, emotional regulation, life transition, self-esteem, grief, burnout, attachment concerns, and interpersonal difficulties. I also have experience working with neurodivergent individuals and tailor therapy to ensure it remains accessible, practical, and empowering. My work combines insight with action, helping clients not only understand the patterns that keep them stuck but also develop healthier ways of relating to themselves and the people around them. Above all, I strive to create a therapeutic relationship built on trust, authenticity, and compassion - where clients can safely explore, heal, and grow.",
   },
 ];
 

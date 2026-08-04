@@ -138,6 +138,29 @@ async function main() {
       process: null,
     },
     {
+      name: "Assessment",
+      slug: "individual-counselling",
+      durationMinutes: 50,
+      priceMinor: 150000,
+      description:
+        "One-on-one sessions tailored to you -- process what's weighing on you, challenge patterns that no longer serve you, and build coping skills that last.",
+      tagline: "A steady space to understand yourself.",
+      image: "/team/office1.jpg",
+      suitableFor: [
+        "Anxiety",
+        "Depression",
+        "Stress and burnout",
+        "Self-esteem",
+        "Grief and loss",
+        "Emotional regulation",
+        "Career or academic concerns",
+        "Relationship difficulties",
+        "Personal growth",
+      ],
+      availability: ["Online", "Offline"],
+      process: null,
+    },
+    {
       name: "Couples & Family Therapy",
       slug: "couples-counseling",
       durationMinutes: 50,
@@ -214,7 +237,7 @@ async function main() {
     {
       email: "madhumatidhumak@thebraintea.co.in",
       password: "DrMadhumati123!",
-      name: "Dr. Madhumati Dhumak",
+      name: "Madhumati Dhumak",
       slug: "dr-madhumati-dhumak",
       bio: "Clinical psychologist with over 15 years of experience in mindfulness-based cognitive therapy and family counseling, guiding individuals through existential challenges, stress mitigation, and emotional stabilization.",
       feeMinor: 150000,
@@ -226,7 +249,11 @@ async function main() {
       activeFromDay: -HISTORY_DAYS,
       activeToDay: FUTURE_DAYS,
       schedule: { days: [1, 2, 3, 4, 5], hours: [9, 10, 11, 13, 14, 15, 16] },
-      serviceSlugs: ["individual-therapy", "couples-counseling"],
+      serviceSlugs: [
+        "individual-therapy",
+        "individual-counselling",
+        "couples-counseling",
+      ],
     },
     {
       email: "rohan@thebraintea.com",

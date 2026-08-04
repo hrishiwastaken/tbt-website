@@ -35,6 +35,10 @@ const STEPS = [
 
 const rupees = (minor) => `₹${(minor / 100).toLocaleString("en-IN")}`;
 
+function displayConsultantName(name) {
+  return name?.replace(/^Dr\.\s+(?=Madhumati Dhumak$)/, "");
+}
+
 export default function BookingWizard({ services = [], initialService = "" }) {
   const router = useRouter();
 
@@ -438,7 +442,7 @@ export default function BookingWizard({ services = [], initialService = "" }) {
               ← Back to Consultants
             </button>
             <h2 className="font-cormorant text-3xl font-semibold text-charcoal mb-6 border-b border-mist/20 pb-2">
-              Schedule with {selectedConsultant?.name}
+              Schedule with {displayConsultantName(selectedConsultant?.name)}
             </h2>
 
             <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start mb-8">
@@ -485,7 +489,7 @@ export default function BookingWizard({ services = [], initialService = "" }) {
                   </div>
                 ) : (
                   <p className="text-terracotta text-sm italic bg-red-50 p-4 rounded-xl border border-red-100">
-                    No availability for {selectedConsultant?.name} on{" "}
+                    No availability for {displayConsultantName(selectedConsultant?.name)} on{" "}
                     {selectedDate}. Please select another date.
                   </p>
                 )}
@@ -660,7 +664,7 @@ export default function BookingWizard({ services = [], initialService = "" }) {
                   Consultant
                 </span>
                 <span className="text-sm font-bold text-charcoal">
-                  {selectedConsultant?.name}
+                  {displayConsultantName(selectedConsultant?.name)}
                 </span>
               </div>
               <div className="flex justify-between items-center border-b border-mist/10 pb-3">
@@ -696,26 +700,23 @@ export default function BookingWizard({ services = [], initialService = "" }) {
                 Completing your booking
               </h4>
               <p className="text-sm text-sage leading-relaxed mb-5">
-                To confirm this slot and settle the session fee, please contact
-                our admin. We&apos;ll walk you through the rest personally.
+                To confirm this booking, please pay the admin before your
+                session. Payment before the session is required for
+                confirmation, as per clinic policy.
               </p>
 
               <a
                 href={`tel:${CONTACT_PHONE.replace(/\s/g, "")}`}
-                className="inline-flex items-center gap-2.5 text-forest hover:text-terracotta transition-colors group"
+                className="inline-flex flex-col items-start gap-1 text-forest hover:text-terracotta transition-colors group"
               >
                 <span className="text-[10px] font-bold tracking-[0.18em] uppercase text-sage group-hover:text-terracotta transition-colors">
                   Contact our admin
                 </span>
-                <span className="font-cormorant text-2xl font-semibold tracking-wide">
+                <span className="font-cormorant text-xl sm:text-2xl font-semibold tracking-wide whitespace-nowrap tabular-nums">
                   {CONTACT_PHONE}
                 </span>
               </a>
 
-              <p className="mt-5 pt-4 border-t border-mist/25 text-xs text-sage leading-relaxed italic">
-                Note: We will soon be available for online payments and
-                bookings.
-              </p>
             </div>
 
             <div className="flex flex-col sm:flex-row justify-between gap-4 pt-6 border-t border-mist/20">

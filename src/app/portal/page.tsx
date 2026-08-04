@@ -6,8 +6,8 @@ import Badge from "../../components/ui/Badge";
 import PrototypeBanner from "../../components/PrototypeBanner";
 
 const MOCK_UPCOMING = {
-  service: "Individual Counselling",
-  therapist: "Dr. Madhumati Dhumak",
+  service: "Assessment",
+  therapist: "Madhumati Dhumak",
   date: "Fri, 12 Jul 2026",
   time: "4:30 PM",
   mode: "Online",
@@ -15,12 +15,12 @@ const MOCK_UPCOMING = {
 
 const MOCK_RECENT = [
   {
-    service: "Individual Counselling",
+    service: "Assessment",
     date: "28 Jun 2026",
     status: "Completed",
   },
   {
-    service: "Individual Counselling",
+    service: "Assessment",
     date: "14 Jun 2026",
     status: "Completed",
   },

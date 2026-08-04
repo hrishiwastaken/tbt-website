@@ -39,15 +39,16 @@ export const WHATSAPP_URL = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURICo
 )}`;
 
 export const CONTACT_PHONE = "+91 93098 33817";
-export const CONTACT_EMAIL = "contact@thebraintea.com";
+export const CONTACT_EMAIL = "admin@thebraintea.co.in";
+export const CONTACT_MAP_URL = "https://maps.app.goo.gl/HCiZkhywCh6Hshsr8";
 export const CONTACT_ADDRESS = {
   line1: "Flat No. 8, 5th Floor, Abhimanshree Society,",
   line2: "Baner-Pashan Link Road, above ICICI Direct, Pune - 411008",
-  landmark: "Near Ramnagar Metro Station",
+  landmark: "Near Sakal Nagar Metro station",
 };
 export const CONTACT_HOURS = {
-  weekday: "Mon – Fri: 9:00 AM – 7:00 PM",
-  weekend: "Saturday: 10:00 AM – 4:00 PM",
+  weekday: "Monday – Saturday: 9:00 AM – 8:00 PM",
+  weekend: "Sunday: 10:00 AM – 4:00 PM",
 };
 
 /**
