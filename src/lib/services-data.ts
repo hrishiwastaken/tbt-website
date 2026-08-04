@@ -12,7 +12,7 @@ export interface ServiceContent {
 export const SERVICES: ServiceContent[] = [
   {
     slug: "individual-counselling",
-    name: "Individual Counselling",
+    name: "Assessment",
     tagline: "A steady space to understand yourself.",
     description:
       "One-on-one sessions tailored to you -- process what's weighing on you, challenge patterns that no longer serve you, and build coping skills that last.",

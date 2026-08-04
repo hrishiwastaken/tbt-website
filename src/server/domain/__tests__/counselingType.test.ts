@@ -15,7 +15,7 @@ describe("counselingType domain", () => {
   });
 
   it("labels known types and falls back for unknown/null", () => {
-    expect(counselingTypeLabel("INDIVIDUAL")).toBe("Individual Counselling");
+    expect(counselingTypeLabel("INDIVIDUAL")).toBe("Assessment");
     expect(counselingTypeLabel("COUPLE_FAMILY")).toBe(
       "Couple / Family Counselling",
     );

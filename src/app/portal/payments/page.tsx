@@ -4,13 +4,13 @@ import PrototypeBanner from "../../../components/PrototypeBanner";
 
 const PAYMENTS = [
   {
-    service: "Individual Counselling",
+    service: "Assessment",
     date: "28 Jun 2026",
     amount: "₹1,500",
     status: "Paid",
   },
   {
-    service: "Individual Counselling",
+    service: "Assessment",
     date: "14 Jun 2026",
     amount: "₹1,500",
     status: "Paid",

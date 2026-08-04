@@ -28,8 +28,8 @@ const staggerContainer = {
 export default function About() {
   const team = [
     {
-      name: "Dr. Madhumati Dhumak",
-      role: "Lead Counseling Psychologist · Couple & Family Therapist · Flower Remedist · Music Therapist",
+      name: "Madhumati Dhumak",
+      role: "Lead Counseling Psychologist",
       credentials:
         "PGDP Counseling Psychology · MSc Clinical Psychology · BSc Clinical Psychology",
       specialisations: [
@@ -37,7 +37,12 @@ export default function About() {
         "Trauma & PTSD",
         "Life Transitions",
       ],
-      bio: "As a therapist, I believe that meaningful healing begins when people feel genuinely seen, heard, and understood. My approach is warm, collaborative, and deeply individualized because no two people experience life in the same way. I integrate evidence-based therapeutic approaches to create a space that adapts to each client's unique needs, pace, and goals, working with adolescents, adults, couples, and families across anxiety, trauma, grief, life transitions, and interpersonal difficulties.",
+      bio: [
+        "As a therapist, I believe that meaningful healing begins when people feel genuinely seen, heard, and understood. My approach is warm, collaborative, and deeply individualized because no two people experience life in the same way. Rather than following a one-size-fits-all model, I integrate evidence-based therapeutic approaches to create a space that adapts to each client's unique needs, pace, and goals.",
+        "I specialize in “adults, adolescents, anxiety, depression, relationship challenges, trauma, emotional regulation, life transition, self-esteem, grief, burnout, attachment concerns, interpersonal difficulties”",
+        "I also have experience working with neurodivergent individuals and tailor therapy to ensure it remains accessible, practical, and empowering.",
+        "My work combines insight with action, helping clients not only understand the patterns that keep them stuck but also develop healthier ways of relating to themselves and the people around them. Above all, I strive to create a therapeutic relationship built on trust, authenticity, and compassion- where clients can safely explore, heal, and grow.",
+      ],
       image: "/team/madhumati-dhumak.jpg",
     },
   ];
@@ -253,9 +258,11 @@ export default function About() {
                     <p className="font-dmsans text-xs text-forest-slate bg-muted-sage/15 border border-teal-sage/10 px-2.5 py-1 rounded-full mb-4 inline-block">
                       {t.credentials}
                     </p>
-                    <p className="text-sm text-forest-slate/85 leading-relaxed mb-6 font-dmsans">
-                      {t.bio}
-                    </p>
+                    <div className="space-y-4 text-sm text-forest-slate/85 leading-relaxed mb-6 font-dmsans">
+                      {t.bio.map((paragraph) => (
+                        <p key={paragraph}>{paragraph}</p>
+                      ))}
+                    </div>
                   </div>
 
                   {/* Specialisation tags */}

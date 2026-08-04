@@ -48,6 +48,10 @@ export default async function BookingConfirmedPage({ searchParams }) {
     hour: "2-digit",
     minute: "2-digit",
   });
+  const practitionerName = booking.therapist.name.replace(
+    /^Dr\.\s+(?=Madhumati Dhumak$)/,
+    "",
+  );
 
   return (
     <main className="flex-grow w-full max-w-4xl mx-auto px-6 md:px-12 py-28 text-center">
@@ -84,58 +88,58 @@ export default async function BookingConfirmedPage({ searchParams }) {
 
         {/* Details Table */}
         <div className="w-full bg-warm-white/50 rounded-xl border border-mist/20 p-6 flex flex-col gap-4 text-left mb-8 font-dmsans text-sm">
-          <div className="flex justify-between items-center border-b border-mist/10 pb-3">
+          <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1.35fr)] gap-4 items-center border-b border-mist/10 pb-3">
             <span className="text-xs font-bold uppercase text-sage">
               Receipt Number
             </span>
-            <span className="font-mono text-charcoal font-semibold">
+            <span className="font-mono text-charcoal font-semibold text-right break-words">
               {booking.invoiceNumber ||
                 `REC-${booking.id.slice(0, 8).toUpperCase()}`}
             </span>
           </div>
 
-          <div className="flex justify-between items-center border-b border-mist/10 pb-3">
+          <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1.35fr)] gap-4 items-center border-b border-mist/10 pb-3">
             <span className="text-xs font-bold uppercase text-sage">
               Practitioner
             </span>
-            <span className="text-charcoal font-semibold">
-              {booking.therapist.name}
+            <span className="text-charcoal font-semibold text-right break-words">
+              {practitionerName}
             </span>
           </div>
 
-          <div className="flex justify-between items-center border-b border-mist/10 pb-3">
+          <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1.35fr)] gap-4 items-center border-b border-mist/10 pb-3">
             <span className="text-xs font-bold uppercase text-sage">
               Service
             </span>
-            <span className="text-charcoal font-semibold">
+            <span className="text-charcoal font-semibold text-right break-words">
               {booking.service.name}
             </span>
           </div>
 
-          <div className="flex justify-between items-center border-b border-mist/10 pb-3">
+          <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1.35fr)] gap-4 items-center border-b border-mist/10 pb-3">
             <span className="text-xs font-bold uppercase text-sage">
               Date & Time
             </span>
-            <span className="text-charcoal font-semibold">
+            <span className="text-charcoal font-semibold text-right break-words">
               {formattedDate} at {formattedTime}
             </span>
           </div>
 
-          <div className="flex justify-between items-center border-b border-mist/10 pb-3">
+          <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1.35fr)] gap-4 items-center border-b border-mist/10 pb-3">
             <span className="text-xs font-bold uppercase text-sage">
               Amount
             </span>
-            <span className="text-charcoal font-semibold">
+            <span className="text-charcoal font-semibold text-right break-words">
               ₹{(booking.amountMinor / 100).toLocaleString("en-IN")}
             </span>
           </div>
 
-          <div className="flex justify-between items-center">
+          <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1.35fr)] gap-4 items-center">
             <span className="text-xs font-bold uppercase text-sage">
               Payment Status
             </span>
             <span
-              className={`px-3 py-1 rounded text-xs font-semibold ${
+              className={`justify-self-end px-3 py-1 rounded text-right text-xs font-semibold ${
                 booking.paymentStatus === "PAID"
                   ? "bg-emerald-50 text-emerald-800 border border-emerald-100"
                   : "bg-mist/20 text-sage"
@@ -143,7 +147,7 @@ export default async function BookingConfirmedPage({ searchParams }) {
             >
               {booking.paymentStatus === "PAID"
                 ? "Paid Online"
-                : "Pending (Pay Post-Session)"}
+                : "Payment required before session"}
             </span>
           </div>
         </div>
@@ -156,9 +160,10 @@ export default async function BookingConfirmedPage({ searchParams }) {
           <ul className="list-disc pl-5 space-y-1">
             {booking.paymentStatus !== "PAID" && (
               <li>
-                To settle your session fee, please contact our admin at{" "}
-                <strong className="text-charcoal">{CONTACT_PHONE}</strong>. We
-                will soon be available for online payments and bookings.
+                To confirm your booking, please pay the admin at{" "}
+                <strong className="text-charcoal">{CONTACT_PHONE}</strong>{" "}
+                before the session. Payment before the session is required for
+                confirmation, as per clinic policy.
               </li>
             )}
             <li>
