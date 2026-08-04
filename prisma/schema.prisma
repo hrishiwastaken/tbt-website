@@ -168,6 +168,7 @@ model Booking {
   payments      PaymentRecord[]
   ledgerEntries LedgerEntry[]
   statusHistory BookingStatusHistory[]
+  emailNotifications EmailNotification[]
   createdAt     DateTime               @default(now())
   updatedAt     DateTime               @updatedAt
 
@@ -177,6 +178,21 @@ model Booking {
   @@index([dateTime])
   @@index([clientId])
   @@index([createdAt])
+}
+
+// Idempotency journal for transactional email. One row is claimed before a
+// message is sent, so a retried webhook or cron run cannot send duplicates.
+model EmailNotification {
+  id            String   @id @default(uuid())
+  bookingId     String
+  booking       Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  type          String
+  recipient     String
+  resendEmailId String?
+  sentAt        DateTime @default(now())
+
+  @@unique([bookingId, type])
+  @@index([sentAt])
 }
 
 // Concurrency guard for double-booking: one row per live hold on a

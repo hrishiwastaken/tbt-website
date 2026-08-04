@@ -8,6 +8,7 @@ import {
   parseBody,
 } from "@/server/http";
 import { publicBookingView } from "@/server/serializers/publicBooking";
+import { notifyBookingCreated } from "@/server/services/emailNotificationService";
 
 const bookingSchema = z.object({
   therapistSlug: z.string().min(1),
@@ -55,6 +56,9 @@ export const POST = handleApi(async (request: Request) => {
     },
     paymentOption: body.paymentOption,
   });
+  // Delivery is intentionally outside the booking transaction: an email
+  // provider outage must never make a booked slot disappear.
+  await notifyBookingCreated(booking.id);
 
   return NextResponse.json({
     // Whitelisted view — never the raw row. Keeps commissionBps, the

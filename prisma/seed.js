@@ -186,7 +186,7 @@ async function main() {
   // ── Users & consultants ───────────────────────────────────────
   const adminUser = await prisma.user.create({
     data: {
-      email: "admin@thebraintea.com",
+      email: "admin@thebraintea.co.in",
       passwordHash: await bcrypt.hash("AdminPass123!", 10),
       role: "ADMIN",
     },
@@ -212,7 +212,7 @@ async function main() {
   // suspended partway through, and a pending applicant not yet bookable.
   const consultantSpecs = [
     {
-      email: "madhumati@thebraintea.com",
+      email: "madhumatidhumak@thebraintea.co.in",
       password: "DrMadhumati123!",
       name: "Dr. Madhumati Dhumak",
       slug: "dr-madhumati-dhumak",

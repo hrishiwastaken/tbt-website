@@ -11,6 +11,7 @@ import { getPaymentProvider } from "../payments/registry";
 import type { PaymentIntentResult } from "../payments/types";
 import { badRequest, conflict, notFound, type Session } from "../http";
 import { recordAudit } from "../audit";
+import { notifyPaymentApproved } from "./emailNotificationService";
 
 // Payment orchestration. Depends on the PaymentProvider interface only —
 // never on a concrete gateway SDK.
@@ -201,7 +202,7 @@ export async function recordChargeSuccess(input: {
   providerRef?: string;
   actor?: Session | null;
 }) {
-  return prisma.$transaction(async (tx) => {
+  const settled = await prisma.$transaction(async (tx) => {
     const record = await tx.paymentRecord.findUnique({
       where: { id: input.paymentRecordId },
       include: { booking: true },
@@ -378,6 +379,10 @@ export async function recordChargeSuccess(input: {
 
     return tx.paymentRecord.findUniqueOrThrow({ where: { id: record.id } });
   });
+  // All callers (webhook, status polling, manual collection) converge here.
+  // The email service's DB journal makes this safe for webhook retries.
+  await notifyPaymentApproved(settled.bookingId);
+  return settled;
 }
 
 /**

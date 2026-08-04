@@ -102,7 +102,17 @@ DATABASE_URL="postgresql://postgres:postgres@localhost:5432/braintea"
 DIRECT_URL="postgresql://postgres:postgres@localhost:5432/braintea"
 NEXTAUTH_SECRET="change-me"
 ENCRYPTION_KEY="<32-byte hex key>"
+RESEND_API_KEY="re_..."
+RESEND_FROM_EMAIL="The Brain Tea <appointments@thebraintea.co.in>"
+GOOGLE_MEET_LINK="https://meet.google.com/your-clinic-room"
+CRON_SECRET="<long random secret>"
+APP_BASE_URL="http://localhost:3000"
 ```
+
+`GOOGLE_MEET_LINK` is the clinic's switch-to-online link included in every
+appointment email. Verify the sending domain in Resend before using the
+configured `RESEND_FROM_EMAIL`. The hourly reminder and payment
+reconciliation jobs both use `APP_BASE_URL` and `CRON_SECRET`.
 
 Generate a secure 32-byte hex encryption key for protecting notes at rest:
 
@@ -118,6 +128,9 @@ Synchronize the Prisma models and populate a realistic 90-day operating history 
 npx prisma db push
 node prisma/seed.js
 ```
+
+For an existing database, update the requested admin and Madhumati login
+addresses without changing passwords by running `node prisma/update-login-emails.js`.
 
 ### 4. Start Local Server
 
@@ -146,7 +159,7 @@ To test the secure dashboards, log in using the following accounts:
 ### Admin Portal
 
 - **URL**: `/admin/login`
-- **Email**: `admin@thebraintea.com`
+- **Email**: `admin@thebraintea.co.in`
 - **Password**: `AdminPass123!`
 
 ### Reception Desk
@@ -160,7 +173,7 @@ There is no separate reception login page. Sign in at `/admin/login` with the re
 ### Therapist Portal
 
 - **URL**: `/therapist/login`
-- **Email**: `madhumati@thebraintea.com` (Dr. Madhumati Halande) OR `rohan@thebraintea.com` (Dr. Rohan Gupta)
+- **Email**: `madhumatidhumak@thebraintea.co.in` (Dr. Madhumati Dhumak) OR `rohan@thebraintea.com` (Dr. Rohan Gupta)
 - **Password**: `DrMadhumati123!` OR `DrRohan123!`
 
 ---

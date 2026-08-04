@@ -19,6 +19,7 @@ import {
 } from "@/server/services/bookingService";
 import { stripNotes } from "@/server/serializers/publicBooking";
 import { rupeesToMinor } from "@/server/money";
+import { notifyBookingCreated, notifyPaymentApproved } from "@/server/services/emailNotificationService";
 
 // Admin booking list: pagination + status/payment/consultant filters,
 // free-text search over client and invoice fields, date windowing, sorting.
@@ -158,6 +159,8 @@ export const POST = handleApi(async (request: Request) => {
     session,
     ip: clientIp(request),
   });
+  await notifyBookingCreated(booking.id);
+  if (booking.paymentStatus === "PAID") await notifyPaymentApproved(booking.id);
 
   return NextResponse.json({ booking }, { status: 201 });
 });

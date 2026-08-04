@@ -8,6 +8,7 @@ export const GET = handleApi(async (request: Request) => {
 
   const therapist = await prisma.therapist.findUnique({
     where: { id: therapistId },
+    include: { user: { select: { email: true } } },
   });
   if (!therapist) throw notFound("Consultant profile not found");
 
@@ -18,6 +19,7 @@ export const GET = handleApi(async (request: Request) => {
     consultant: {
       id: therapist.id,
       name: therapist.name,
+      email: therapist.user?.email ?? session.email,
       slug: therapist.slug,
       photo: therapist.photo,
       bio: therapist.bio,

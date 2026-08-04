@@ -16,6 +16,9 @@ PAYMENT_PROVIDER="manual"
 # UPI payments via PhonePe PG (see section 5 before flipping PAYMENT_PROVIDER)
 APP_BASE_URL="https://<your-site>.netlify.app"
 CRON_SECRET="<long random secret>"
+RESEND_API_KEY="re_..."
+RESEND_FROM_EMAIL="The Brain Tea <appointments@thebraintea.co.in>"
+GOOGLE_MEET_LINK="https://meet.google.com/your-clinic-room"
 PHONEPE_ENV="sandbox"                      # "production" when live
 PHONEPE_CLIENT_ID="<from PhonePe business dashboard>"
 PHONEPE_CLIENT_SECRET="<from PhonePe business dashboard>"
@@ -23,6 +26,11 @@ PHONEPE_CLIENT_VERSION="1"
 PHONEPE_WEBHOOK_USERNAME="<choose one; also set in PhonePe dashboard>"
 PHONEPE_WEBHOOK_PASSWORD="<choose one; also set in PhonePe dashboard>"
 ```
+
+Verify the domain used by `RESEND_FROM_EMAIL` in Resend. `GOOGLE_MEET_LINK`
+is included in the booking and reminder emails so either party can switch to
+an online consultation. The `send-appointment-reminders` scheduled function
+runs hourly and uses the existing `APP_BASE_URL` and `CRON_SECRET` settings.
 
 Generate `ENCRYPTION_KEY` locally:
 
